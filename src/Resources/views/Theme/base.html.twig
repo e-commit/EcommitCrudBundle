@@ -1,7 +1,7 @@
 {# paginator_links / crud_paginator_links #}
 
 {% block paginator_links %}
-{% spaceless %}
+{% apply spaceless %}
     {% if paginator.haveToPaginate %}
         {% set ul_attr = ul_attr|merge({class: (ul_attr.class|default('') ~ ' ec-crud-pagination')|trim}) %}
         <nav{% with { attr: nav_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
@@ -10,7 +10,7 @@
             </ul>
         </nav>
     {% endif %}
-{% endspaceless %}
+{% endapply %}
 {% endblock %}
 
 {% block paginator_links_content %}
@@ -85,7 +85,7 @@
 {# th #}
 
 {% block th %}
-{% spaceless %}
+{% apply spaceless %}
     {% if not column.sortable %}
         {{ block('th_not_sortable', template_name) }}
     {% elseif crud.sessionValues.sort != column.id %}
@@ -95,7 +95,7 @@
     {% else %}
         {{ block('th_sortable_active_asc', template_name) }}
     {% endif %}
-{% endspaceless %}
+{% endapply %}
 {% endblock %}
 
 {% block th_not_sortable %}
@@ -144,7 +144,7 @@
 {# td #}
 
 {% block td %}
-{% spaceless %}
+{% apply spaceless %}
     {% if repeatedValue %}
         {% if td_attr.title is not defined %}
             {% set td_attr = td_attr|merge({title: value}) %}
@@ -154,13 +154,13 @@
     <td{% with { attr: td_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
         {{- (options.escape) ? value : value|raw -}}
     </td>
-{% endspaceless %}
+{% endapply %}
 {% endblock %}
 
 {# Display settings #}
 
 {% block display_settings %}
-{% spaceless %}
+{% apply spaceless %}
     {% if crud.displayResults %}
         {% set displaySettingsContainerAttributes = {'class': 'ec-crud-display-settings', 'id': 'ec-crud-display-settings-'~crud.sessionName, 'data-crud-list-id': crud.divIdList} %}
         {% if modal %}
@@ -171,7 +171,7 @@
             {{ block('display_settings_container_without_modal', template_name) }}
         {% endif %}
     {% endif %}
-{% endspaceless %}
+{% endapply %}
 {% endblock %}
 
 {% block display_settings_button_modal %}
@@ -231,29 +231,29 @@
 {# search_form_start #}
 
 {% block search_form_start %}
-{% spaceless %}
+{% apply spaceless %}
     {{ form_start(crud.searchForm, {'attr': form_attr}) }}
-{% endspaceless %}
+{% endapply %}
 {% endblock %}
 
 {# search_form_submit #}
 
 {% block search_form_submit %}
-    {% spaceless %}
+    {% apply spaceless %}
         <button type="submit" {% with { attr: button_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
             {{ crud_icon('search') }} {{ 'search.submit'|trans({}, 'EcommitCrudBundle') }}
         </button>
-    {% endspaceless %}
+    {% endapply %}
 {% endblock %}
 
 {# search_form_reset #}
 
 {% block search_form_reset %}
-{% spaceless %}
+{% apply spaceless %}
     <button type="button" {% with { attr: button_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
         {{ crud_icon('reset') }} {{ 'search.reset'|trans({}, 'EcommitCrudBundle') }}
     </button>
-{% endspaceless %}
+{% endapply %}
 {% endblock %}
 
 {# Attributes #}

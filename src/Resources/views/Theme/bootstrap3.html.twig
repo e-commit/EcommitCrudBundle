@@ -86,17 +86,17 @@
 {# search_form_submit #}
 
 {% block search_form_submit %}
-{% spaceless %}
+{% apply spaceless %}
     {% set button_attr = button_attr|default([])|merge({class: (button_attr.class|default('') ~ ' btn btn-default btn-sm')|trim}) %}
     {{ parent() }}
-{% endspaceless %}
+{% endapply %}
 {% endblock %}
 
 {# search_form_reset #}
 
 {% block search_form_reset %}
-{% spaceless %}
+{% apply spaceless %}
     {% set button_attr = button_attr|default([])|merge({class: (button_attr.class|default('') ~ ' btn btn-default btn-sm')|trim}) %}
     {{ parent() }}
-{% endspaceless %}
+{% endapply %}
 {% endblock %}

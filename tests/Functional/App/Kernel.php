@@ -16,8 +16,6 @@ namespace Ecommit\CrudBundle\Tests\Functional\App;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle;
 use Ecommit\CrudBundle\EcommitCrudBundle;
-use Ecommit\JavascriptBundle\EcommitJavascriptBundle;
-use Ecommit\UtilBundle\EcommitUtilBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -61,8 +59,6 @@ class Kernel extends BaseKernel implements CompilerPassInterface
             new SecurityBundle(),
             new WebpackEncoreBundle(),
             new EcommitCrudBundle(),
-            new EcommitJavascriptBundle(),
-            new EcommitUtilBundle(),
         ];
     }
 

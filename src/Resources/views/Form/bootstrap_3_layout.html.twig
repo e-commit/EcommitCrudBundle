@@ -1,17 +1,17 @@
 {% extends 'bootstrap_3_layout.html.twig' %}
 
 {% block form_row -%}
-    {% spaceless %}
+    {% apply spaceless %}
         <div class="form-group{% if (not compound or force_error|default(false)) and not valid %} has-error{% endif %}">
             {{ form_label(form) }}
             {{ form_errors(form) }}
             {{ form_widget(form) }}
         </div>
-    {% endspaceless %}
+    {% endapply %}
 {%- endblock form_row %}
 
 {% block form_errors %}
-    {% spaceless %}
+    {% apply spaceless %}
         {% if errors|length > 0 %}
             {% if form.parent %}
                 <span class="help-block">
@@ -41,5 +41,5 @@
                 {% endfor %}
             {% endif %}
         {% endif %}
-    {% endspaceless %}
+    {% endapply %}
 {% endblock form_errors %}
