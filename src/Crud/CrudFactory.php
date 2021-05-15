@@ -27,12 +27,7 @@ class CrudFactory
         $this->container = $container;
     }
 
-    /**
-     * @param $sessionName
-     *
-     * @return Crud
-     */
-    public function create($sessionName)
+    public function create(string $sessionName): Crud
     {
         return new Crud($sessionName, $this->container);
     }

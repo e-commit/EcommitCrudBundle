@@ -77,13 +77,6 @@ class Crud
      */
     protected $container;
 
-    /**
-     * Constructor.
-     *
-     * @param string $sessionName Session name
-     *
-     * @return Crud
-     */
     public function __construct($sessionName, ContainerInterface $container)
     {
         if (!preg_match('/^[a-zA-Z0-9_]{1,50}$/', $sessionName)) {
@@ -107,10 +100,8 @@ class Crud
      *                        * default_displayed: If the column is displayed, by default (Default: true)
      *                        * alias_search: Column SQL alias, used during searchs. If null, $alias is used.
      *                        * alias_sort: Column(s) SQL alias (string or array of strings), used during sorting. If null, $alias is used.
-     *
-     * @return Crud
      */
-    public function addColumn($id, $alias, $label, $options = [])
+    public function addColumn(string $id, string $alias, string $label, array $options = []): self
     {
         if (mb_strlen($id) > 30) {
             throw new \Exception('Column id is too long');
@@ -148,10 +139,8 @@ class Crud
      *
      * @param string $id          Column id (used everywhere inside the crud)
      * @param string $aliasSearch column SQL alias, used during searchs
-     *
-     * @return Crud
      */
-    public function addVirtualColumn($id, $aliasSearch)
+    public function addVirtualColumn(string $id, string $aliasSearch): self
     {
         $column = new CrudColumn($id, $aliasSearch, null, false, false, null, null);
         $this->availableVirtualColumns[$id] = $column;
@@ -159,24 +148,12 @@ class Crud
         return $this;
     }
 
-    /**
-     * Gets the query builder.
-     *
-     * @return QueryBuilder
-     */
     public function getQueryBuilder()
     {
         return $this->queryBuilder;
     }
 
-    /**
-     * Sets the query builder.
-     *
-     * @param QueryBuilder $queryBuilder
-     *
-     * @return Crud
-     */
-    public function setQueryBuilder($queryBuilder)
+    public function setQueryBuilder($queryBuilder): self
     {
         if (!($queryBuilder instanceof \Doctrine\ORM\QueryBuilder) &&
             !($queryBuilder instanceof \Doctrine\DBAL\Query\QueryBuilder) &&
@@ -188,24 +165,12 @@ class Crud
         return $this;
     }
 
-    /**
-     * Returns available results per page.
-     *
-     * @return array
-     */
-    public function getAvailableResultsPerPage()
+    public function getAvailableResultsPerPage(): array
     {
         return $this->availableResultsPerPage;
     }
 
-    /**
-     * Sets available results per page.
-     *
-     * @param int $defaultValue
-     *
-     * @return Crud
-     */
-    public function setAvailableResultsPerPage(array $availableResultsPerPage, $defaultValue)
+    public function setAvailableResultsPerPage(array $availableResultsPerPage, int $defaultValue): self
     {
         $this->availableResultsPerPage = $availableResultsPerPage;
         $this->defaultResultsPerPage = $defaultValue;
@@ -218,10 +183,8 @@ class Crud
      *
      * @param string $sort  Column id
      * @param const  $sense Sense (Crud::ASC / Crud::DESC)
-     *
-     * @return Crud
      */
-    public function setDefaultSort($sort, $sense)
+    public function setDefaultSort(string $sort, string $sense): self
     {
         $this->defaultSort = $sort;
         $this->defaultSense = $sense;
@@ -235,10 +198,8 @@ class Crud
      * @param array $criterias Criterias :
      *                         If key is defined: Key = Sort  Value = Sense
      *                         If key is not defined: Value = Sort
-     *
-     * @return Crud
      */
-    public function setDefaultPersonalizedSort(array $criterias)
+    public function setDefaultPersonalizedSort(array $criterias): self
     {
         $this->defaultPersonalizedSort = $criterias;
 
@@ -248,15 +209,7 @@ class Crud
         return $this;
     }
 
-    /**
-     * Sets the list route.
-     *
-     * @param string $routeName
-     * @param array  $parameters
-     *
-     * @return Crud
-     */
-    public function setRoute($routeName, $parameters = [])
+    public function setRoute(string $routeName, array $parameters = []): self
     {
         $this->routeName = $routeName;
         $this->routeParams = $parameters;
@@ -264,22 +217,12 @@ class Crud
         return $this;
     }
 
-    /**
-     * Returns the route name.
-     *
-     * @return string
-     */
-    public function getRouteName()
+    public function getRouteName(): ?string
     {
         return $this->routeName;
     }
 
-    /**
-     * Returns the route params.
-     *
-     * @return array
-     */
-    public function getRouteParams()
+    public function getRouteParams(): array
     {
         return $this->routeParams;
     }
@@ -288,10 +231,8 @@ class Crud
      * Returns the list url.
      *
      * @param array $parameters Additional parameters
-     *
-     * @return string
      */
-    public function getUrl($parameters = [])
+    public function getUrl($parameters = []): string
     {
         $parameters = array_merge($this->routeParams, $parameters);
 
@@ -302,10 +243,8 @@ class Crud
      * Returns the search url.
      *
      * @param array $parameters Additional parameters
-     *
-     * @return string
      */
-    public function getSearchUrl($parameters = [])
+    public function getSearchUrl($parameters = []): string
     {
         $parameters = array_merge($this->routeParams, ['search' => 1], $parameters);
 
@@ -317,7 +256,7 @@ class Crud
      *
      * @param bool|closure|array $value
      */
-    public function setBuildPaginator($value)
+    public function setBuildPaginator($value): self
     {
         $this->buildPaginator = $value;
 
@@ -329,7 +268,7 @@ class Crud
      *
      * @param bool $value
      */
-    public function setPersistentSettings($value)
+    public function setPersistentSettings(bool $value): self
     {
         if ($value && !($this->container->get('security.token_storage')->getToken()->getUser() instanceof UserInterface)) {
             $value = false;
@@ -456,10 +395,8 @@ class Crud
 
     /**
      * Return default displayed columns.
-     *
-     * @return array
      */
-    public function getDefaultDisplayedColumns()
+    public function getDefaultDisplayedColumns(): array
     {
         $columns = [];
         foreach ($this->availableColumns as $column) {
@@ -851,10 +788,8 @@ class Crud
 
     /**
      * Return default results per page.
-     *
-     * @return int
      */
-    public function getDefaultResultsPerPage()
+    public function getDefaultResultsPerPage(): ?int
     {
         return $this->defaultResultsPerPage;
     }
@@ -874,20 +809,13 @@ class Crud
 
     /**
      * Returns availabled columns.
-     *
-     * @return array
      */
-    public function getColumns()
+    public function getColumns(): array
     {
         return $this->availableColumns;
     }
 
-    /**
-     * Returns one column.
-     *
-     * @return CrudColumn $columnId
-     */
-    public function getColumn($columnId)
+    public function getColumn(string $columnId): CrudColumn
     {
         if (isset($this->availableColumns[$columnId])) {
             return $this->availableColumns[$columnId];
@@ -897,20 +825,13 @@ class Crud
 
     /**
      * Returns availabled virtual columns.
-     *
-     * @return array
      */
-    public function getVirtualColumns()
+    public function getVirtualColumns(): array
     {
         return $this->availableVirtualColumns;
     }
 
-    /**
-     * Returns one virtual column.
-     *
-     * @return CrudColumn $columnId
-     */
-    public function getVirtualColumn($columnId)
+    public function getVirtualColumn(string $columnId): CrudColumn
     {
         if (isset($this->availableVirtualColumns[$columnId])) {
             return $this->availableVirtualColumns[$columnId];
@@ -918,31 +839,16 @@ class Crud
         throw new \Exception('Crud: Column '.$columnId.' does not exist');
     }
 
-    /**
-     * Returns user values.
-     *
-     * @return CrudSession
-     */
-    public function getSessionValues()
+    public function getSessionValues(): CrudSession
     {
         return $this->sessionValues;
     }
 
-    /**
-     * Returns the paginator.
-     *
-     * @return object
-     */
     public function getPaginator()
     {
         return $this->paginator;
     }
 
-    /**
-     * Sets the paginator.
-     *
-     * @param object $value
-     */
     public function setPaginator($value)
     {
         $this->paginator = $value;
@@ -970,98 +876,53 @@ class Crud
         return $this->formDisplaySettings;
     }
 
-    /**
-     * Returns the div id search.
-     *
-     * @return string
-     */
-    public function getDivIdSearch()
+    public function getDivIdSearch(): string
     {
         return $this->divIdSearch;
     }
 
-    /**
-     * Sets the div id search.
-     *
-     * @param string
-     *
-     * @return Crud
-     */
-    public function setDivIdSearch($divIdSearch)
+    public function setDivIdSearch(string $divIdSearch): self
     {
         $this->divIdSearch = $divIdSearch;
 
         return $this;
     }
 
-    /**
-     * Returns the div id list.
-     *
-     * @return string
-     */
-    public function getDivIdList()
+    public function getDivIdList(): string
     {
         return $this->divIdList;
     }
 
-    /**
-     * Sets the div id list.
-     *
-     * @param string
-     *
-     * @return Crud
-     */
-    public function setDivIdList($divIdList)
+    public function setDivIdList(string $divIdList): self
     {
         $this->divIdList = $divIdList;
 
         return $this;
     }
 
-    /**
-     * Gets session name.
-     *
-     * @return string
-     */
-    public function getSessionName()
+    public function getSessionName(): ?string
     {
         return $this->sessionName;
     }
 
-    /**
-     * @return bool
-     */
-    public function getDisplayResultsOnlyIfSearch()
+    public function getDisplayResultsOnlyIfSearch(): bool
     {
         return $this->displayResultsOnlyIfSearch;
     }
 
-    /**
-     * @param bool $displayResultsOnlyIfSearch
-     *
-     * @return Crud
-     */
-    public function setDisplayResultsOnlyIfSearch($displayResultsOnlyIfSearch)
+    public function setDisplayResultsOnlyIfSearch(bool $displayResultsOnlyIfSearch): self
     {
         $this->displayResultsOnlyIfSearch = $displayResultsOnlyIfSearch;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function getDisplayResults()
+    public function getDisplayResults(): bool
     {
         return $this->displayResults;
     }
 
-    /**
-     * @param bool $displayResults
-     *
-     * @return Crud
-     */
-    public function setDisplayResults($displayResults)
+    public function setDisplayResults(bool $displayResults): self
     {
         $this->displayResults = $displayResults;
 
