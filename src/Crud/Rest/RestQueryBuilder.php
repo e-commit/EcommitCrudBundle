@@ -15,6 +15,8 @@ namespace Ecommit\CrudBundle\Crud\Rest;
 
 use Ecommit\CrudBundle\Crud\QueryBuilderInterface;
 use Ecommit\CrudBundle\Crud\QueryBuilderParameterInterface;
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class RestQueryBuilder implements QueryBuilderInterface
 {
@@ -58,14 +60,7 @@ class RestQueryBuilder implements QueryBuilderInterface
      */
     protected $orders = [];
 
-    /**
-     * RestQueryBuilder constructor.
-     *
-     * @param string $url
-     * @param string $method
-     * @param array  $defaultParameters Array of RestQueryBuilderParameter objects
-     */
-    public function __construct($url, $method, $defaultParameters = [])
+    public function __construct(string $url, string $method, array $defaultParameters = [])
     {
         $this->url = $url;
         $this->method = $method;
@@ -74,36 +69,21 @@ class RestQueryBuilder implements QueryBuilderInterface
         }
     }
 
-    /**
-     * @return $this
-     */
-    public function setOrderBuilder(\Closure $orderBuilder)
+    public function setOrderBuilder(\Closure $orderBuilder): self
     {
         $this->orderBuilder = $orderBuilder;
 
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    public function setPaginationBuilder(\Closure $paginationBuilder)
+    public function setPaginationBuilder(\Closure $paginationBuilder): self
     {
         $this->paginationBuilder = $paginationBuilder;
 
         return $this;
     }
 
-    /**
-     * @param string $parameter
-     * @param string $value
-     * @param string $method
-     *
-     * @throws \Exception
-     *
-     * @return $this
-     */
-    public function addParameter(QueryBuilderParameterInterface $parameter)
+    public function addParameter(QueryBuilderParameterInterface $parameter): self
     {
         if (!($parameter instanceof RestQueryBuilderParameter)) {
             throw new \Exception('Bad class');
@@ -126,26 +106,14 @@ class RestQueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    /**
-     * @param string $sort
-     * @param string $sense
-     *
-     * @return $this
-     */
-    public function addOrderBy($sort, $sense)
+    public function addOrderBy(string $sort, string $sense): self
     {
         $this->orders[$sort] = $sense;
 
         return $this;
     }
 
-    /**
-     * @param string $sort
-     * @param string $sense
-     *
-     * @return $this
-     */
-    public function orderBy($sort, $sense)
+    public function orderBy($sort, $sense): self
     {
         $this->orders = [];
         $this->addOrderBy($sort, $sense);
@@ -153,18 +121,9 @@ class RestQueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    /**
-     * @param int   $page
-     * @param int   $resultsPerPage
-     * @param array $options
-     *
-     * @throws \Exception
-     *
-     * @return mixed|\Psr\Http\Message\ResponseInterface
-     */
-    public function getResponse($page, $resultsPerPage, $options = [])
+    public function getResponse(int $page, int $resultsPerPage, array $options = []): ResponseInterface
     {
-        $client = new \GuzzleHttp\Client();
+        $client = HttpClient::create();
 
         //Add paginator parameters
         if ($this->paginationBuilder && $this->paginationBuilder instanceof \Closure) {
@@ -182,12 +141,12 @@ class RestQueryBuilder implements QueryBuilderInterface
             }
         }
 
-        //Add parameters to GuzzleHttp options
+        //Add parameters to client options
         foreach ($this->queryParameters as $parameterName => $parameterValue) {
             $options['query'][$parameterName] = $parameterValue;
         }
         foreach ($this->formParameters as $parameterName => $parameterValue) {
-            $options['form_params'][$parameterName] = $parameterValue;
+            $options['body'][$parameterName] = $parameterValue;
         }
         if ($this->bodyParameter) {
             $options['body'] = $this->bodyParameter;
