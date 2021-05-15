@@ -16,19 +16,14 @@ namespace Ecommit\CrudBundle\Tests\Form\Type;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Form\Type\EntityAjaxType;
-use Ecommit\CrudBundle\Tests\DoctrineHelper;
-use Ecommit\CrudBundle\Tests\Fixtures\Tag;
-use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\Doctrine\Form\DoctrineOrmTypeGuesser;
-use Symfony\Bridge\Doctrine\ManagerRegistry;
-use Symfony\Component\Form\Exception\RuntimeException;
+use Ecommit\CrudBundle\Tests\Functional\App\Entity\Tag;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\Forms;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
-use Symfony\Component\Routing\Router;
 
-class EntityAjaxTypeTest extends TestCase
+class EntityAjaxTypeTest extends KernelTestCase
 {
     /**
      * @var EntityManager
@@ -42,40 +37,10 @@ class EntityAjaxTypeTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->em = DoctrineHelper::createEntityManager();
-        DoctrineHelper::loadTagsFixtures($this->em);
+        static::bootKernel();
 
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->expects($this->any())
-            ->method('getManager')
-            ->with($this->equalTo('default'))
-            ->willReturn($this->em);
-        $registry
-            ->expects($this->any())
-            ->method('getManagerForClass')
-            ->willReturnCallback(function ($class) {
-                if (Tag::class === $class) {
-                    return $this->em;
-                }
-
-                return null;
-            });
-
-        $router = $this->createMock(Router::class);
-        $router->expects($this->any())
-            ->method('generate')
-            ->willReturnCallback(function (string $routeName, array $routeParams) {
-                if (\count($routeParams) > 0) {
-                    return '/'.$routeName.'?'.http_build_query($routeParams);
-                }
-
-                return '/'.$routeName;
-            });
-
-        $this->factory = Forms::createFormFactoryBuilder()
-            ->addType(new EntityAjaxType($registry, $router))
-            ->addTypeGuesser(new DoctrineOrmTypeGuesser($registry))
-            ->getFormFactory();
+        $this->em = static::$container->get(ManagerRegistry::class)->getManager();
+        $this->factory = static::$container->get(FormFactoryInterface::class);
     }
 
     protected function tearDown(): void
@@ -92,10 +57,10 @@ class EntityAjaxTypeTest extends TestCase
 
     public function testInvalidClassOption(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(\Exception::class);
         $this->factory->createNamed('name', EntityAjaxType::class, null, [
             'class' => 'bad',
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
         ]);
     }
 
@@ -108,14 +73,14 @@ class EntityAjaxTypeTest extends TestCase
 
         $field = $this->factory->create(EntityAjaxType::class, $modelData, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
             'data_class' => null,
         ]);
         $view = $field->createView();
 
         $this->assertSame($expectedViewValue, $view->vars['value']);
-        $this->assertSame('/route_name', $view->vars['url']);
+        $this->assertSame('/fake', $view->vars['url']);
         $this->assertSame($multiple, $view->vars['multiple']);
     }
 
@@ -140,7 +105,7 @@ class EntityAjaxTypeTest extends TestCase
     {
         $field = $this->factory->create(EntityAjaxType::class, null, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
         ]);
 
@@ -176,7 +141,7 @@ class EntityAjaxTypeTest extends TestCase
     {
         $field = $this->factory->create(EntityAjaxType::class, null, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
             'max_elements' => 2,
         ]);
@@ -223,7 +188,7 @@ class EntityAjaxTypeTest extends TestCase
 
         $field = $this->factory->create(EntityAjaxType::class, null, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
             'query_builder' => $queryBuilder,
         ]);
@@ -267,7 +232,7 @@ class EntityAjaxTypeTest extends TestCase
 
         $field = $this->factory->create(EntityAjaxType::class, $tag, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'data_class' => null,
             'choice_label' => $choiceLabel,
         ]);
@@ -294,13 +259,13 @@ class EntityAjaxTypeTest extends TestCase
 
         $field = $this->factory->create(EntityAjaxType::class, $tag, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'route_params' => ['param1' => 'value1'],
             'data_class' => null,
         ]);
         $view = $field->createView();
 
-        $this->assertSame('/route_name?param1=value1', $view->vars['url']);
+        $this->assertSame('/fake?param1=value1', $view->vars['url']);
     }
 
     public function testViewWithEmParams(): void
@@ -309,7 +274,7 @@ class EntityAjaxTypeTest extends TestCase
 
         $field = $this->factory->create(EntityAjaxType::class, $tag, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'em' => 'default',
             'data_class' => null,
         ]);

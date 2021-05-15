@@ -7,6 +7,10 @@ display_settings:
     title: Propriétés d'affichage
     uncheck_all: Tout désélectionner
 
+filter:
+    'false': Non
+    'true': Oui
+
 search:
     reset: R.A.Z
     submit: Rechercher

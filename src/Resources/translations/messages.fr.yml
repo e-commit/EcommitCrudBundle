@@ -2,8 +2,6 @@
 Page %firstPage%/%lastPage%: Page %page%/%lastPage%
 Results %first%-%last%: Résultats %first%-%last%
 Page %page%/%lastPage%: Page %page%/%lastPage%
-filter.true: Oui
-filter.false: Non
 filter.choices.placeholder: Tous
 picker.add: Ajouter
 picker.list: Sélectionner

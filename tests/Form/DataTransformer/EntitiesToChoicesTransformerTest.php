@@ -15,8 +15,8 @@ namespace Ecommit\CrudBundle\Tests\Form\DataTransformer;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Ecommit\CrudBundle\Form\DataTransformer\Entity\EntitiesToChoicesTransformer;
-use Ecommit\CrudBundle\Tests\Fixtures\EntityManyToOne;
-use Ecommit\CrudBundle\Tests\Fixtures\Tag;
+use Ecommit\CrudBundle\Tests\Functional\App\Entity\EntityManyToOne;
+use Ecommit\CrudBundle\Tests\Functional\App\Entity\Tag;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;

@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Ecommit\CrudBundle\Tests\Fixtures;
+namespace Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher;
 
-use Ecommit\CrudBundle\Form\Searcher\AbstractFormSearcher;
+use Ecommit\CrudBundle\Form\Searcher\AbstractSearcher;
 
-class EntityToManyToOneSearcher extends AbstractFormSearcher
+class EntityToManyToOneSearcher extends AbstractSearcher
 {
     public $propertyName;
 }

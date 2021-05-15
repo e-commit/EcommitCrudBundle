@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher;
 
+use Ecommit\CrudBundle\Crud\SearchFormBuilder;
 use Ecommit\CrudBundle\Form\Filter as Filter;
-use Ecommit\CrudBundle\Form\Searcher\AbstractFormSearcher;
+use Ecommit\CrudBundle\Form\Searcher\AbstractSearcher;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class UserSearcher extends AbstractFormSearcher
+class UserSearcher extends AbstractSearcher
 {
     public $username;
 
@@ -24,12 +26,21 @@ class UserSearcher extends AbstractFormSearcher
 
     public $lastName;
 
-    public function configureFieldsFilter()
+    public function buildForm(SearchFormBuilder $builder, array $options): void
     {
-        return [
-            new Filter\FieldFilterText('username', 'username', []),
-            new Filter\FieldFilterText('firstName', 'firstName', []),
-            new Filter\FieldFilterText('lastName', 'lastName', []),
-        ];
+        $builder->addFilter('username', Filter\TextFilter::class);
+        $builder->addFilter('firstName', Filter\TextFilter::class);
+        $builder->addField('lastName', TextType::class, [
+            'required' => false,
+            'label' => 'last_name',
+        ]);
+    }
+
+    public function updateQueryBuilder($queryBuilder, array $options): void
+    {
+        if (null !== $this->lastName) {
+            $queryBuilder->andWhere('u.lastName = :lastName')
+                ->setParameter('lastName', $this->lastName);
+        }
     }
 }

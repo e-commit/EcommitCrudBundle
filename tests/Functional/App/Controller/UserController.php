@@ -35,7 +35,7 @@ class UserController extends AbstractCrudController
             ->setQueryBuilder($queryBuilder)
             ->setAvailableResultsPerPage([5, 5, 10, 50], 5)
             ->setDefaultSort('firstName', Crud::ASC)
-            ->createSearcherForm(new UserSearcher())
+            ->createSearchForm(new UserSearcher())
             ->setRoute('user_ajax_crud')
             ->setPersistentSettings(true)
             ->init();

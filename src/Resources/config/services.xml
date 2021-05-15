@@ -3,12 +3,20 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <service id="ecommit_crud.locator" class="Symfony\Component\DependencyInjection\ServiceLocator">
+            <argument type="collection">
+                <argument key="router" type="service" id="Symfony\Component\Routing\RouterInterface"/>
+                <argument key="form.factory" type="service" id="Symfony\Component\Form\FormFactoryInterface"/>
+                <argument key="request_stack" type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
+                <argument key="doctrine" type="service" id="Doctrine\Persistence\ManagerRegistry"/>
+                <argument key="security.token_storage" type="service" id="Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface"/>
+                <argument key="ecommit_crud.filters" type="service" id="Ecommit\CrudBundle\Crud\CrudFilters"/>
+            </argument>
+            <tag name="container.service_locator"/>
+        </service>
+
         <service id="Ecommit\CrudBundle\Crud\CrudFactory" class="Ecommit\CrudBundle\Crud\CrudFactory" public="true">
-            <argument type="service" id="Symfony\Component\Routing\RouterInterface"/>
-            <argument type="service" id="Symfony\Component\Form\FormFactoryInterface"/>
-            <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
-            <argument type="service" id="Doctrine\Persistence\ManagerRegistry" />
-            <argument type="service" id="Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface"/>
+            <argument type="service" id="ecommit_crud.locator"/>
         </service>
         <service id="ecommit_crud.factory" alias="Ecommit\CrudBundle\Crud\CrudFactory" public="true" />
 

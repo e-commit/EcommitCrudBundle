@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="Ecommit\CrudBundle\Form\Filter\BooleanFilter" class="Ecommit\CrudBundle\Form\Filter\BooleanFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\ChoiceFilter" class="Ecommit\CrudBundle\Form\Filter\ChoiceFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\DateFilter" class="Ecommit\CrudBundle\Form\Filter\DateFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\EntityAjaxFilter" class="Ecommit\CrudBundle\Form\Filter\EntityAjaxFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\EntityFilter" class="Ecommit\CrudBundle\Form\Filter\EntityFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\IntegerFilter" class="Ecommit\CrudBundle\Form\Filter\IntegerFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\NotNullFilter" class="Ecommit\CrudBundle\Form\Filter\NotNullFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\NullFilter" class="Ecommit\CrudBundle\Form\Filter\NullFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\NumberFilter" class="Ecommit\CrudBundle\Form\Filter\NumberFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+
+        <service id="Ecommit\CrudBundle\Form\Filter\TextFilter" class="Ecommit\CrudBundle\Form\Filter\TextFilter">
+            <tag name="ecommit_crud.filter" />
+        </service>
+    </services>
+</container>

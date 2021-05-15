@@ -38,7 +38,7 @@ class UserWithoutTraitController extends AbstractController
             ->setQueryBuilder($queryBuilder)
             ->setAvailableResultsPerPage([5, 5, 10, 50], 5)
             ->setDefaultSort('firstName', Crud::ASC)
-            ->createSearcherForm(new UserSearcher())
+            ->createSearchForm(new UserSearcher())
             ->setRoute('user_without_trait_ajax_crud', $routeParams)
             ->setPersistentSettings(true)
             ->init();

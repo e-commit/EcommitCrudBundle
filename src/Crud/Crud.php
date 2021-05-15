@@ -13,18 +13,16 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Ecommit\CrudBundle\DoctrineExtension\Paginate;
 use Ecommit\CrudBundle\Entity\UserCrudSettings;
-use Ecommit\CrudBundle\Form\Searcher\AbstractFormSearcher;
+use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 use Ecommit\CrudBundle\Form\Type\DisplaySettingsType;
-use Ecommit\CrudBundle\Form\Type\FormSearchType;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class Crud
@@ -40,9 +38,9 @@ class Crud
     protected $sessionValues;
 
     /**
-     * @var Form
+     * @var SearchFormBuilder|FormView
      */
-    protected $formSearcher = null;
+    protected $searchForm;
 
     /**
      * @var Form
@@ -56,7 +54,6 @@ class Crud
     protected $defaultPersonalizedSort = [];
     protected $defaultSense = null;
     protected $defaultResultsPerPage = null;
-    protected $defaultFormSearcherData = null;
 
     protected $queryBuilder = null;
     protected $persistentSettings = false;
@@ -76,29 +73,9 @@ class Crud
     protected $divIdList = 'crud_list';
 
     /**
-     * @var RouterInterface
+     * @var ContainerInterface
      */
-    protected $router;
-
-    /**
-     * @var FormFactoryInterface
-     */
-    protected $formFactory;
-
-    /**
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     * @var Registry
-     */
-    protected $registry;
-
-    /**
-     * @var User
-     */
-    protected $user;
+    protected $container;
 
     /**
      * Constructor.
@@ -107,23 +84,13 @@ class Crud
      *
      * @return Crud
      */
-    public function __construct(
-        $sessionName,
-        RouterInterface $router,
-        FormFactoryInterface $formFactory,
-        Request $request,
-        Registry $registry,
-        $user
-    ) {
+    public function __construct($sessionName, ContainerInterface $container)
+    {
         if (!preg_match('/^[a-zA-Z0-9_]{1,50}$/', $sessionName)) {
             throw new \Exception('Variable sessionName is not given or is invalid');
         }
         $this->sessionName = $sessionName;
-        $this->router = $router;
-        $this->formFactory = $formFactory;
-        $this->request = $request;
-        $this->registry = $registry;
-        $this->user = $user;
+        $this->container = $container;
         $this->sessionValues = new CrudSession();
 
         return $this;
@@ -328,7 +295,7 @@ class Crud
     {
         $parameters = array_merge($this->routeParams, $parameters);
 
-        return $this->router->generate($this->routeName, $parameters);
+        return $this->container->get('router')->generate($this->routeName, $parameters);
     }
 
     /**
@@ -342,7 +309,7 @@ class Crud
     {
         $parameters = array_merge($this->routeParams, ['search' => 1], $parameters);
 
-        return $this->router->generate($this->routeName, $parameters);
+        return $this->container->get('router')->generate($this->routeName, $parameters);
     }
 
     /**
@@ -364,7 +331,7 @@ class Crud
      */
     public function setPersistentSettings($value)
     {
-        if ($value && !($this->user instanceof UserInterface)) {
+        if ($value && !($this->container->get('security.token_storage')->getToken()->getUser() instanceof UserInterface)) {
             $value = false;
         }
         $this->persistentSettings = $value;
@@ -372,35 +339,9 @@ class Crud
         return $this;
     }
 
-    /**
-     * Adds search form.
-     *
-     * @param string|null $type    The type of the form. If null, FormSearchType is used
-     * @param array       $options The options
-     *
-     * @return Crud
-     */
-    public function createSearcherForm(AbstractFormSearcher $defaultFormSearcherData, $type = null, $options = [])
+    public function createSearchForm(SearcherInterface $defaultData, ?string $type = null, array $options = []): self
     {
-        $this->defaultFormSearcherData = $defaultFormSearcherData;
-        $this->initializeFieldsFilter($defaultFormSearcherData);
-
-        if ($type) {
-            $formBuilder = $this->formFactory->createBuilder($type, null, $options);
-        } else {
-            $formName = sprintf('crud_search_%s', $this->sessionName);
-            $formBuilder = $this->formFactory->createNamedBuilder($formName, FormSearchType::class, null, $options);
-        }
-        foreach ($defaultFormSearcherData->getFieldsFilter($this->registry) as $field) {
-            if (!($field instanceof \Ecommit\CrudBundle\Form\Filter\AbstractFieldFilter)) {
-                throw new \Exception('Crud: AbstractFormSearcher: getFieldsFilter() must only returns AbstractFieldFilter implementations');
-            }
-
-            $formBuilder = $field->addField($formBuilder);
-        }
-        //Global
-        $formBuilder = $defaultFormSearcherData->globalBuildForm($formBuilder);
-        $this->formSearcher = $formBuilder;
+        $this->searchForm = new SearchFormBuilder($this->container, $this, $defaultData, $type, $options);
 
         return $this;
     }
@@ -410,22 +351,24 @@ class Crud
      */
     public function processForm(): void
     {
-        if (empty($this->defaultFormSearcherData)) {
-            throw new NotFoundHttpException('Crud: Form searcher does not exist');
+        if (!$this->searchForm) {
+            throw new NotFoundHttpException('Crud: Search form does not exist');
         }
 
-        if ($this->request->query->has('raz')) {
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        if ($request->query->has('raz')) {
             return;
         }
-        if ('POST' == $this->request->getMethod()) {
+        if ('POST' == $request->getMethod()) {
             if ($this->displayResultsOnlyIfSearch) {
                 $this->displayResults = false;
             }
-            $this->formSearcher->handleRequest($this->request);
-            if ($this->formSearcher->isSubmitted() && $this->formSearcher->isValid()) {
+            $searchForm = $this->searchForm->getForm();
+            $searchForm->handleRequest($request);
+            if ($searchForm->isSubmitted() && $searchForm->isValid()) {
                 $this->displayResults = true;
-                $this->formSearcher->getData()->isSubmitted = true;
-                $this->changeFilterValues($this->formSearcher->getData());
+                $this->sessionValues->searchFormIsSubmitted = true;
+                $this->changeFilterValues($searchForm->getData());
                 $this->changePage(1);
                 $this->save();
             }
@@ -439,13 +382,13 @@ class Crud
      */
     protected function changeFilterValues($value): void
     {
-        if (empty($this->defaultFormSearcherData)) {
+        if (!$this->searchForm) {
             return;
         }
-        if (\get_class($value) == \get_class($this->defaultFormSearcherData)) {
-            $this->sessionValues->formSearcherData = $value;
+        if (\get_class($value) === \get_class($this->searchForm->getDefaultData())) {
+            $this->sessionValues->searchFormData = $value;
         } else {
-            $this->sessionValues->formSearcherData = clone $this->defaultFormSearcherData;
+            $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();
         }
     }
 
@@ -472,23 +415,22 @@ class Crud
     protected function save(): void
     {
         //Save in session
-        $session = $this->request->getSession();
-        $sessionValuesClean = clone $this->sessionValues;
-        if (\is_object($this->sessionValues->formSearcherData)) {
-            $sessionValuesClean->formSearcherData = clone $this->sessionValues->formSearcherData;
-            $sessionValuesClean->formSearcherData->clear();
+        $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
+        $sessionValues = clone $this->sessionValues;
+        if (\is_object($this->sessionValues->searchFormData)) {
+            $sessionValues->searchFormData = clone $this->sessionValues->searchFormData;
         }
-        $session->set($this->sessionName, $sessionValuesClean);
+        $session->set($this->sessionName, $sessionValues);
 
         //Save in database
         if ($this->persistentSettings && $this->updateDatabase) {
-            $objectDatabase = $this->registry->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
+            $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
                 [
-                    'user' => $this->user,
+                    'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
                     'crudName' => $this->sessionName,
                 ]
             );
-            $em = $this->registry->getManager();
+            $em = $this->container->get('doctrine')->getManager();
 
             if ($objectDatabase) {
                 //Update object in database
@@ -502,7 +444,7 @@ class Crud
                     $this->sessionValues->sort != $this->defaultSort
                 ) {
                     $objectDatabase = new UserCrudSettings();
-                    $objectDatabase->setUser($this->user);
+                    $objectDatabase->setUser($this->container->get('security.token_storage')->getToken()->getUser());
                     $objectDatabase->setCrudName($this->sessionName);
                     $objectDatabase->updateFromSessionManager($this->sessionValues);
                     $em->persist($objectDatabase);
@@ -553,19 +495,16 @@ class Crud
             }
         }
 
-        if (!empty($this->defaultFormSearcherData)) {
-            //Set url
-            $this->formSearcher->setAction($this->getSearchUrl());
-            //Transform FormBuilder to Form
-            $this->formSearcher = $this->formSearcher->getForm();
+        if ($this->searchForm) {
+            $this->searchForm->createForm();
         }
 
         //Loads user values inside this object
         $this->load();
 
         //Display or not results
-        if (!empty($this->defaultFormSearcherData) && $this->displayResultsOnlyIfSearch) {
-            $this->displayResults = $this->sessionValues->formSearcherData->isSubmitted;
+        if ($this->searchForm && $this->displayResultsOnlyIfSearch) {
+            $this->displayResults = $this->sessionValues->searchFormIsSubmitted;
         }
 
         $this->createDisplaySettingsForm();
@@ -573,16 +512,18 @@ class Crud
         //Process request (resultsPerPage, sort, sense, change_columns)
         $this->processRequest();
 
-        //Searcher form: Allocates object (Defaults values and validators)
-        if (!empty($this->defaultFormSearcherData) && !$this->request->query->has('raz')) {
+        //Searcher form: Allocates object
+        if ($this->searchForm && !$this->container->get('request_stack')->getCurrentRequest()->query->has('raz')) {
             //IMPORTANT
-            //We have not to allocate directelly the "$this->sessionValues->formSearcherData" object
+            //We have not to allocate directelly the "$this->sessionValues->searchFormData" object
             //because otherwise it will be linked to form, and will be updated when the "bind" function will
             //be called (If form is not valid, the session values will still be updated: Undesirable behavior)
-            $values = clone $this->sessionValues->formSearcherData;
-            $values->setFieldsFilter($this->defaultFormSearcherData->getFieldsFilter()); //Copy fields from defaultFormSearcherData to current data
-            $values->setCommonOptions($this->defaultFormSearcherData->getCommonOptions());
-            $this->formSearcher->setData($values);
+            $values = clone $this->sessionValues->searchFormData;
+            try {
+                $this->searchForm->getForm()->setData($values);
+            } catch (TransformationFailedException $exception) {
+                //Avoid error if data stored in session is invalid
+            }
         }
 
         //Saves
@@ -590,42 +531,16 @@ class Crud
     }
 
     /**
-     * Init "fieldFilters" property in $formSearcherData object
-     * Inject the registry in $formSearcherData objet if implements FieldFilterDoctrineInterface.
-     */
-    protected function initializeFieldsFilter(AbstractFormSearcher $formSearcherData): void
-    {
-        foreach ($formSearcherData->getFieldsFilter($this->registry) as $field) {
-            if (!($field instanceof \Ecommit\CrudBundle\Form\Filter\AbstractFieldFilter)) {
-                throw new \Exception('Crud: AbstractFormSearcher: getFieldsFilter() must only returns AbstractFieldFilter implementations');
-            }
-
-            if (isset($this->availableColumns[$field->getColumnId()])) {
-                $column = $this->availableColumns[$field->getColumnId()];
-            } elseif (isset($this->availableVirtualColumns[$field->getColumnId()])) {
-                $column = $this->availableVirtualColumns[$field->getColumnId()];
-            } else {
-                throw new \Exception('Crud: AbstractFormSearcher: getFieldsFilter(): Column id does not exit: '.$field->getColumnId());
-            }
-
-            $field->setLabel($column->label, $formSearcherData->displayLabelInErrors());
-        }
-    }
-
-    /**
      * Load user values.
      */
     protected function load(): void
     {
-        $session = $this->request->getSession();
+        $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
         $object = $session->get($this->sessionName); //Load from session
 
         if (!empty($object)) {
             $this->sessionValues = $object;
             $this->checkCrudSession();
-            if (!empty($this->defaultFormSearcherData)) {
-                $object->formSearcherData->setCommonOptions($this->defaultFormSearcherData->getCommonOptions());
-            }
 
             return;
         }
@@ -633,16 +548,16 @@ class Crud
         //If session is null => Retrieve from database
         //Only if persistent settings is enabled
         if ($this->persistentSettings) {
-            $objectDatabase = $this->registry->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
+            $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
                 [
-                    'user' => $this->user,
+                    'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
                     'crudName' => $this->sessionName,
                 ]
             );
             if ($objectDatabase) {
                 $this->sessionValues = $objectDatabase->transformToCrudSession(new CrudSession());
-                if (!empty($this->defaultFormSearcherData)) {
-                    $this->sessionValues->formSearcherData = clone $this->defaultFormSearcherData;
+                if ($this->searchForm) {
+                    $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();
                 }
                 $this->checkCrudSession();
 
@@ -655,8 +570,8 @@ class Crud
         $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
         $this->sessionValues->sense = $this->defaultSense;
         $this->sessionValues->sort = $this->defaultSort;
-        if (!empty($this->defaultFormSearcherData)) {
-            $this->sessionValues->formSearcherData = clone $this->defaultFormSearcherData;
+        if ($this->searchForm) {
+            $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();
         }
     }
 
@@ -670,7 +585,7 @@ class Crud
         $this->changeColumnsDisplayed($this->sessionValues->displayedColumns);
         $this->changeSort($this->sessionValues->sort);
         $this->changeSense($this->sessionValues->sense);
-        $this->changeFilterValues($this->sessionValues->formSearcherData);
+        $this->changeFilterValues($this->sessionValues->searchFormData);
         $this->changePage($this->sessionValues->page);
     }
 
@@ -763,32 +678,33 @@ class Crud
      */
     protected function processRequest(): void
     {
-        if ($this->request->query->has('razsettings')) {
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        if ($request->query->has('razsettings')) {
             //Reset display settings
             $this->razDisplaySettings();
 
             return;
         }
-        if ($this->request->query->has('raz')) {
+        if ($request->query->has('raz')) {
             $this->raz();
 
             return;
         }
 
-        $this->formDisplaySettings->handleRequest($this->request);
+        $this->formDisplaySettings->handleRequest($request);
         if ($this->formDisplaySettings->isSubmitted() && $this->formDisplaySettings->isValid()) {
             $displaySettingsData = $this->formDisplaySettings->getData();
             $this->changeColumnsDisplayed($displaySettingsData['displayedColumns']);
             $this->changeNumberResultsDisplayed($displaySettingsData['resultsPerPage']);
         }
-        if ($this->request->query->has('sort')) {
-            $this->changeSort($this->request->query->get('sort'));
+        if ($request->query->has('sort')) {
+            $this->changeSort($request->query->get('sort'));
         }
-        if ($this->request->query->has('sense')) {
-            $this->changeSense($this->request->query->get('sense'));
+        if ($request->query->has('sense')) {
+            $this->changeSense($request->query->get('sense'));
         }
-        if ($this->request->query->has('page')) {
-            $this->changePage($this->request->query->get('page'));
+        if ($request->query->has('page')) {
+            $this->changePage($request->query->get('page'));
         }
     }
 
@@ -808,7 +724,7 @@ class Crud
         ];
         $formName = sprintf('crud_display_settings_%s', $this->getSessionName());
 
-        $this->formDisplaySettings = $this->formFactory->createNamed($formName, DisplaySettingsType::class, $data, [
+        $this->formDisplaySettings = $this->container->get('form.factory')->createNamed($formName, DisplaySettingsType::class, $data, [
             'results_per_page_choices' => $resultsPerPageChoices,
             'columns_choices' => $columnsChoices,
             'action' => $this->getUrl(['display-settings' => 1]),
@@ -828,10 +744,10 @@ class Crud
 
         if ($this->persistentSettings) {
             //Remove settings in database
-            $qb = $this->registry->getManager()->createQueryBuilder();
+            $qb = $this->container->get('doctrine')->getManager()->createQueryBuilder();
             $qb->delete('EcommitCrudBundle:UserCrudSettings', 's')
                 ->andWhere('s.user = :user AND s.crudName = :crud_name')
-                ->setParameters(['user' => $this->user, 'crud_name' => $this->sessionName])
+                ->setParameters(['user' => $this->container->get('security.token_storage')->getToken()->getUser(), 'crud_name' => $this->sessionName])
                 ->getQuery()
                 ->execute();
         }
@@ -842,10 +758,10 @@ class Crud
      */
     public function raz(): void
     {
-        if ($this->defaultFormSearcherData) {
-            $newValue = clone $this->defaultFormSearcherData;
+        if ($this->searchForm) {
+            $newValue = clone $this->searchForm->getDefaultData();
             $this->changeFilterValues($newValue);
-            $this->formSearcher->setData(clone $newValue);
+            $this->searchForm->getForm()->setData(clone $newValue);
         }
         $this->changePage(1);
         $this->save();
@@ -902,37 +818,8 @@ class Crud
         }
 
         //Adds form searcher filters
-        if (!empty($this->defaultFormSearcherData)) {
-            foreach ($this->defaultFormSearcherData->getFieldsFilter() as $field) {
-                if (!($this->queryBuilder instanceof \Doctrine\ORM\QueryBuilder) &&
-                    !($this->queryBuilder instanceof \Doctrine\DBAL\Query\QueryBuilder)) {
-                    throw new \Exception('getFieldsFilter can not be used');
-                }
-
-                if (isset($this->availableColumns[$field->getColumnId()])) {
-                    $column = $this->availableColumns[$field->getColumnId()];
-                } elseif (isset($this->availableVirtualColumns[$field->getColumnId()])) {
-                    $column = $this->availableVirtualColumns[$field->getColumnId()];
-                } else {
-                    throw new \Exception('Crud: AbstractFormSearcher: getFieldsFilter(): Column id does not exit: '.$field->getColumnId());
-                }
-
-                //Get alias search
-                if (empty($column->aliasSearch)) {
-                    $aliasSearch = $column->alias;
-                } else {
-                    $aliasSearch = $column->aliasSearch;
-                }
-
-                $this->queryBuilder = $field->changeQuery(
-                    $this->queryBuilder,
-                    $this->sessionValues->formSearcherData,
-                    $aliasSearch
-                );
-            }
-
-            //Global change Query
-            $this->queryBuilder = $this->sessionValues->formSearcherData->globalChangeQuery($this->queryBuilder);
+        if ($this->searchForm) {
+            $this->searchForm->updateQueryBuilder($this->queryBuilder, $this->sessionValues->searchFormData);
         }
 
         //Builds paginator
@@ -978,16 +865,11 @@ class Crud
     public function clearTemplate(): void
     {
         $this->queryBuilder = null;
-        $this->formFactory = null;
-        $this->request = null;
-        $this->registry = null;
-        if (empty($this->defaultFormSearcherData)) {
-            $this->formSearcher = null;
-        } else {
-            $this->formSearcher = $this->formSearcher->createView();
+        if ($this->searchForm) {
+            $this->searchForm->createFormView();
+            $this->searchForm = $this->searchForm->getForm();
         }
         $this->formDisplaySettings = $this->formDisplaySettings->createView();
-        $this->defaultFormSearcherData = null;
     }
 
     /**
@@ -1009,6 +891,29 @@ class Crud
     {
         if (isset($this->availableColumns[$columnId])) {
             return $this->availableColumns[$columnId];
+        }
+        throw new \Exception('Crud: Column '.$columnId.' does not exist');
+    }
+
+    /**
+     * Returns availabled virtual columns.
+     *
+     * @return array
+     */
+    public function getVirtualColumns()
+    {
+        return $this->availableVirtualColumns;
+    }
+
+    /**
+     * Returns one virtual column.
+     *
+     * @return CrudColumn $columnId
+     */
+    public function getVirtualColumn($columnId)
+    {
+        if (isset($this->availableVirtualColumns[$columnId])) {
+            return $this->availableVirtualColumns[$columnId];
         }
         throw new \Exception('Crud: Column '.$columnId.' does not exist');
     }
@@ -1048,11 +953,11 @@ class Crud
     /**
      * Returns the search form.
      *
-     * @return FormBuilder (before init) or Form (before clearTemplate) or FormView (after clearTemplate)
+     * @return SearchFormBuilder (before clearTemplate) or FormView (after clearTemplate)
      */
-    public function getSearcherForm()
+    public function getSearchForm()
     {
-        return $this->formSearcher;
+        return $this->searchForm;
     }
 
     /**

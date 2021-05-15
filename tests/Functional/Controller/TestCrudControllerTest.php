@@ -212,6 +212,25 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testPersistentValuesAfterSearch
      */
+    public function testSearchWithoutFilter(Client $client): Client
+    {
+        $form = $client->getCrawler()->filterXPath('//div[@id="crud_search"]/descendant::button[@type="submit" and contains(text(), "Search")]')->form();
+        $form['crud_search_'.static::SESSION_NAME.'[lastName]'] = 'Plait';
+        $client->submit($form);
+        $this->waitForAjax($client);
+
+        $this->assertSame([1, 3], $this->countRowsAndColumns($client->getCrawler()));
+        $this->assertSame([1, 1], $this->getPagination($client->getCrawler()));
+        $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
+        $this->assertSame('HenriPlait', $this->getFirstUsername($client->getCrawler()));
+        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+
+        return $client;
+    }
+
+    /**
+     * @depends testSearchWithoutFilter
+     */
     public function testResetSearch(Client $client): Client
     {
         $button = $client->getCrawler()->filterXPath('//div[@id="crud_search"]/descendant::button[contains(text(), "Reset")]');

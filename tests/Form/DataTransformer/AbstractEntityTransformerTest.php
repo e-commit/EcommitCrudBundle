@@ -14,11 +14,11 @@ declare(strict_types=1);
 namespace Ecommit\CrudBundle\Tests\Form\DataTransformer;
 
 use Doctrine\ORM\EntityManager;
-use Ecommit\CrudBundle\Tests\DoctrineHelper;
-use PHPUnit\Framework\TestCase;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Form\DataTransformerInterface;
 
-abstract class AbstractEntityTransformerTest extends TestCase
+abstract class AbstractEntityTransformerTest extends KernelTestCase
 {
     /**
      * @var EntityManager
@@ -27,9 +27,8 @@ abstract class AbstractEntityTransformerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->em = DoctrineHelper::createEntityManager();
-        DoctrineHelper::loadTagsFixtures($this->em);
-        DoctrineHelper::loadEntityManyToOneFixtures($this->em);
+        static::bootKernel();
+        $this->em = static::$container->get(ManagerRegistry::class)->getManager();
     }
 
     protected function tearDown(): void

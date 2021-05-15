@@ -13,11 +13,14 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Form\Filter;
 
-use Doctrine\Persistence\ManagerRegistry;
-
-interface FieldFilterDoctrineInterface
+class NotNullFilter extends NullFilter
 {
-    public function getRegistry();
+    public function updateQueryBuilder($queryBuilder, string $property, $value, array $options): void
+    {
+        if (!$value) {
+            return;
+        }
 
-    public function setRegistry(ManagerRegistry $registry);
+        $queryBuilder->andWhere(sprintf('%s IS NOT NULL', $options['alias_search']));
+    }
 }

@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace Ecommit\CrudBundle\Tests\Form\DataTransformer;
 
 use Ecommit\CrudBundle\Form\DataTransformer\Entity\EntityToIdTransformer;
-use Ecommit\CrudBundle\Tests\Fixtures\EntityManyToOne;
-use Ecommit\CrudBundle\Tests\Fixtures\Tag;
+use Ecommit\CrudBundle\Tests\Functional\App\Entity\EntityManyToOne;
+use Ecommit\CrudBundle\Tests\Functional\App\Entity\Tag;
 use Symfony\Component\Form\DataTransformerInterface;
 
 class EntityToIdTransformerTest extends EntityToChoiceTransformerTest

@@ -12,6 +12,7 @@
         <env name="KERNEL_CLASS" value="Ecommit\CrudBundle\Tests\Functional\App\Kernel" />
         <env name="APP_ENV" value="test"/>
         <server name="PANTHER_WEB_SERVER_DIR" value="./tests/Functional/App/public" />
+        <ini name="intl.default_locale" value="fr" />
     </php>
 
     <extensions>

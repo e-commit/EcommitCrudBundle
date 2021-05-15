@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle;
 
+use Ecommit\CrudBundle\DependencyInjection\Compiler\FiltersPass;
 use Ecommit\CrudBundle\DependencyInjection\Compiler\TwigFormPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -24,5 +25,6 @@ class EcommitCrudBundle extends Bundle
         parent::build($container);
 
         $container->addCompilerPass(new TwigFormPass());
+        $container->addCompilerPass(new FiltersPass());
     }
 }

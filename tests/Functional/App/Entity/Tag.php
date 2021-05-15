@@ -11,14 +11,14 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Ecommit\CrudBundle\Tests\Fixtures;
+namespace Ecommit\CrudBundle\Tests\Functional\App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
  */
-class EntityManyToOne
+class Tag
 {
     /**
      * @ORM\Id
@@ -31,16 +31,15 @@ class EntityManyToOne
      */
     protected $name;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Tag")
-     */
-    protected $tag;
-
-    public function __construct(int $id, string $name, Tag $tag)
+    public function __construct(int $id, string $name)
     {
         $this->id = $id;
         $this->name = $name;
-        $this->tag = $tag;
+    }
+
+    public function __toString()
+    {
+        return $this->name;
     }
 
     public function getId(): ?int
@@ -63,18 +62,6 @@ class EntityManyToOne
     public function setName(?string $name): self
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getTag(): ?Tag
-    {
-        return $this->tag;
-    }
-
-    public function setTag(?Tag $tag): self
-    {
-        $this->tag = $tag;
 
         return $this;
     }

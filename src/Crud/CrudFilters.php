@@ -13,13 +13,11 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud;
 
+use Ecommit\CrudBundle\Form\Filter\FilterInterface;
 use Psr\Container\ContainerInterface;
 
-class CrudFactory
+final class CrudFilters
 {
-    /**
-     * @var ContainerInterface
-     */
     protected $container;
 
     public function __construct(ContainerInterface $container)
@@ -27,13 +25,13 @@ class CrudFactory
         $this->container = $container;
     }
 
-    /**
-     * @param $sessionName
-     *
-     * @return Crud
-     */
-    public function create($sessionName)
+    public function has($filter): bool
     {
-        return new Crud($sessionName, $this->container);
+        return $this->container->has($filter);
+    }
+
+    public function get($filter): FilterInterface
+    {
+        return $this->container->get($filter);
     }
 }

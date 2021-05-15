@@ -35,6 +35,7 @@ class EcommitCrudExtension extends Extension
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
+        $loader->load('filters.xml');
 
         $container->setParameter('ecommit_crud.theme', $config['theme']);
         $container->setParameter('ecommit_crud.icon_theme', $config['icon_theme']);

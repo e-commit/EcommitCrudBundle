@@ -13,3 +13,9 @@ user_without_trait_crud:
 user_without_trait_ajax_crud:
     path: /user-without-trait/ajax-crud
     controller: Ecommit\CrudBundle\Tests\Functional\App\Controller\UserWithoutTraitController::ajaxCrudAction
+
+fake_route:
+    path: /fake
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /

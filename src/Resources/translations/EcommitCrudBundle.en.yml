@@ -7,6 +7,10 @@ display_settings:
     title: Display Settings
     uncheck_all: Uncheck all
 
+filter:
+    'false': No
+    'true': Yes
+
 search:
     reset: Reset
     submit: Search

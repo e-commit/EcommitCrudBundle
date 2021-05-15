@@ -13,83 +13,19 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Tests\Form\Filter;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Ecommit\CrudBundle\Form\Filter\FieldFilterEntityAjax;
-use Ecommit\CrudBundle\Form\Type\EntityAjaxType;
-use Ecommit\CrudBundle\Tests\DoctrineHelper;
-use Ecommit\CrudBundle\Tests\Fixtures\EntityManyToOne;
-use Ecommit\CrudBundle\Tests\Fixtures\EntityToManyToOneSearcher;
-use Ecommit\CrudBundle\Tests\Fixtures\Tag;
-use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\Doctrine\Form\DoctrineOrmTypeGuesser;
-use Symfony\Bridge\Doctrine\ManagerRegistry;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\Forms;
+use Ecommit\CrudBundle\Form\Filter\EntityAjaxFilter;
+use Ecommit\CrudBundle\Tests\Functional\App\Entity\Tag;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
-use Symfony\Component\Routing\Router;
 
-class FieldFilterEntityAjaxTest extends TestCase
+class EntityAjaxFilterTest extends AbstractFilterTest
 {
-    /**
-     * @var EntityManager
-     */
-    protected $em;
-
-    /**
-     * @var FormFactoryInterface
-     */
-    protected $factory;
-
-    protected function setUp(): void
-    {
-        $this->em = DoctrineHelper::createEntityManager();
-        DoctrineHelper::loadTagsFixtures($this->em);
-        DoctrineHelper::loadEntityManyToOneFixtures($this->em);
-
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->expects($this->any())
-            ->method('getManager')
-            ->with($this->equalTo('default'))
-            ->willReturn($this->em);
-        $registry->expects($this->any())
-            ->method('getManagerForClass')
-            ->willReturnCallback(function ($class) {
-                if (Tag::class === $class) {
-                    return $this->em;
-                }
-
-                return null;
-            });
-
-        $router = $this->createMock(Router::class);
-        $router->expects($this->any())
-            ->method('generate')
-            ->willReturnCallback(function (string $routeName, array $routeParams) {
-                if (\count($routeParams) > 0) {
-                    return '/'.$routeName.'?'.http_build_query($routeParams);
-                }
-
-                return '/'.$routeName;
-            });
-
-        $this->factory = Forms::createFormFactoryBuilder()
-            ->addType(new EntityAjaxType($registry, $router))
-            ->addTypeGuesser(new DoctrineOrmTypeGuesser($registry))
-            ->getFormFactory();
-    }
-
-    protected function tearDown(): void
-    {
-        $this->em = null;
-    }
-
     public function testOptionsAreRequired(): void
     {
         $this->expectException(MissingOptionsException::class);
-        $filter = new FieldFilterEntityAjax('columnId', 'propertyName');
-        $filter->init();
+
+        $crud = $this->createCrud('e.tag');
+        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class);
     }
 
     /**
@@ -97,29 +33,19 @@ class FieldFilterEntityAjaxTest extends TestCase
      */
     public function testViewAndQueryBuilder(bool $multiple, $modelData, $expectedViewData, array $expectedIdsFound): void
     {
-        $searcher = new EntityToManyToOneSearcher();
-        $searcher->propertyName = $modelData;
-
-        $filter = new FieldFilterEntityAjax('columnId', 'propertyName', [
+        $crud = $this->createCrud('e.tag', $modelData);
+        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
         ]);
-        $filter->init();
-
-        $formBuilder = $this->factory->createBuilder(FormType::class, [
-            'propertyName' => $searcher->propertyName,
-        ]);
-        $filter->addField($formBuilder);
-        $view = $formBuilder->getForm()->createView();
+        $view = $this->initCrudAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
-        $queryBuilder = $this->em->getRepository(EntityManyToOne::class)->createQueryBuilder('e')
-            ->orderBy('e.id', 'asc');
-        $filter->changeQuery($queryBuilder, $searcher, 'e.tag');
+        $crud->buildQuery();
         $idsFound = [];
-        foreach ($queryBuilder->getQuery()->getResult() as $entity) {
+        foreach ($crud->getQueryBuilder()->getQuery()->getResult() as $entity) {
             $idsFound[] = $entity->getId();
         }
         $this->assertSame($expectedIdsFound, $idsFound);
@@ -148,22 +74,14 @@ class FieldFilterEntityAjaxTest extends TestCase
      */
     public function testSubmit(bool $multiple, $submittedData, $expectedModelData, $expectedViewData): void
     {
-        $searcher = new EntityToManyToOneSearcher();
-        $searcher->propertyName = ($multiple) ? [] : null;
-
-        $filter = new FieldFilterEntityAjax('columnId', 'propertyName', [
+        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
         ]);
-        $filter->init();
 
-        $formBuilder = $this->factory->createBuilder(FormType::class, [
-            'propertyName' => $searcher->propertyName,
-        ]);
-        $filter->addField($formBuilder);
-
-        $form = $formBuilder->getForm();
+        $form = $this->initCrudAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -196,23 +114,15 @@ class FieldFilterEntityAjaxTest extends TestCase
      */
     public function testSubmitInvalid(bool $multiple, $submittedData): void
     {
-        $searcher = new EntityToManyToOneSearcher();
-        $searcher->propertyName = ($multiple) ? [] : null;
-
-        $filter = new FieldFilterEntityAjax('columnId', 'propertyName', [
+        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
             'max' => 2,
         ]);
-        $filter->init();
 
-        $formBuilder = $this->factory->createBuilder(FormType::class, [
-            'propertyName' => $searcher->propertyName,
-        ]);
-        $filter->addField($formBuilder);
-
-        $form = $formBuilder->getForm();
+        $form = $this->initCrudAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -221,7 +131,6 @@ class FieldFilterEntityAjaxTest extends TestCase
         $this->assertFalse($field->isSynchronized());
         $this->assertFalse($field->isValid());
         $this->assertNull($field->getData());
-        $this->assertSame($submittedData, $field->getViewData()); //Twig doesn't display invalid list
     }
 
     public function getTestSubmitInvalidProvider(): array
@@ -256,31 +165,22 @@ class FieldFilterEntityAjaxTest extends TestCase
                 ->andWhere('t.id > 2');
         }
 
-        $searcher = new EntityToManyToOneSearcher();
-        $searcher->propertyName = $modelData;
-
-        $filter = new FieldFilterEntityAjax('columnId', 'propertyName', [
+        $crud = $this->createCrud('e.tag', $modelData);
+        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
-        ], [
-            'query_builder' => $queryBuilder,
+            'type_options' => [
+                'query_builder' => $queryBuilder,
+            ],
         ]);
-        $filter->init();
-
-        $formBuilder = $this->factory->createBuilder(FormType::class, [
-            'propertyName' => $searcher->propertyName,
-        ]);
-        $filter->addField($formBuilder);
-        $view = $formBuilder->getForm()->createView();
+        $view = $this->initCrudAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']); //Twig doesn't display invalid list
 
-        $queryBuilderResults = $this->em->getRepository(EntityManyToOne::class)->createQueryBuilder('e')
-            ->orderBy('e.id', 'asc');
-        $filter->changeQuery($queryBuilderResults, $searcher, 'e.tag');
+        $crud->buildQuery();
         $idsFound = [];
-        foreach ($queryBuilderResults->getQuery()->getResult() as $entity) {
+        foreach ($crud->getQueryBuilder()->getQuery()->getResult() as $entity) {
             $idsFound[] = $entity->getId();
         }
         $this->assertSame($expectedIdsFound, $idsFound);
@@ -324,24 +224,17 @@ class FieldFilterEntityAjaxTest extends TestCase
                 ->andWhere('t.id > 2');
         }
 
-        $searcher = new EntityToManyToOneSearcher();
-        $searcher->propertyName = ($multiple) ? [] : null;
-
-        $filter = new FieldFilterEntityAjax('columnId', 'propertyName', [
+        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
-            'route_name' => 'route_name',
+            'route_name' => 'fake_route',
             'multiple' => $multiple,
-        ], [
-            'query_builder' => $queryBuilder,
+            'type_options' => [
+                'query_builder' => $queryBuilder,
+            ],
         ]);
-        $filter->init();
 
-        $formBuilder = $this->factory->createBuilder(FormType::class, [
-            'propertyName' => $searcher->propertyName,
-        ]);
-        $filter->addField($formBuilder);
-
-        $form = $formBuilder->getForm();
+        $form = $this->initCrudAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);

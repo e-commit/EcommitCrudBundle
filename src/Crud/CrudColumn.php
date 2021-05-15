@@ -41,7 +41,7 @@ class CrudColumn
         $this->label = $label;
         $this->sortable = $sortable;
         $this->defaultDisplayed = $defaultDisplayed;
-        $this->aliasSearch = $aliasSearch;
-        $this->aliasSort = $aliasSort;
+        $this->aliasSearch = $aliasSearch ?: $alias;
+        $this->aliasSort = $aliasSort ?: $alias;
     }
 }
