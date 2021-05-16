@@ -39,6 +39,5 @@ class EcommitCrudExtension extends Extension
 
         $container->setParameter('ecommit_crud.theme', $config['theme']);
         $container->setParameter('ecommit_crud.icon_theme', $config['icon_theme']);
-        $container->setParameter('ecommit_crud.images', ['th_image_up' => $config['images']['th_image_up'], 'th_image_down' => $config['images']['th_image_down']]);
     }
 }

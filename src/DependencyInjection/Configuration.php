@@ -35,13 +35,6 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('theme')->isRequired()->end()
                 ->scalarNode('icon_theme')->isRequired()->end()
-                ->arrayNode('images')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->scalarNode('th_image_up')->defaultValue('/bundles/ecommitcrud/images/i16/sort_incr.png')->end()
-                        ->scalarNode('th_image_down')->defaultValue('/bundles/ecommitcrud/images/i16/sort_decrease.png')->end()
-                    ->end()
-                ->end()
             ->end()
         ;
 
