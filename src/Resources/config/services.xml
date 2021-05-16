@@ -29,6 +29,7 @@
             <argument type="service" id="twig.form.renderer" />
             <argument>%ecommit_crud.theme%</argument>
             <argument>%ecommit_crud.icon_theme%</argument>
+            <argument>%ecommit_crud.twig_functions_configuration%</argument>
             <tag name="twig.extension"/>
         </service>
 

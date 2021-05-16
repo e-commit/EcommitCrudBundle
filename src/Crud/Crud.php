@@ -63,6 +63,8 @@ class Crud
     protected $displayResultsOnlyIfSearch = false;
     protected $displayResults = true;
 
+    protected $twigFunctionsConfiguration = [];
+
     /*
      * Router
      */
@@ -925,6 +927,27 @@ class Crud
     public function setDisplayResults(bool $displayResults): self
     {
         $this->displayResults = $displayResults;
+
+        return $this;
+    }
+
+    public function getTwigFunctionsConfiguration(): array
+    {
+        return $this->twigFunctionsConfiguration;
+    }
+
+    public function getTwigFunctionConfiguration(string $function): array
+    {
+        if (isset($this->twigFunctionsConfiguration[$function])) {
+            return $this->twigFunctionsConfiguration;
+        }
+
+        return [];
+    }
+
+    public function setTwigFunctionsConfiguration(array $twigFunctionsConfiguration): self
+    {
+        $this->twigFunctionsConfiguration = $twigFunctionsConfiguration;
 
         return $this;
     }

@@ -31,14 +31,16 @@ class CrudExtension extends AbstractExtension
 
     protected $theme;
     protected $iconTheme;
+    protected $configuration;
 
     protected $lastTdValues = [];
 
-    public function __construct(FormRendererInterface $formRenderer, string $theme, string $iconTheme)
+    public function __construct(FormRendererInterface $formRenderer, string $theme, string $iconTheme, array $configuration)
     {
         $this->formRenderer = $formRenderer;
         $this->theme = $theme;
         $this->iconTheme = $iconTheme;
+        $this->configuration = $configuration;
     }
 
     public function getName()
@@ -199,7 +201,7 @@ class CrudExtension extends AbstractExtension
         $resolver->setAllowedTypes('max_pages_before', 'int');
         $resolver->setAllowedTypes('max_pages_after', 'int');
         $resolver->setAllowedValues('type', ['sliding', 'elastic']);
-        $options = $resolver->resolve($options);
+        $options = $resolver->resolve($this->buildOptions('paginator_links', $options));
 
         if ($options['render']) {
             return $environment->render($options['render'], [
@@ -256,6 +258,8 @@ class CrudExtension extends AbstractExtension
             $options['ajax_options']['update'] = '#'.$crud->getDivIdList();
         }
 
+        $options = $this->buildOptions('crud_paginator_links', $options, $crud);
+
         return $this->paginatorLinks($environment, $crud->getPaginator(), $crud->getRouteName(), $crud->getRouteParams(), $options);
     }
 
@@ -303,7 +307,7 @@ class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['null', 'array']);
         $resolver->setAllowedTypes('label', ['null', 'string']);
-        $options = $resolver->resolve($options);
+        $options = $resolver->resolve($this->buildOptions('th', $options, $crud));
 
         //If the column is not to be shown, returns empty
         $sessionValues = $crud->getSessionValues();
@@ -362,7 +366,7 @@ class CrudExtension extends AbstractExtension
         $resolver->setAllowedTypes('escape', 'bool');
         $resolver->setAllowedTypes('repeated_values_string', ['null', 'string']);
         $resolver->setAllowedTypes('td_attr', ['null', 'array']);
-        $options = $resolver->resolve($options);
+        $options = $resolver->resolve($this->buildOptions('td', $options, $crud));
 
         //If the column is not to be shown, returns empty
         $sessionValues = $crud->getSessionValues();
@@ -418,7 +422,7 @@ class CrudExtension extends AbstractExtension
             'block' => 'display_settings',
         ]);
         $resolver->setAllowedTypes('modal', 'bool');
-        $options = $resolver->resolve($options);
+        $options = $resolver->resolve($this->buildOptions('display_settings', $options, $crud));
 
         $form = $crud->getDisplaySettingsForm();
 
@@ -455,7 +459,7 @@ class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('form_attr', ['array']);
-        $options = $resolver->resolve($options);
+        $options = $resolver->resolve($this->buildOptions('search_form_start', $options, $crud));
 
         if ($options['render']) {
             return $environment->render($options['render'], [
@@ -504,7 +508,7 @@ class CrudExtension extends AbstractExtension
             'block' => 'search_form_submit',
         ]);
         $resolver->setAllowedTypes('button_attr', ['array']);
-        $options = $resolver->resolve($options);
+        $options = $resolver->resolve($this->buildOptions('search_form_submit', $options, $crud));
 
         if ($options['render']) {
             return $environment->render($options['render'], [
@@ -537,7 +541,7 @@ class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('button_attr', ['array']);
-        $options = $resolver->resolve($options);
+        $options = $resolver->resolve($this->buildOptions('search_form_reset', $options, $crud));
 
         if ($options['render']) {
             return $environment->render($options['render'], [
@@ -666,5 +670,20 @@ class CrudExtension extends AbstractExtension
         $template->displayBlock($blockName, array_merge(['template_name' => $templateName], $parameters));
 
         return ob_get_clean();
+    }
+
+    protected function buildOptions(string $function, array $inlineOptions, ?Crud $crud = null): array
+    {
+        $options = [];
+
+        if (isset($this->configuration[$function])) {
+            $options = $this->configuration[$function];
+        }
+
+        if (null !== $crud) {
+            $options = array_merge($options, $crud->getTwigFunctionConfiguration($function));
+        }
+
+        return array_merge($options, $inlineOptions);
     }
 }

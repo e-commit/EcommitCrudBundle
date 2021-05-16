@@ -39,5 +39,6 @@ class EcommitCrudExtension extends Extension
 
         $container->setParameter('ecommit_crud.theme', $config['theme']);
         $container->setParameter('ecommit_crud.icon_theme', $config['icon_theme']);
+        $container->setParameter('ecommit_crud.twig_functions_configuration', $config['twig_functions_configuration']);
     }
 }

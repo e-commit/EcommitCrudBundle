@@ -35,6 +35,10 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('theme')->isRequired()->end()
                 ->scalarNode('icon_theme')->isRequired()->end()
+                ->arrayNode('twig_functions_configuration')
+                    ->treatNullLike([])
+                    ->prototype('variable')->end()
+                ->end()
             ->end()
         ;
 
