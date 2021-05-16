@@ -192,6 +192,8 @@ class CrudExtension extends AbstractExtension
                 }
             },
             'render' => null,
+            'theme' => $this->theme,
+            'block' => 'paginator_links',
         ]);
         $resolver->setAllowedTypes('ajax_options', ['null', 'array']);
         $resolver->setAllowedTypes('max_pages_before', 'int');
@@ -234,7 +236,7 @@ class CrudExtension extends AbstractExtension
             }
         }
 
-        return $this->renderBlock($environment, $this->theme, 'paginator_links', array_merge($options, [
+        return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
             'paginator' => $paginator,
             'pages' => $pages,
             'route_name' => $routeName,
@@ -296,6 +298,8 @@ class CrudExtension extends AbstractExtension
                 }
             },
             'render' => null,
+            'theme' => $this->theme,
+            'block' => 'th',
         ]);
         $resolver->setAllowedTypes('ajax_options', ['null', 'array']);
         $resolver->setAllowedTypes('label', ['null', 'string']);
@@ -326,7 +330,7 @@ class CrudExtension extends AbstractExtension
             $label = $column->label;
         }
 
-        return $this->renderBlock($environment, $this->theme, 'th', array_merge($options, [
+        return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
             'column' => $column,
             'crud' => $crud,
             'options' => $options,
@@ -352,6 +356,8 @@ class CrudExtension extends AbstractExtension
             'repeated_values_string' => null,
             'td_attr' => [],
             'render' => null,
+            'theme' => $this->theme,
+            'block' => 'td',
         ]);
         $resolver->setAllowedTypes('escape', 'bool');
         $resolver->setAllowedTypes('repeated_values_string', ['null', 'string']);
@@ -386,7 +392,7 @@ class CrudExtension extends AbstractExtension
             }
         }
 
-        return $this->renderBlock($environment, $this->theme, 'td', array_merge($options, [
+        return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
             'column' => $column,
             'crud' => $crud,
             'value' => $value,
@@ -408,6 +414,8 @@ class CrudExtension extends AbstractExtension
         $resolver->setDefaults([
             'modal' => true,
             'render' => null,
+            'theme' => $this->theme,
+            'block' => 'display_settings',
         ]);
         $resolver->setAllowedTypes('modal', 'bool');
         $options = $resolver->resolve($options);
@@ -422,7 +430,7 @@ class CrudExtension extends AbstractExtension
             ]);
         }
 
-        return $this->renderBlock($environment, $this->theme, 'display_settings', array_merge($options, [
+        return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
             'crud' => $crud,
             'form' => $form,
             'options' => $options,
@@ -442,6 +450,8 @@ class CrudExtension extends AbstractExtension
             'ajax_options' => [],
             'form_attr' => [],
             'render' => null,
+            'theme' => $this->theme,
+            'block' => 'search_form_start',
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('form_attr', ['array']);
@@ -473,7 +483,7 @@ class CrudExtension extends AbstractExtension
             $options['form_attr']['novalidate'] = 'novalidate';
         }
 
-        return $this->renderBlock($environment, $this->theme, 'search_form_start', array_merge($options, [
+        return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
             'crud' => $crud,
             'options' => $options,
         ]));
@@ -490,6 +500,8 @@ class CrudExtension extends AbstractExtension
         $resolver->setDefaults([
             'button_attr' => [],
             'render' => null,
+            'theme' => $this->theme,
+            'block' => 'search_form_submit',
         ]);
         $resolver->setAllowedTypes('button_attr', ['array']);
         $options = $resolver->resolve($options);
@@ -501,7 +513,7 @@ class CrudExtension extends AbstractExtension
             ]);
         }
 
-        return $this->renderBlock($environment, $this->theme, 'search_form_submit', array_merge($options, [
+        return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
             'crud' => $crud,
             'options' => $options,
         ]));
@@ -520,6 +532,8 @@ class CrudExtension extends AbstractExtension
             'ajax_options' => [],
             'button_attr' => [],
             'render' => null,
+            'theme' => $this->theme,
+            'block' => 'search_form_reset',
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('button_attr', ['array']);
@@ -548,7 +562,7 @@ class CrudExtension extends AbstractExtension
             $options['button_attr']['class'] = $class;
         }
 
-        return $this->renderBlock($environment, $this->theme, 'search_form_reset', array_merge($options, [
+        return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
             'crud' => $crud,
             'options' => $options,
         ]));

@@ -377,6 +377,21 @@ class CrudExtensionTest extends KernelTestCase
         $this->assertRegExp('/OK/', $result);
     }
 
+    public function testPaginatorWithThemeAndBlockOptions(): void
+    {
+        $paginator = new ArrayPaginator(5);
+        $paginator->setData(range(1, 100));
+        $paginator->setPage(1);
+        $paginator->init();
+
+        $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
+            'theme' => 'theme.html.twig',
+            'block' => 'hello_world',
+        ]);
+
+        $this->assertRegExp('/Hello world/', $result);
+    }
+
     public function testPaginatorWithBadOptions(): void
     {
         $this->expectException(UndefinedOptionsException::class);
@@ -502,6 +517,16 @@ class CrudExtensionTest extends KernelTestCase
         ]);
 
         $this->assertRegExp('/OK/', $html);
+    }
+
+    public function testThWithThemeAndBlockOptions(): void
+    {
+        $html = $this->crudExtension->th($this->environment, 'column1', $this->createCrud(), [
+            'theme' => 'theme.html.twig',
+            'block' => 'hello_world',
+        ]);
+
+        $this->assertRegExp('/Hello world/', $html);
     }
 
     public function testThWithBadOptions(): void
@@ -663,6 +688,16 @@ class CrudExtensionTest extends KernelTestCase
         ]);
 
         $this->assertRegExp('/OK/', $html);
+    }
+
+    public function testTdWithThemeAndBlockOptions(): void
+    {
+        $html = $this->crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1', [
+            'theme' => 'theme.html.twig',
+            'block' => 'hello_world',
+        ]);
+
+        $this->assertRegExp('/Hello world/', $html);
     }
 
     public function testTdWithBadOptions(): void
