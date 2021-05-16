@@ -239,6 +239,7 @@ class CrudExtension extends AbstractExtension
             'pages' => $pages,
             'route_name' => $routeName,
             'route_params' => $routeParams,
+            'options' => $options,
         ]));
     }
 
@@ -424,6 +425,7 @@ class CrudExtension extends AbstractExtension
         return $this->renderBlock($environment, $this->theme, 'display_settings', array_merge($options, [
             'crud' => $crud,
             'form' => $form,
+            'options' => $options,
         ]));
     }
 
@@ -473,6 +475,7 @@ class CrudExtension extends AbstractExtension
 
         return $this->renderBlock($environment, $this->theme, 'search_form_start', array_merge($options, [
             'crud' => $crud,
+            'options' => $options,
         ]));
     }
 
@@ -500,6 +503,7 @@ class CrudExtension extends AbstractExtension
 
         return $this->renderBlock($environment, $this->theme, 'search_form_submit', array_merge($options, [
             'crud' => $crud,
+            'options' => $options,
         ]));
     }
 
@@ -546,6 +550,7 @@ class CrudExtension extends AbstractExtension
 
         return $this->renderBlock($environment, $this->theme, 'search_form_reset', array_merge($options, [
             'crud' => $crud,
+            'options' => $options,
         ]));
     }
 
