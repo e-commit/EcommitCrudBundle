@@ -1,7 +1,0 @@
-'{0} No results|{1} 1 result found|]1,Inf] %count% results found': '{0} No results|{1} 1 result found|]1,Inf] %count% results found'
-Page %firstPage%/%lastPage%: Page %page%/%lastPage%
-Results %first%-%last%: Results %first%-%last%
-Page %page%/%lastPage%: Page %page%/%lastPage%
-filter.choices.placeholder: All
-picker.add: Add
-picker.list: Select
