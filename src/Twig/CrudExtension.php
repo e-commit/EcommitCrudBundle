@@ -389,7 +389,7 @@ class CrudExtension extends AbstractExtension
             'column' => $column,
             'crud' => $crud,
             'value' => $value,
-            'repeatedValue' => $repeatedValue,
+            'repeated_value' => $repeatedValue,
             'options' => $options,
         ]));
     }

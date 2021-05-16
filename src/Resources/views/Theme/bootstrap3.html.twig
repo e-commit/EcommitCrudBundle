@@ -26,8 +26,8 @@
 {% endblock %}
 
 {% block display_settings_container_modal %}
-    {% set displaySettingsContainerAttributes = displaySettingsContainerAttributes|default({})|merge({class: (displaySettingsContainerAttributes.class|default('') ~ ' modal fade')|trim, 'data-modal': '1', 'style': 'display: none;', 'role': 'dialog'}) %}
-    <div{% with { attr: displaySettingsContainerAttributes } %}{{ block('attributes', template_name) }}{% endwith %}>
+    {% set display_settings_container_attributes = display_settings_container_attributes|default({})|merge({class: (display_settings_container_attributes.class|default('') ~ ' modal fade')|trim, 'data-modal': '1', 'style': 'display: none;', 'role': 'dialog'}) %}
+    <div{% with { attr: display_settings_container_attributes } %}{{ block('attributes', template_name) }}{% endwith %}>
         {{ block('display_settings_content_modal', template_name) }}
     </div>
 {% endblock %}

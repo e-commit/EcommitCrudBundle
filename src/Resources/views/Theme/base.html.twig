@@ -117,16 +117,16 @@
 {% block th_sortable_active_asc %}
     {% set th_attr = th_attr.sortable_active_asc|merge({class: (th_attr.sortable_active_asc.class|default('') ~ ' ec-crud-th ec-crud-th-sortable-active-asc')|trim}) %}
     {% set a_attr = a_attr.sortable_active_asc %}
-    {% set newSense = constant('Ecommit\\CrudBundle\\Crud\\Crud::DESC') %}
-    {% set iconName = 'asc' %}
+    {% set new_sense = constant('Ecommit\\CrudBundle\\Crud\\Crud::DESC') %}
+    {% set icon_name = 'asc' %}
     {{ block('th_sortable_active', template_name) }}
 {% endblock %}
 
 {% block th_sortable_active_desc %}
     {% set th_attr = th_attr.sortable_active_desc|merge({class: (th_attr.sortable_active_desc.class|default('') ~ ' ec-crud-th ec-crud-th-sortable-active-desc')|trim}) %}
     {% set a_attr = a_attr.sortable_active_desc %}
-    {% set newSense = constant('Ecommit\\CrudBundle\\Crud\\Crud::ASC') %}
-    {% set iconName = 'desc' %}
+    {% set new_sense = constant('Ecommit\\CrudBundle\\Crud\\Crud::ASC') %}
+    {% set icon_name = 'desc' %}
     {{ block('th_sortable_active', template_name) }}
 {% endblock %}
 
@@ -135,8 +135,8 @@
         {% set a_attr = a_attr|merge({class: (a_attr.class|default('') ~ ' ec-crud-ajax-link-auto')|trim}) %}
     {% endif %}
     <th{% with { attr: th_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-        <a href="{{ path(crud.routeName, crud.routeParams|merge({('sort'): column.id, 'sense': newSense})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}{% if ajax_options is not null %}{{ ajax_attributes(ajax_options) }}{% endif %}>
-            {{- label|trans }} {{ crud_icon(iconName) -}}
+        <a href="{{ path(crud.routeName, crud.routeParams|merge({('sort'): column.id, 'sense': new_sense})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}{% if ajax_options is not null %}{{ ajax_attributes(ajax_options) }}{% endif %}>
+            {{- label|trans }} {{ crud_icon(icon_name) -}}
         </a>
     </th>
 {% endblock %}
@@ -145,7 +145,7 @@
 
 {% block td %}
 {% apply spaceless %}
-    {% if repeatedValue %}
+    {% if repeated_value %}
         {% if td_attr.title is not defined %}
             {% set td_attr = td_attr|merge({title: value}) %}
         {% endif %}
@@ -162,7 +162,7 @@
 {% block display_settings %}
 {% apply spaceless %}
     {% if crud.displayResults %}
-        {% set displaySettingsContainerAttributes = {'class': 'ec-crud-display-settings', 'id': 'ec-crud-display-settings-'~crud.sessionName, 'data-crud-list-id': crud.divIdList} %}
+        {% set display_settings_container_attributes = {'class': 'ec-crud-display-settings', 'id': 'ec-crud-display-settings-'~crud.sessionName, 'data-crud-list-id': crud.divIdList} %}
         {% if modal %}
             {{ block('display_settings_button_modal', template_name) }}
             {{ block('display_settings_container_modal', template_name) }}
@@ -197,8 +197,8 @@
 {% endblock %}
 
 {% block display_settings_container_without_modal %}
-    {% set displaySettingsContainerAttributes = displaySettingsContainerAttributes|default({})|merge({'data-modal': '0', 'style': 'display: none;'}) %}
-    <div{% with { attr: displaySettingsContainerAttributes } %}{{ block('attributes', template_name) }}{% endwith %}>
+    {% set display_settings_container_attributes = display_settings_container_attributes|default({})|merge({'data-modal': '0', 'style': 'display: none;'}) %}
+    <div{% with { attr: display_settings_container_attributes } %}{{ block('attributes', template_name) }}{% endwith %}>
         {{ block('display_settings_content_without_modal', template_name) }}
     </div>
 {% endblock %}
@@ -259,8 +259,8 @@
 {# Attributes #}
 
 {% block attributes %}
-    {%- for attrName, attrValue in attr -%}
+    {%- for attr_name, attr_value in attr -%}
         {{- " " -}}
-        {{- attrName }}="{{ attrValue }}"
+        {{- attr_name }}="{{ attr_value }}"
     {%- endfor -%}
 {% endblock %}
