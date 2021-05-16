@@ -90,6 +90,62 @@ class Crud
     }
 
     /**
+     * Inits the CRUD.
+     */
+    public function init(): void
+    {
+        //Cheks not empty values
+        $check_values = [
+            'availableColumns',
+            'availableResultsPerPage',
+            'defaultSort',
+            'defaultSense',
+            'defaultResultsPerPage',
+            'queryBuilder',
+            'routeName',
+        ];
+        foreach ($check_values as $value) {
+            if (empty($this->$value)) {
+                throw new \Exception('Config Crud: Option '.$value.' is required');
+            }
+        }
+
+        if ($this->searchForm) {
+            $this->searchForm->createForm();
+        }
+
+        //Loads user values inside this object
+        $this->load();
+
+        //Display or not results
+        if ($this->searchForm && $this->displayResultsOnlyIfSearch) {
+            $this->displayResults = $this->sessionValues->searchFormIsSubmitted;
+        }
+
+        $this->createDisplaySettingsForm();
+
+        //Process request (resultsPerPage, sort, sense, change_columns)
+        $this->processRequest();
+
+        //Searcher form: Allocates object
+        if ($this->searchForm && !$this->container->get('request_stack')->getCurrentRequest()->query->has('raz')) {
+            //IMPORTANT
+            //We have not to allocate directelly the "$this->sessionValues->searchFormData" object
+            //because otherwise it will be linked to form, and will be updated when the "bind" function will
+            //be called (If form is not valid, the session values will still be updated: Undesirable behavior)
+            $values = clone $this->sessionValues->searchFormData;
+            try {
+                $this->searchForm->getForm()->setData($values);
+            } catch (TransformationFailedException $exception) {
+                //Avoid error if data stored in session is invalid
+            }
+        }
+
+        //Saves
+        $this->save();
+    }
+
+    /**
      * Add a column inside the crud.
      *
      * @param string $id      Column id (used everywhere inside the crud)
@@ -409,62 +465,6 @@ class Crud
         }
 
         return $columns;
-    }
-
-    /**
-     * Inits the CRUD.
-     */
-    public function init(): void
-    {
-        //Cheks not empty values
-        $check_values = [
-            'availableColumns',
-            'availableResultsPerPage',
-            'defaultSort',
-            'defaultSense',
-            'defaultResultsPerPage',
-            'queryBuilder',
-            'routeName',
-        ];
-        foreach ($check_values as $value) {
-            if (empty($this->$value)) {
-                throw new \Exception('Config Crud: Option '.$value.' is required');
-            }
-        }
-
-        if ($this->searchForm) {
-            $this->searchForm->createForm();
-        }
-
-        //Loads user values inside this object
-        $this->load();
-
-        //Display or not results
-        if ($this->searchForm && $this->displayResultsOnlyIfSearch) {
-            $this->displayResults = $this->sessionValues->searchFormIsSubmitted;
-        }
-
-        $this->createDisplaySettingsForm();
-
-        //Process request (resultsPerPage, sort, sense, change_columns)
-        $this->processRequest();
-
-        //Searcher form: Allocates object
-        if ($this->searchForm && !$this->container->get('request_stack')->getCurrentRequest()->query->has('raz')) {
-            //IMPORTANT
-            //We have not to allocate directelly the "$this->sessionValues->searchFormData" object
-            //because otherwise it will be linked to form, and will be updated when the "bind" function will
-            //be called (If form is not valid, the session values will still be updated: Undesirable behavior)
-            $values = clone $this->sessionValues->searchFormData;
-            try {
-                $this->searchForm->getForm()->setData($values);
-            } catch (TransformationFailedException $exception) {
-                //Avoid error if data stored in session is invalid
-            }
-        }
-
-        //Saves
-        $this->save();
     }
 
     /**
