@@ -649,9 +649,13 @@ class CrudExtension extends AbstractExtension
         return $attributes;
     }
 
-    public function crudIcon(Environment $environment, string $iconName): string
+    public function crudIcon(Environment $environment, string $iconName, ?string $iconTheme = null): string
     {
-        return $this->renderBlock($environment, $this->iconTheme, $iconName);
+        if (null === $iconTheme) {
+            $iconTheme = $this->iconTheme;
+        }
+
+        return $this->renderBlock($environment, $iconTheme, $iconName);
     }
 
     protected function renderBlock(Environment $environment, string $templateName, string $blockName, array $parameters = []): ?string
