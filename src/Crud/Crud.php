@@ -45,7 +45,7 @@ class Crud
     /**
      * @var Form
      */
-    protected $formDisplaySettings = null;
+    protected $displaySettingsForm = null;
 
     protected $availableColumns = [];
     protected $availableVirtualColumns = [];
@@ -630,9 +630,9 @@ class Crud
             return;
         }
 
-        $this->formDisplaySettings->handleRequest($request);
-        if ($this->formDisplaySettings->isSubmitted() && $this->formDisplaySettings->isValid()) {
-            $displaySettingsData = $this->formDisplaySettings->getData();
+        $this->displaySettingsForm->handleRequest($request);
+        if ($this->displaySettingsForm->isSubmitted() && $this->displaySettingsForm->isValid()) {
+            $displaySettingsData = $this->displaySettingsForm->getData();
             $this->changeColumnsDisplayed($displaySettingsData['displayedColumns']);
             $this->changeNumberResultsDisplayed($displaySettingsData['resultsPerPage']);
         }
@@ -663,7 +663,7 @@ class Crud
         ];
         $formName = sprintf('crud_display_settings_%s', $this->getSessionName());
 
-        $this->formDisplaySettings = $this->container->get('form.factory')->createNamed($formName, DisplaySettingsType::class, $data, [
+        $this->displaySettingsForm = $this->container->get('form.factory')->createNamed($formName, DisplaySettingsType::class, $data, [
             'results_per_page_choices' => $resultsPerPageChoices,
             'columns_choices' => $columnsChoices,
             'action' => $this->getUrl(['display-settings' => 1]),
@@ -806,7 +806,7 @@ class Crud
             $this->searchForm->createFormView();
             $this->searchForm = $this->searchForm->getForm();
         }
-        $this->formDisplaySettings = $this->formDisplaySettings->createView();
+        $this->displaySettingsForm = $this->displaySettingsForm->createView();
     }
 
     /**
@@ -875,7 +875,7 @@ class Crud
      */
     public function getDisplaySettingsForm()
     {
-        return $this->formDisplaySettings;
+        return $this->displaySettingsForm;
     }
 
     public function getDivIdSearch(): string
