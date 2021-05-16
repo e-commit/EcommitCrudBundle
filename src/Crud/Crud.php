@@ -95,7 +95,7 @@ class Crud
     public function init(): void
     {
         //Cheks not empty values
-        $check_values = [
+        $checkValues = [
             'availableColumns',
             'availableResultsPerPage',
             'defaultSort',
@@ -104,7 +104,7 @@ class Crud
             'queryBuilder',
             'routeName',
         ];
-        foreach ($check_values as $value) {
+        foreach ($checkValues as $value) {
             if (empty($this->$value)) {
                 throw new \Exception('Config Crud: Option '.$value.' is required');
             }
@@ -119,7 +119,7 @@ class Crud
 
         //Display or not results
         if ($this->searchForm && $this->displayResultsOnlyIfSearch) {
-            $this->displayResults = $this->sessionValues->searchFormIsSubmitted;
+            $this->displayResults = $this->sessionValues->searchFormIsSubmittedAndValid;
         }
 
         $this->createDisplaySettingsForm();
@@ -362,7 +362,7 @@ class Crud
             $searchForm->handleRequest($request);
             if ($searchForm->isSubmitted() && $searchForm->isValid()) {
                 $this->displayResults = true;
-                $this->sessionValues->searchFormIsSubmitted = true;
+                $this->sessionValues->searchFormIsSubmittedAndValid = true;
                 $this->changeFilterValues($searchForm->getData());
                 $this->changePage(1);
                 $this->save();
@@ -370,38 +370,11 @@ class Crud
         }
     }
 
-    /**
-     * User action: Changes search form values.
-     *
-     * @param object $value
-     */
-    protected function changeFilterValues($value): void
+    protected function testIfDatabaseMustMeUpdated($oldValue, $new_value): void
     {
-        if (!$this->searchForm) {
-            return;
+        if ($oldValue != $new_value) {
+            $this->updateDatabase = true;
         }
-        if (\get_class($value) === \get_class($this->searchForm->getDefaultData())) {
-            $this->sessionValues->searchFormData = $value;
-        } else {
-            $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();
-        }
-    }
-
-    /**
-     * User action: Changes page number.
-     *
-     * @param string $value Page number
-     */
-    protected function changePage($value): void
-    {
-        if (!is_scalar($value)) {
-            $value = 1;
-        }
-        $value = (int) $value;
-        if ($value > 1000000000000) {
-            $value = 1;
-        }
-        $this->sessionValues->page = $value;
     }
 
     /**
@@ -542,13 +515,6 @@ class Crud
         $this->testIfDatabaseMustMeUpdated($oldValue, $value);
     }
 
-    protected function testIfDatabaseMustMeUpdated($oldValue, $new_value): void
-    {
-        if ($oldValue != $new_value) {
-            $this->updateDatabase = true;
-        }
-    }
-
     /**
      * User Action: Changes displayed columns.
      *
@@ -584,7 +550,7 @@ class Crud
         $oldValue = $this->sessionValues->sort;
         $availableColumns = $this->availableColumns;
         if ((is_scalar($value) && \array_key_exists($value, $availableColumns) && $availableColumns[$value]->sortable)
-            || (is_scalar($value) && 'defaultPersonalizedSort' == $value && $this->defaultPersonalizedSort)) {
+            || (is_scalar($value) && 'defaultPersonalizedSort' === $value && $this->defaultPersonalizedSort)) {
             $this->sessionValues->sort = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
@@ -601,13 +567,47 @@ class Crud
     protected function changeSense($value): void
     {
         $oldValue = $this->sessionValues->sense;
-        if (is_scalar($value) && (self::ASC == $value || self::DESC == $value)) {
+        if (is_scalar($value) && (self::ASC === $value || self::DESC === $value)) {
             $this->sessionValues->sense = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
             $this->sessionValues->sense = $this->defaultSense;
             $this->testIfDatabaseMustMeUpdated($oldValue, $this->defaultSense);
         }
+    }
+
+    /**
+     * User action: Changes search form values.
+     *
+     * @param object $value
+     */
+    protected function changeFilterValues($value): void
+    {
+        if (!$this->searchForm) {
+            return;
+        }
+        if (\get_class($value) === \get_class($this->searchForm->getDefaultData())) {
+            $this->sessionValues->searchFormData = $value;
+        } else {
+            $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();
+        }
+    }
+
+    /**
+     * User action: Changes page number.
+     *
+     * @param string $value Page number
+     */
+    protected function changePage($value): void
+    {
+        if (!is_scalar($value)) {
+            $value = 1;
+        }
+        $value = (int) $value;
+        if ($value > 1000000000000) {
+            $value = 1;
+        }
+        $this->sessionValues->page = $value;
     }
 
     /**

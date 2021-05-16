@@ -25,7 +25,7 @@ class CrudSession
      */
     public $searchFormData = null;
 
-    public $searchFormIsSubmitted = false;
+    public $searchFormIsSubmittedAndValid = false;
 
     /**
      * Number of results, in one page.
