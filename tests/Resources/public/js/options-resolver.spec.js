@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import * as optionsRevolser from '../../../../src/Resources/public/js/options-resolver';
+import * as optionsRevolser from '@ecommit/crud-bundle/js/options-resolver';
 import $ from 'jquery';
 
 describe('Test options-resolver.resolve', function () {

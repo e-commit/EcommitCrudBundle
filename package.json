@@ -3,6 +3,7 @@
     "jquery": "^3"
   },
   "devDependencies": {
+    "@ecommit/crud-bundle": "link:src/Resources/assets",
     "@symfony/webpack-encore": "^0.29.1",
     "core-js": "^3.0.0",
     "eslint": "^6.8.0",

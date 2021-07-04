@@ -7,10 +7,10 @@
  * file that was distributed with this source code.
  */
 
-import * as modalManager from '../../../../../src/Resources/public/js/modal/modal-manager';
+import * as modalManager from '@ecommit/crud-bundle/js/modal/modal-manager';
 import $ from 'jquery';
 const testEngine = require('./engine/test');
-const bootstrap3Engine = require('../../../../../src/Resources/public/js/modal/engine/bootstrap3');
+const bootstrap3Engine = require('@ecommit/crud-bundle/js/modal/engine/bootstrap3');
 
 it('Get engine when not defined', function () {
     modalManager.defineEngine(null);

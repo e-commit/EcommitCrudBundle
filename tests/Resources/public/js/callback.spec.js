@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import runCallback from '../../../../src/Resources/public/js/callback';
+import runCallback from '@ecommit/crud-bundle/js/callback';
 
 describe('Test callback', function () {
     it('Test callback with function', function () {

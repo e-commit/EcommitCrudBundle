@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import runCallback from '../../../../../../src/Resources/public/js/callback';
+import runCallback from '@ecommit/crud-bundle/js/callback';
 import $ from 'jquery';
 
 export function openModal (options) {

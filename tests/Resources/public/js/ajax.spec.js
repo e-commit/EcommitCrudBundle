@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import * as ajax from '../../../../src/Resources/public/js/ajax';
+import * as ajax from '@ecommit/crud-bundle/js/ajax';
 import $ from 'jquery';
 
 describe('Test Ajax.sendRequest', function () {
