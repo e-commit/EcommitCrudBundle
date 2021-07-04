@@ -140,7 +140,7 @@ class CrudExtension extends AbstractExtension
     }
 
     /**
-     * Returns links paginator.
+     * Displays links paginator.
      *
      * @param string $routeName   Route name
      * @param array  $routeParams Route parameters
@@ -154,7 +154,9 @@ class CrudExtension extends AbstractExtension
      *                            * ul_attr: "ul" attributes
      *                            * li_attr: "li" attributes for each page type (sub arrays: first_page, previous_page, current_page, next_page, last_page, other_page)
      *                            * a_attr: "a" CSS attributes for each page type (sub arrays: first_page, previous_page, current_page, next_page, last_page, other_page)
-     *                            * render: Template used for generation. If null, default template is used
+     *                            * render: Template used for generation without the default process. If null, default process is used
+     *                            * theme: Theme used. If null, default theme is used
+     *                            * block: Twig block used. Default: paginator_links
      */
     public function paginatorLinks(Environment $environment, AbstractPaginator $paginator, string $routeName, array $routeParams = [], array $options = []): string
     {
@@ -248,7 +250,7 @@ class CrudExtension extends AbstractExtension
     }
 
     /**
-     * Returns CRUD links paginator.
+     * Displays CRUD links paginator.
      *
      * @see CrudExtension::paginatorLinks()
      */
@@ -264,7 +266,7 @@ class CrudExtension extends AbstractExtension
     }
 
     /**
-     * Returns CRUD th tag.
+     * Displays CRUD th tag.
      *
      * @param string $columnId Column to display
      * @param array  $options  Options:
@@ -272,7 +274,9 @@ class CrudExtension extends AbstractExtension
      *                         * label: Th label. If null, CRUD configuration is used
      *                         * th_attr: "th" attributes
      *                         * a_attr: "a" attributes
-     *                         * render: Template used for generation. If null, default template is used
+     *                         * render: Template used for generation without the default process. If null, default process is used
+     *                         * theme: Theme used. If null, default theme is used
+     *                         * block: Twig block used. Default: th
      */
     public function th(Environment $environment, string $columnId, Crud $crud, array $options = []): string
     {
@@ -307,7 +311,7 @@ class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['null', 'array']);
         $resolver->setAllowedTypes('label', ['null', 'string']);
-        $options = $resolver->resolve($this->buildOptions('th', $options, $crud));
+        $options = $resolver->resolve($this->buildOptions('crud_th', $options, $crud));
 
         //If the column is not to be shown, returns empty
         $sessionValues = $crud->getSessionValues();
@@ -343,14 +347,16 @@ class CrudExtension extends AbstractExtension
     }
 
     /**
-     * Returns CRUD td tag.
+     * Displays CRUD td tag.
      *
      * @param string $columnId Column to display
      * @param array  $options  Options:
      *                         * escape: Escape or not value. Default: true
      *                         * repeated_values_string: If not null, use this value if the original value is repeated. Default: null
      *                         * td_attr: "td" attributes
-     *                         * render: Template used for generation. If null, default template is used
+     *                         * render: Template used for generation without the default process. If null, default process is used
+     *                         * theme: Theme used. If null, default theme is used
+     *                         * block: Twig block used. Default: td
      */
     public function td(Environment $environment, string $columnId, Crud $crud, $value, $options = []): string
     {
@@ -366,7 +372,7 @@ class CrudExtension extends AbstractExtension
         $resolver->setAllowedTypes('escape', 'bool');
         $resolver->setAllowedTypes('repeated_values_string', ['null', 'string']);
         $resolver->setAllowedTypes('td_attr', ['null', 'array']);
-        $options = $resolver->resolve($this->buildOptions('td', $options, $crud));
+        $options = $resolver->resolve($this->buildOptions('crud_td', $options, $crud));
 
         //If the column is not to be shown, returns empty
         $sessionValues = $crud->getSessionValues();
@@ -406,11 +412,13 @@ class CrudExtension extends AbstractExtension
     }
 
     /**
-     * Returns CRUD td tag.
+     * Returns CRUD display settings button.
      *
      * @param array $options Options:
      *                       * modal: Use modal or not. Default: true
-     *                       * render: Template used for generation. If null, default template is used
+     *                       * render: Template used for generation without the default process. If null, default process is used
+     *                       * theme: Theme used. If null, default theme is used
+     *                       * block: Twig block used. Default: display_settings
      */
     public function displaySettings(Environment $environment, Crud $crud, array $options = []): string
     {
@@ -422,7 +430,7 @@ class CrudExtension extends AbstractExtension
             'block' => 'display_settings',
         ]);
         $resolver->setAllowedTypes('modal', 'bool');
-        $options = $resolver->resolve($this->buildOptions('display_settings', $options, $crud));
+        $options = $resolver->resolve($this->buildOptions('crud_display_settings', $options, $crud));
 
         $form = $crud->getDisplaySettingsForm();
 
@@ -442,10 +450,14 @@ class CrudExtension extends AbstractExtension
     }
 
     /**
+     * Search form start tag.
+     *
      * @param array $options Options:
      *                       * ajax_options: Ajax options. Default: []
      *                       * form_attr: "form" attributes
-     *                       * render: Template used for generation. If null, default template is used
+     *                       * render: Template used for generation without the default process. If null, default process is used
+     *                       * theme: Theme used. If null, default theme is used
+     *                       * block: Twig block used. Default: search_form_start
      */
     public function searchFormStart(Environment $environment, Crud $crud, array $options = [])
     {
@@ -459,7 +471,7 @@ class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('form_attr', ['array']);
-        $options = $resolver->resolve($this->buildOptions('search_form_start', $options, $crud));
+        $options = $resolver->resolve($this->buildOptions('crud_search_form_start', $options, $crud));
 
         if ($options['render']) {
             return $environment->render($options['render'], [
@@ -494,9 +506,13 @@ class CrudExtension extends AbstractExtension
     }
 
     /**
+     * Search form submit button.
+     *
      * @param array $options Options:
      *                       * button_attr: "button" attributes
-     *                       * render: Template used for generation. If null, default template is used
+     *                       * render: Template used for generation without the default process. If null, default process is used
+     *                       * theme: Theme used. If null, default theme is used
+     *                       * block: Twig block used. Default: search_form_submit
      */
     public function searchFormSubmit(Environment $environment, Crud $crud, $options = [], $ajaxOptions = [], $htmlOptions = [])
     {
@@ -508,7 +524,7 @@ class CrudExtension extends AbstractExtension
             'block' => 'search_form_submit',
         ]);
         $resolver->setAllowedTypes('button_attr', ['array']);
-        $options = $resolver->resolve($this->buildOptions('search_form_submit', $options, $crud));
+        $options = $resolver->resolve($this->buildOptions('crud_search_form_submit', $options, $crud));
 
         if ($options['render']) {
             return $environment->render($options['render'], [
@@ -524,10 +540,14 @@ class CrudExtension extends AbstractExtension
     }
 
     /**
+     * Search form reset button.
+     *
      * @param array $options Options:
      *                       * ajax_options: Ajax options. Default: []
      *                       * button_attr: "button" attributes
-     *                       * render: Template used for generation. If null, default template is used
+     *                       * render: Template used for generation without the default process. If null, default process is used
+     *                       * theme: Theme used. If null, default theme is used
+     *                       * block: Twig block used. Default: search_form_reset
      */
     public function searchFormReset(Environment $environment, Crud $crud, $options = [], $ajaxOptions = [], $htmlOptions = [])
     {
@@ -541,7 +561,7 @@ class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('button_attr', ['array']);
-        $options = $resolver->resolve($this->buildOptions('search_form_reset', $options, $crud));
+        $options = $resolver->resolve($this->buildOptions('crud_search_form_reset', $options, $crud));
 
         if ($options['render']) {
             return $environment->render($options['render'], [
@@ -572,6 +592,13 @@ class CrudExtension extends AbstractExtension
         ]));
     }
 
+    /**
+     * Ajax form start tag.
+     *
+     * @param array $options Options:
+     *                       * auto_class: Auto CSS class used. Default: ec-crud-ajax-form-auto
+     *                       * ajax_options: See "ajaxAttributes" method options
+     */
     public function formStartAjax(FormView $formView, array $options = []): string
     {
         $autoClass = 'ec-crud-ajax-form-auto';
@@ -597,6 +624,23 @@ class CrudExtension extends AbstractExtension
         return $this->formRenderer->renderBlock($formView, 'form_start', $options);
     }
 
+    /**
+     * Displays Ajax attributes.
+     *
+     * @param array $ajaxOptions Options:
+     *                           * url: Ajax url
+     *                           * update: Update the DOM with the response - jquery selector (eg: #mydiv)
+     *                           * update_mode: Update the DOM with the response - mode (update / before / after / prepend / append). Default: update
+     *                           * on_before_send: Callback
+     *                           * on_success: Callback
+     *                           * on_error: Callback
+     *                           * on_complete: Callback
+     *                           * data_type: Request type. Default: html
+     *                           * method: Resquest method: Default: POST
+     *                           * data: Data sent
+     *                           * cache: Use cache. Default: false
+     *                           * options: Array of options
+     */
     public function ajaxAttributes(Environment $environment, array $ajaxOptions): string
     {
         $this->validateAjaxOptions($ajaxOptions);
