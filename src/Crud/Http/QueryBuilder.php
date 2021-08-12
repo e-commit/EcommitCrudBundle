@@ -11,14 +11,14 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Ecommit\CrudBundle\Crud\Rest;
+namespace Ecommit\CrudBundle\Crud\Http;
 
 use Ecommit\CrudBundle\Crud\QueryBuilderInterface;
 use Ecommit\CrudBundle\Crud\QueryBuilderParameterInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-class RestQueryBuilder implements QueryBuilderInterface
+class QueryBuilder implements QueryBuilderInterface
 {
     /**
      * @var string
@@ -85,7 +85,7 @@ class RestQueryBuilder implements QueryBuilderInterface
 
     public function addParameter(QueryBuilderParameterInterface $parameter): self
     {
-        if (!($parameter instanceof RestQueryBuilderParameter)) {
+        if (!($parameter instanceof QueryBuilderParameter)) {
             throw new \Exception('Bad class');
         }
 

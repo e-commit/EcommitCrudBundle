@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Ecommit\CrudBundle\Crud\Rest;
+namespace Ecommit\CrudBundle\Crud\Http;
 
 use Ecommit\CrudBundle\Crud\QueryBuilderParameterInterface;
 
-class RestQueryBuilderParameter implements QueryBuilderParameterInterface
+class QueryBuilderParameter implements QueryBuilderParameterInterface
 {
     public $name;
 
