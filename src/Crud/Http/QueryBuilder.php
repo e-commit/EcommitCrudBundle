@@ -152,6 +152,6 @@ class QueryBuilder implements QueryBuilderInterface
             $options['body'] = $this->bodyParameter;
         }
 
-        return $client->request($this->method, $this->url, $options);
+        return $client->request(mb_strtoupper($this->method), $this->url, $options);
     }
 }
