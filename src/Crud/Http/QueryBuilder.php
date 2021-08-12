@@ -61,6 +61,11 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected $orders = [];
 
+    /**
+     * @var HttpClientInterface
+     */
+    protected $client;
+
     public function __construct(string $url, string $method, array $defaultParameters = [], ?HttpClientInterface $client = null)
     {
         $this->url = $url;
