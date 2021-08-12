@@ -16,6 +16,7 @@ namespace Ecommit\CrudBundle\Crud\Http;
 use Ecommit\CrudBundle\Crud\QueryBuilderInterface;
 use Ecommit\CrudBundle\Crud\QueryBuilderParameterInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class QueryBuilder implements QueryBuilderInterface
@@ -60,12 +61,16 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected $orders = [];
 
-    public function __construct(string $url, string $method, array $defaultParameters = [])
+    public function __construct(string $url, string $method, array $defaultParameters = [], ?HttpClientInterface $client = null)
     {
         $this->url = $url;
         $this->method = $method;
         foreach ($defaultParameters as $defaultParameter) {
             $this->addParameter($defaultParameter);
+        }
+        $this->client = $client;
+        if (null === $this->client) {
+            $this->client = HttpClient::create();
         }
     }
 
@@ -123,8 +128,6 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function getResponse(int $page, int $resultsPerPage, array $options = []): ResponseInterface
     {
-        $client = HttpClient::create();
-
         //Add paginator parameters
         if ($this->paginationBuilder && $this->paginationBuilder instanceof \Closure) {
             $parameters = $this->paginationBuilder->__invoke($page, $resultsPerPage);
@@ -152,6 +155,6 @@ class QueryBuilder implements QueryBuilderInterface
             $options['body'] = $this->bodyParameter;
         }
 
-        return $client->request(mb_strtoupper($this->method), $this->url, $options);
+        return $this->client->request(mb_strtoupper($this->method), $this->url, $options);
     }
 }
