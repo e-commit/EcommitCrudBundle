@@ -29,7 +29,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * @var string
      */
-    protected $method;
+    protected $httpMethod;
 
     /**
      * @var array
@@ -39,12 +39,19 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * @var array
      */
-    protected $formParameters = [];
+    protected $bodyParameters = [];
 
     /**
-     * @var string
+     * @var QueryBuilderBody
      */
-    protected $bodyParameter;
+    protected $body;
+
+    protected $bodyIsJson = false;
+
+    /**
+     * @var array
+     */
+    protected $headerParameters = [];
 
     /**
      * @var \Closure
@@ -66,19 +73,19 @@ class QueryBuilder implements QueryBuilderInterface
      */
     protected $client;
 
-    public function __construct(string $url, string $method, array $defaultParameters = [], ?HttpClientInterface $client = null)
+    public function __construct(string $url, string $httpMethod, ?HttpClientInterface $client = null)
     {
         $this->url = $url;
-        $this->method = $method;
-        foreach ($defaultParameters as $defaultParameter) {
-            $this->addParameter($defaultParameter);
-        }
+        $this->httpMethod = $httpMethod;
         $this->client = $client;
         if (null === $this->client) {
             $this->client = HttpClient::create();
         }
     }
 
+    /**
+     * @param \Closure $orderBuilder Closure aguments: $queryBuilder, $orders
+     */
     public function setOrderBuilder(\Closure $orderBuilder): self
     {
         $this->orderBuilder = $orderBuilder;
@@ -86,6 +93,9 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
+    /**
+     * @param \Closure $orderBuilder Closure aguments: $queryBuilder, $page, $resultsPerPage
+     */
     public function setPaginationBuilder(\Closure $paginationBuilder): self
     {
         $this->paginationBuilder = $paginationBuilder;
@@ -95,23 +105,30 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function addParameter(QueryBuilderParameterInterface $parameter): self
     {
-        if (!($parameter instanceof QueryBuilderParameter)) {
+        if ($parameter instanceof QueryBuilderQueryParameter) {
+            $this->queryParameters[] = $parameter;
+        } elseif ($parameter instanceof QueryBuilderBodyParameter) {
+            if (null !== $this->body) {
+                throw new \Exception('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported.');
+            }
+            $this->bodyParameters[] = $parameter;
+        } elseif ($parameter instanceof QueryBuilderBody) {
+            if (\count($this->bodyParameters) > 0) {
+                throw new \Exception('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported.');
+            }
+            $this->body = $parameter;
+        } elseif ($parameter instanceof QueryBuilderHeaderParameter) {
+            $this->headerParameters[] = $parameter;
+        } else {
             throw new \Exception('Bad class');
         }
 
-        switch ($parameter->method) {
-            case 'get':
-                $this->queryParameters[$parameter->name] = $parameter->value;
-                break;
-            case 'post':
-                $this->formParameters[$parameter->name] = $parameter->value;
-                break;
-            case 'body':
-                $this->bodyParameter = $parameter->value;
-                break;
-            default:
-                throw new \Exception('Bad parameter method');
-        }
+        return $this;
+    }
+
+    public function setBodyIsJson(bool $bodyIsJson): self
+    {
+        $this->bodyIsJson = $bodyIsJson;
 
         return $this;
     }
@@ -134,32 +151,34 @@ class QueryBuilder implements QueryBuilderInterface
     public function getResponse(int $page, int $resultsPerPage, array $options = []): ResponseInterface
     {
         //Add paginator parameters
-        if ($this->paginationBuilder && $this->paginationBuilder instanceof \Closure) {
-            $parameters = $this->paginationBuilder->__invoke($page, $resultsPerPage);
-            foreach ($parameters as $parameter) {
-                $this->addParameter($parameter);
-            }
+        if ($this->paginationBuilder) {
+            $this->paginationBuilder->__invoke($this, $page, $resultsPerPage);
         }
 
         //Add sort parameters
-        if (\count($this->orders) > 0 && $this->orderBuilder && $this->orderBuilder instanceof \Closure) {
-            $parameters = $this->orderBuilder->__invoke($this->orders);
-            foreach ($parameters as $parameter) {
-                $this->addParameter($parameter);
-            }
+        if (\count($this->orders) > 0 && $this->orderBuilder) {
+            $this->orderBuilder->__invoke($this, $this->orders);
         }
 
         //Add parameters to client options
-        foreach ($this->queryParameters as $parameterName => $parameterValue) {
-            $options['query'][$parameterName] = $parameterValue;
+        /** @var QueryBuilderQueryParameter $parameter */
+        foreach ($this->queryParameters as $parameter) {
+            $options['query'][$parameter->name] = $parameter->value;
         }
-        foreach ($this->formParameters as $parameterName => $parameterValue) {
-            $options['body'][$parameterName] = $parameterValue;
+        /** @var QueryBuilderBodyParameter $parameter */
+        foreach ($this->bodyParameters as $parameter) {
+            $bodyType = ($this->bodyIsJson) ? 'json' : 'body';
+            $options[$bodyType][$parameter->name] = $parameter->value;
         }
-        if ($this->bodyParameter) {
-            $options['body'] = $this->bodyParameter;
+        if ($this->body) {
+            $bodyType = ($this->bodyIsJson) ? 'json' : 'body';
+            $options[$bodyType] = $this->body->value;
+        }
+        /** @var QueryBuilderHeaderParameter $parameter */
+        foreach ($this->headerParameters as $parameter) {
+            $options['headers'][$parameter->name] = $parameter->value;
         }
 
-        return $this->client->request(mb_strtoupper($this->method), $this->url, $options);
+        return $this->client->request(mb_strtoupper($this->httpMethod), $this->url, $options);
     }
 }

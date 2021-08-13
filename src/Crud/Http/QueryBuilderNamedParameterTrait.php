@@ -13,20 +13,13 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud\Http;
 
-use Ecommit\CrudBundle\Crud\QueryBuilderParameterInterface;
-
-class QueryBuilderParameter implements QueryBuilderParameterInterface
+trait QueryBuilderNamedParameterTrait
 {
     public $name;
 
-    public $value;
-
-    public $method;
-
-    public function __construct($name, $value, $method)
+    public function __construct(string $name, $value)
     {
         $this->name = $name;
         $this->value = $value;
-        $this->method = $method;
     }
 }
