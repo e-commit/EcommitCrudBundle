@@ -514,7 +514,7 @@ class CrudExtension extends AbstractExtension
      *                       * theme: Theme used. If null, default theme is used
      *                       * block: Twig block used. Default: search_form_submit
      */
-    public function searchFormSubmit(Environment $environment, Crud $crud, $options = [], $ajaxOptions = [], $htmlOptions = [])
+    public function searchFormSubmit(Environment $environment, Crud $crud, $options = [])
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
@@ -549,7 +549,7 @@ class CrudExtension extends AbstractExtension
      *                       * theme: Theme used. If null, default theme is used
      *                       * block: Twig block used. Default: search_form_reset
      */
-    public function searchFormReset(Environment $environment, Crud $crud, $options = [], $ajaxOptions = [], $htmlOptions = [])
+    public function searchFormReset(Environment $environment, Crud $crud, $options = [])
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
