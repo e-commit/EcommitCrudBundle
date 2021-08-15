@@ -38,12 +38,14 @@ ecommit_crud:
     #Themes disponibles :
     #@EcommitCrud/Theme/base.html.twig
     #@EcommitCrud/Theme/bootstrap3.html.twig (boostrap3 requis)
+    #Ou faire son propre terme (doit hériter de l'un des thèmes précédents)
     theme: '@EcommitCrud/Theme/bootstrap3.html.twig'
 
     #Theme pour les icones
     #Themes disponibles :
     #@EcommitCrud/IconTheme/base.html.twig
     #@EcommitCrud/IconTheme/fontawesome4.html.twig (fontawesome4 requis)
+    #Ou faire son propre terme (doit hériter de l'un des thèmes précédents)
     icon_theme: '@EcommitCrud/IconTheme/fontawesome4.html.twig'
 ```
 

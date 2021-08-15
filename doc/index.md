@@ -26,3 +26,7 @@
 * [Tri par défaut personnalisé](cookbook/sort.md)
 * [Configuration par défaut des templates des CRUD](cookbook/template_configuration.md)
 * [Colonnes virtuelles](cookbook/virtual_columns.md)
+
+## Migrations
+
+* [Mise à jour de 2.6 vers 3.0](upgrade/3.0.md)
