@@ -1,6 +1,8 @@
 # Personnalisation avancée de la classe Searcher
 
-## Solution 1: Utilisation de addField et updateQueryBuilder
+## Personnalisation des filtres de recherche
+
+### Solution 1: Utilisation de addField et updateQueryBuilder
 
 ```php
 <?php
@@ -42,7 +44,7 @@ class CarSearcher extends AbstractSearcher
 }
 ```
 
-## Solution 2: Utilisation d'une classe FormType
+### Solution 2: Utilisation d'une classe FormType
 
 ```php
 <?php
@@ -122,3 +124,65 @@ class MyCrudController extends AbstractCrudController
     }
 }
 ```
+
+### Solution 3: Création d'un filtre de recherche
+
+Voir [Création d'un filtre de recherche](create_filter.md)
+
+
+## Définir les options du formulaire de recherche
+
+La classe `configureOptions` de `SearcherInterface` peut être utilisée pour définir des options au formulaire de recherche :
+
+```php
+//src/Form/Searcher/CarSearcher
+namespace App\Form\Searcher;
+
+use Ecommit\CrudBundle\Form\Searcher\AbstractSearcher;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+class CarSearcher extends AbstractSearcher
+{
+    //...
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'my_option' => null,
+        ]);
+    }
+}
+```
+
+Ces options doivent être passées au 3ème argument (`$options`) de la méthode `createSearchForm` de `Crud` :
+
+```diff
+<?php
+//src/Controller/MyCrudController
+namespace App\Controller;
+
+//...
+
+class MyCrudController extends AbstractCrudController
+{
+    protected function getCrud(): Crud
+    {
+        //...
+        
+        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
+        $crud->addColumn('id', 'c1.id', 'Id')
+            //...
+            ->setRoute('my_crud_ajax')
+-           ->createSearchForm(new CarSearcher())
++           ->createSearchForm(new CarSearcher(), null , [
++               'my_option' => 'my_value',
++           ])
+            //...
+            ->init();
+
+        return $crud;
+    }
+}
+```
+
+Ces options peuvent être enfin récupérées dans les arguments `$options` des méthodes `buildForm` et `updateQueryBuilder` de `SearcherInterface`.

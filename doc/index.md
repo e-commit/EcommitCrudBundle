@@ -18,6 +18,7 @@
 ## Fonctionnalités avancées
 
 * [Personnalisation avancée de la classe Searcher](cookbook/advanced-searcher.md)
+* [Création d'un filtre de recherche](cookbook/create_filter.md)
 * [Ajout de données aux templates](cookbook/data-template.md)
 * [Affichage des résultats uniquement si recherche envoyée](cookbook/display_results.md)
 * [Personnaliser les IDs des Divs](cookbook/div_ids.md)

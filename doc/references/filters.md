@@ -1,5 +1,10 @@
 # Filtres
 
+> **_A VOIR AUSSI :_**
+> 
+> * [Personnalisation avancée de la classe Searcher](../cookbook/advanced-searcher.md)
+> * [Création d'un filtre de recherche](create_filter.md)
+
 ## Options générales pour tous les filtres
 
 | Option | Description | Requis  | Valeur par défaut |
