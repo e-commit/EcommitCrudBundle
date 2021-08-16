@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\DependencyInjection;
 
+use Ecommit\CrudBundle\Form\Filter\FilterInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -40,5 +41,7 @@ class EcommitCrudExtension extends Extension
         $container->setParameter('ecommit_crud.theme', $config['theme']);
         $container->setParameter('ecommit_crud.icon_theme', $config['icon_theme']);
         $container->setParameter('ecommit_crud.twig_functions_configuration', $config['twig_functions_configuration']);
+
+        $container->registerForAutoconfiguration(FilterInterface::class)->addTag('ecommit_crud.filter');
     }
 }

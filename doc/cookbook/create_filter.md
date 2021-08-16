@@ -15,3 +15,6 @@ Un filtre doit être une classe qui hérite de `AbstractFilter` ou implémente `
 
 
 La classe doit être déclarée comme service ayant le [tag](https://symfony.com/doc/current/service_container/tags.html) `ecommit_crud.filter`.
+
+> **_REMARQUE :_** Avec l'option [autoconfigure](https://symfony.com/doc/current/service_container.html#services-autoconfigure)
+> de Symfony, le tag est automatiquement ajouté aux services.

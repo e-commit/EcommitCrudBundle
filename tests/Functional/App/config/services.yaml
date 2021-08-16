@@ -12,3 +12,7 @@ services:
     Ecommit\CrudBundle\Tests\Functional\App\Controller\:
         resource: '../Controller'
         tags: ['controller.service_arguments']
+
+    Ecommit\CrudBundle\Tests\Functional\App\Form\Filter\:
+        resource: '../Form/Filter'
+        #Do not add the tag - Autoconfigure is tested by EcommitCrudExtensionTest
