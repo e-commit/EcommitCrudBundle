@@ -369,7 +369,7 @@ class Crud
 
     /*
      * Use (or not) DBAL
-     * 
+     *
      * @param bool $value
      * @deprecated Deprecated since version 2.3.
      */
@@ -384,7 +384,7 @@ class Crud
 
     /*
      * Use (or not) persistent settings
-     * 
+     *
      * @param bool $value
      */
     public function setPersistentSettings($value)
@@ -425,7 +425,7 @@ class Crud
 
             $formBuilder = $field->addField($formBuilder);
         }
-        //Global 
+        //Global
         $formBuilder = $defaultFormSearcherData->globalBuildForm($formBuilder);
         $this->formSearcher = $formBuilder;
 
@@ -721,7 +721,7 @@ class Crud
     protected function changeNumberResultsDisplayed($value)
     {
         $oldValue = $this->sessionValues->resultsPerPage;
-        if (in_array($value, $this->availableResultsPerPage)) {
+        if (is_scalar($value) && in_array($value, $this->availableResultsPerPage)) {
             $this->sessionValues->resultsPerPage = $value;
         } else {
             $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
@@ -750,7 +750,7 @@ class Crud
         $newDisplayedColumns = array();
         $availableColumns = $this->availableColumns;
         foreach ($value as $column_name) {
-            if (array_key_exists($column_name, $availableColumns)) {
+            if (is_scalar($column_name) && array_key_exists($column_name, $availableColumns)) {
                 $newDisplayedColumns[] = $column_name;
             }
         }
