@@ -12,7 +12,6 @@ module.exports = {
         Atomics: 'readonly',
         SharedArrayBuffer: 'readonly'
     },
-    ignorePatterns: ['/src/Resources/assets/js/scrollToFirstMessage.js'],
     parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module'
