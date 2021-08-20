@@ -8,6 +8,7 @@
  */
 
 import * as ajax from '@ecommit/crud-bundle/js/ajax';
+import * as callbackManager from '@ecommit/crud-bundle/js/callback-manager';
 import $ from 'jquery';
 
 describe('Test Ajax.sendRequest', function () {
@@ -33,6 +34,7 @@ describe('Test Ajax.sendRequest', function () {
     afterEach(function () {
         jasmine.Ajax.uninstall();
         $('.html-test').remove();
+        callbackManager.clear();
     });
 
     it('Send request', function () {
@@ -268,6 +270,7 @@ describe('Test Ajax.click', function () {
     afterEach(function () {
         jasmine.Ajax.uninstall();
         $('.html-test').remove();
+        callbackManager.clear();
     });
 
     it('Send request with button', function () {
@@ -287,22 +290,30 @@ describe('Test Ajax.click', function () {
     });
 
     it('Send request with button and data-*', function () {
-        $('body').append('<button id="buttonToTest" class="html-test" data-ec-crud-ajax-url="/goodRequest" data-ec-crud-ajax-on-success="callbackSuccess()">Go !</button>');
+        $('body').append('<button id="buttonToTest" class="html-test" data-ec-crud-ajax-url="/goodRequest" data-ec-crud-ajax-on-success="my_callback_on_success">Go !</button>');
 
-        global.callbackSuccess = jasmine.createSpy('success');
+        const callbackSuccess = jasmine.createSpy('success');
+
+        callbackManager.registerCallback('my_callback_on_success', function (args) {
+            callbackSuccess(args);
+        });
 
         ajax.click($('#buttonToTest'));
 
         expect(jasmine.Ajax.requests.mostRecent().url).toBe('/goodRequest');
-        expect(global.callbackSuccess).toHaveBeenCalled();
+        expect(callbackSuccess).toHaveBeenCalled();
     });
 
     it('Send request with button and data-* and options', function () {
-        $('body').append('<button id="buttonToTest" class="html-test" data-ec-crud-ajax-on-success="callbackSuccess1()" data-ec-crud-ajax-method="PUT" data-ec-crud-ajax-url="/goodRequest">Go !</a>');
+        $('body').append('<button id="buttonToTest" class="html-test" data-ec-crud-ajax-on-success="my_callback_on_success_1" data-ec-crud-ajax-method="PUT" data-ec-crud-ajax-url="/goodRequest">Go !</a>');
 
-        global.callbackSuccess1 = jasmine.createSpy('success1');
+        const callbackSuccess1 = jasmine.createSpy('success1');
         const callbackSuccess2 = jasmine.createSpy('success2');
         const callbackComplete = jasmine.createSpy('complete');
+
+        callbackManager.registerCallback('my_callback_on_success_1', function (args) {
+            callbackSuccess1(args);
+        });
 
         ajax.click($('#buttonToTest'), {
             url: '/badRequest', // overridden by data-ec-crud-ajax-url
@@ -317,7 +328,7 @@ describe('Test Ajax.click', function () {
 
         expect(jasmine.Ajax.requests.mostRecent().url).toBe('/goodRequest');
         expect(jasmine.Ajax.requests.mostRecent().method).toBe('PUT');
-        expect(global.callbackSuccess1).toHaveBeenCalled();
+        expect(callbackSuccess1).toHaveBeenCalled();
         expect(callbackSuccess2).not.toHaveBeenCalled();
         expect(callbackComplete).toHaveBeenCalled();
     });
@@ -343,18 +354,12 @@ describe('Test Ajax.click', function () {
         $(document).off('ec-crud-ajax-click-auto-before', '#clickToTest');
     });
 
-    it('Send auto-request canceled by onBeforeSend option (function)', function () {
-        $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="clickToTest" data-ec-crud-ajax-url="/goodRequest" data-ec-crud-ajax-on-before-send="function (args) { args.stop = true; }">Go !</button>');
+    it('Send auto-request canceled by onBeforeSend option', function () {
+        $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="clickToTest" data-ec-crud-ajax-url="/goodRequest" data-ec-crud-ajax-on-before-send="my_callback_on_before_send">Go !</button>');
 
-        $('#clickToTest').click();
-
-        expect(jasmine.Ajax.requests.mostRecent()).toBeUndefined();
-
-        $(document).off('ec-crud-ajax-click-auto-before', '#clickToTest');
-    });
-
-    it('Send auto-request canceled by onBeforeSend option (function content)', function () {
-        $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="clickToTest" data-ec-crud-ajax-url="/goodRequest" data-ec-crud-ajax-on-before-send="/args/args.stop = true">Go !</button>');
+        callbackManager.registerCallback('my_callback_on_before_send', function (args) {
+            args.stop = true;
+        });
 
         $('#clickToTest').click();
 
@@ -377,6 +382,7 @@ describe('Test Ajax.link', function () {
     afterEach(function () {
         jasmine.Ajax.uninstall();
         $('.html-test').remove();
+        callbackManager.clear();
     });
 
     it('Send request with link', function () {
@@ -395,23 +401,31 @@ describe('Test Ajax.link', function () {
     });
 
     it('Send request with link and data-*', function () {
-        $('body').append('<a href="/goodRequest" id="linkToTest" class="html-test" data-ec-crud-ajax-on-success="callbackSuccess()">Go !</a>');
+        $('body').append('<a href="/goodRequest" id="linkToTest" class="html-test" data-ec-crud-ajax-on-success="my_callback_on_success">Go !</a>');
 
-        global.callbackSuccess = jasmine.createSpy('success');
+        const callbackSuccess = jasmine.createSpy('success');
+
+        callbackManager.registerCallback('my_callback_on_success', function (args) {
+            callbackSuccess(args);
+        });
 
         ajax.link($('#linkToTest'));
 
         expect(jasmine.Ajax.requests.mostRecent().url).toBe('/goodRequest');
-        expect(global.callbackSuccess).toHaveBeenCalled();
+        expect(callbackSuccess).toHaveBeenCalled();
     });
 
     it('Send request with link and data-* and options', function () {
-        $('body').append('<a href="/badRequest" id="linkToTest" class="html-test" data-ec-crud-ajax-on-success="callbackSuccess1()" data-ec-crud-ajax-method="PUT" data-ec-crud-ajax-url="/goodRequest">Go !</a>');
+        $('body').append('<a href="/badRequest" id="linkToTest" class="html-test" data-ec-crud-ajax-on-success="my_callback_on_success_1" data-ec-crud-ajax-method="PUT" data-ec-crud-ajax-url="/goodRequest">Go !</a>');
         // href is overridden by url option
 
-        global.callbackSuccess1 = jasmine.createSpy('success1');
+        const callbackSuccess1 = jasmine.createSpy('success1');
         const callbackSuccess2 = jasmine.createSpy('success2');
         const callbackComplete = jasmine.createSpy('complete');
+
+        callbackManager.registerCallback('my_callback_on_success_1', function (args) {
+            callbackSuccess1(args);
+        });
 
         ajax.link($('#linkToTest'), {
             url: '/badRequest', // overridden by data-ec-crud-ajax-url
@@ -426,7 +440,7 @@ describe('Test Ajax.link', function () {
 
         expect(jasmine.Ajax.requests.mostRecent().url).toBe('/goodRequest');
         expect(jasmine.Ajax.requests.mostRecent().method).toBe('PUT');
-        expect(global.callbackSuccess1).toHaveBeenCalled();
+        expect(callbackSuccess1).toHaveBeenCalled();
         expect(callbackSuccess2).not.toHaveBeenCalled();
         expect(callbackComplete).toHaveBeenCalled();
     });
@@ -466,6 +480,7 @@ describe('Test Ajax.form', function () {
     afterEach(function () {
         jasmine.Ajax.uninstall();
         $('.html-test').remove();
+        callbackManager.clear();
     });
 
     it('Send request with form', function () {
@@ -511,11 +526,14 @@ describe('Test Ajax.form', function () {
     });
 
     it('Send request with form and data-*', function () {
-        $('body').append('<form action="/goodRequest" method="POST" class="html-test" id="formToTest" data-ec-crud-ajax-on-success="callbackSuccess()"><input type="text" name="var1" /><input type="text" name="var2" /></form>');
+        $('body').append('<form action="/goodRequest" method="POST" class="html-test" id="formToTest" data-ec-crud-ajax-on-success="my_callback_on_success"><input type="text" name="var1" /><input type="text" name="var2" /></form>');
         $('#formToTest input[name=var1]').val('My value 1');
         $('#formToTest input[name=var2]').val('My value 2');
 
-        global.callbackSuccess = jasmine.createSpy('success');
+        const callbackSuccess = jasmine.createSpy('success');
+        callbackManager.registerCallback('my_callback_on_success', function (args) {
+            callbackSuccess(args);
+        });
 
         ajax.sendForm($('#formToTest'));
 
@@ -524,18 +542,22 @@ describe('Test Ajax.form', function () {
         expect(jasmine.Ajax.requests.mostRecent().data()).toEqual({
             var1: ['My value 1'], var2: ['My value 2']
         });
-        expect(global.callbackSuccess).toHaveBeenCalled();
+        expect(callbackSuccess).toHaveBeenCalled();
     });
 
     it('Send request with form and data-* and options', function () {
-        $('body').append('<form action="/badRequest" method="POST" class="html-test" id="formToTest" data-ec-crud-ajax-on-success="callbackSuccess1()" data-ec-crud-ajax-method="PUT" data-ec-crud-ajax-url="/goodRequest"><input type="text" name="var1" /><input type="text" name="var2" /></form>');
+        $('body').append('<form action="/badRequest" method="POST" class="html-test" id="formToTest" data-ec-crud-ajax-on-success="my_callback_on_success_1" data-ec-crud-ajax-method="PUT" data-ec-crud-ajax-url="/goodRequest"><input type="text" name="var1" /><input type="text" name="var2" /></form>');
         // action is overridden by url option
         $('#formToTest input[name=var1]').val('My value 1');
         $('#formToTest input[name=var2]').val('My value 2');
 
-        global.callbackSuccess1 = jasmine.createSpy('success1');
+        const callbackSuccess1 = jasmine.createSpy('success1');
         const callbackSuccess2 = jasmine.createSpy('success2');
         const callbackComplete = jasmine.createSpy('complete');
+
+        callbackManager.registerCallback('my_callback_on_success_1', function (args) {
+            callbackSuccess1();
+        });
 
         ajax.sendForm($('#formToTest'), {
             url: '/badRequest', // overridden by data-ec-crud-ajax-url
@@ -554,7 +576,7 @@ describe('Test Ajax.form', function () {
             var1: ['My value 1'],
             var2: ['My value 2']
         });
-        expect(global.callbackSuccess1).toHaveBeenCalled();
+        expect(callbackSuccess1).toHaveBeenCalled();
         expect(callbackSuccess2).not.toHaveBeenCalled();
         expect(callbackComplete).toHaveBeenCalled();
     });
@@ -599,6 +621,7 @@ describe('Test Ajax.updateDom', function () {
         $('.html-test').remove();
         $(document).off('ec-crud-ajax-update-dom-before');
         $(document).off('ec-crud-ajax-update-dom-after');
+        callbackManager.clear();
     });
 
     it('Update with "update" mode', function () {

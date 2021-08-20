@@ -2,22 +2,27 @@
 
 ## Définition des callbacks
 
+**Méthode 1 :**
+
 ```js
-//Methode 1
 var callback = function (arg) {
     alert('go');
     //...
 };
+```
 
-//Methode 2
-var callback = 'alert("go")';
+**Méthode 2 :**
 
-//Méthode 3
-var callback = 'function (arg) { alert("go"); }';
+```js
+import * as callbackManager from '@ecommit/crud-bundle/js/callback-manager';
+
+callbackManager.registerCallback('my_callback_name', function (arg) {
+    alert('go');
+});
 ```
 
 
-Gestion de plusieurs callbacks :
+**Gestion de plusieurs callbacks :**
 
 ```js
 var callbacks = [
@@ -28,7 +33,7 @@ var callbacks = [
     },
     
     //Callback 2
-    'alert("go")'
+    'my_callback_name' //Callback enregistré par nom (voir méthode 2 plus haut)
 ];
 
 //Gestion des priorités (priorité par défaut = 0)
@@ -44,7 +49,7 @@ var callbacks = [
     
     //Callback 2
     {
-        callback: 'alert("go")',
+        callback: 'my_callback_name', //Callback enregistré par nom (voir méthode 2 plus haut)
         priority: 20
     }
 ];
@@ -53,14 +58,28 @@ var callbacks = [
 
 ## Appel des callbacks
 
+La fonction `runCallback` doit être appelée avec comme arguments :
+* Callback ou liste de callbacks
+* Argument passé à l'appel de chaque callback
+
+
+Le premier argument de la fonction `runCallback` est un callback ou liste de callbacks. Un callback (unique ou parmi le tableau) peut être :
+* 1 callback JavaScript (voir méthode 1 plus haut)
+* 1 nom de callback enregistré par par la méthode `registerCallback` (voir méthode 2 plus haut)
+* 1 objet avec les propriétés `callback` et `priority` (voir plus haut)
+
+
 ```js
 import runCallback from '@ecommit/crud-bundle/js/callback';
 
+//Exemple avec un unique callback
+//Voir paragraphe précédent
+//var callback = 
+runCallback(callback, '5');
+
+//Exemple avec un tableau de callbacks
 var callbacks = [
     //... Voir paragraphe précédent
 ];
-
-//1er argument: Callback ou liste de callbacks
-//2ème argument: Argument passé à l'appel de chaque callback
 runCallback(callbacks, '5');
 ```

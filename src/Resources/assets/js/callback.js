@@ -8,6 +8,7 @@
  */
 
 import $ from 'jquery';
+import * as callbackManager from './callback-manager';
 
 export default function (callbacks, arg) {
     if (undefined === callbacks || callbacks === null) {
@@ -69,23 +70,8 @@ function processCallback (callback, arg) {
         return;
     }
 
-    const patternFunction = /^function\s*\(/i;
-    if (patternFunction.test(callback)) {
-        callback = eval('(' + callback + ')');
+    callback = callbackManager.getRegistredCallback(callback);
+    if (callback) {
         callback(arg);
-
-        return;
     }
-
-    const patternFunctionContent = /^\/(.+)\/(.+)$/i;
-    const groups = callback.match(patternFunctionContent);
-    if (groups !== null && groups.length > 0) {
-        console.debug(groups);
-        callback = eval('(function(' + groups[1] + ') {' + groups[2] + '})');
-        callback(arg);
-
-        return;
-    }
-
-    eval(callback);
 }

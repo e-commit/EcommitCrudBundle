@@ -8,6 +8,7 @@
  */
 
 import runCallback from '@ecommit/crud-bundle/js/callback';
+import * as callbackManager from '@ecommit/crud-bundle/js/callback-manager';
 
 describe('Test callback', function () {
     it('Test callback with function', function () {
@@ -21,27 +22,21 @@ describe('Test callback', function () {
     });
 
     it('Test callback with string', function () {
-        global.myCallback = jasmine.createSpy('callback');
+        const myCallback = jasmine.createSpy('callback');
+        callbackManager.registerCallback('my_callback', function (arg) {
+            myCallback(arg);
+        });
 
-        runCallback('function (arg) { myCallback(arg); }', 3);
+        runCallback('my_callback', 3);
 
-        expect(global.myCallback).toHaveBeenCalledWith(3);
+        expect(myCallback).toHaveBeenCalledWith(3);
+        callbackManager.clear();
     });
 
-    it('Test callback with function content with argument', function () {
-        global.myCallback = jasmine.createSpy('callback');
-
-        runCallback('/arg/myCallback(arg)', 5);
-
-        expect(global.myCallback).toHaveBeenCalledWith(5);
-    });
-
-    it('Test callback with function content without argument', function () {
-        global.myCallback = jasmine.createSpy('callback');
-
-        runCallback('myCallback(5)', 4);
-
-        expect(global.myCallback).toHaveBeenCalledWith(5);
+    it('Test callback with string - Callback not registred', function () {
+        spyOn(window.console, 'error');
+        runCallback('my_callback_never_registred', 3);
+        expect(window.console.error).toHaveBeenCalledWith('Callback not found: my_callback_never_registred');
     });
 
     it('Test callback with sub array', function () {
@@ -83,9 +78,19 @@ describe('Test callback', function () {
     it('Test callback with priorities', function () {
         const callback1 = jasmine.createSpy('callback1');
         const callback2 = jasmine.createSpy('callback2');
-        global.callback3 = jasmine.createSpy('callback3');
-        global.callback4 = jasmine.createSpy('callback4');
-        global.callback5 = jasmine.createSpy('callback5');
+        const callback3 = jasmine.createSpy('callback3');
+        const callback4 = jasmine.createSpy('callback4');
+        const callback5 = jasmine.createSpy('callback5');
+
+        callbackManager.registerCallback('my_callback3', function (arg) {
+            callback3(arg);
+        });
+        callbackManager.registerCallback('my_callback4', function (arg) {
+            callback4(arg);
+        });
+        callbackManager.registerCallback('my_callback5', function (arg) {
+            callback5(arg);
+        });
 
         runCallback([
             // Called third
@@ -102,28 +107,30 @@ describe('Test callback', function () {
             // Called second
             {
                 priority: 10,
-                callback: 'callback3()'
+                callback: 'my_callback3'
             },
             // Called fourth
             {
-                callback: 'callback4()'
+                callback: 'my_callback4'
             },
             // Called in fifth
-            'callback5()'
+            'my_callback5'
         ], 'myValue');
 
         expect(callback1).toHaveBeenCalledTimes(1);
         expect(callback2).toHaveBeenCalledTimes(1);
-        expect(global.callback3).toHaveBeenCalledTimes(1);
-        expect(global.callback4).toHaveBeenCalledTimes(1);
-        expect(global.callback5).toHaveBeenCalledTimes(1);
+        expect(callback3).toHaveBeenCalledTimes(1);
+        expect(callback4).toHaveBeenCalledTimes(1);
+        expect(callback5).toHaveBeenCalledTimes(1);
 
         expect(callback1).toHaveBeenCalledWith('myValue');
         expect(callback2).toHaveBeenCalledWith('myValue');
 
-        expect(callback2).toHaveBeenCalledBefore(global.callback3);
-        expect(global.callback3).toHaveBeenCalledBefore(callback1);
-        expect(callback1).toHaveBeenCalledBefore(global.callback4);
-        expect(global.callback4).toHaveBeenCalledBefore(global.callback5);
+        expect(callback2).toHaveBeenCalledBefore(callback3);
+        expect(callback3).toHaveBeenCalledBefore(callback1);
+        expect(callback1).toHaveBeenCalledBefore(callback4);
+        expect(callback4).toHaveBeenCalledBefore(callback5);
+
+        callbackManager.clear();
     });
 });
