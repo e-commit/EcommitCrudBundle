@@ -28,10 +28,10 @@ module.exports = function(config) {
             terminal: false //Remove console.* logs
         },
         files: [
-            'tests/Resources/public/js/main.js'
+            'tests/Resources/assets/js/main.js'
         ],
         preprocessors: {
-            'tests/Resources/public/js/main.js': ['webpack']
+            'tests/Resources/assets/js/main.js': ['webpack']
         },
         webpackMiddleware: {
             stats: 'errors-only',
