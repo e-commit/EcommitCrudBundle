@@ -83,3 +83,15 @@ var callbacks = [
 ];
 runCallback(callbacks, '5');
 ```
+
+Exemple avec un callback à plusieurs aguments :
+
+```js
+import runCallback from '@ecommit/crud-bundle/js/callback';
+
+var callback = function (arg1, arg2) {
+    var sum = arg1 + arg2;
+    alert(sum);
+};
+runCallback(callback, 10, 5); //Display "15"
+```

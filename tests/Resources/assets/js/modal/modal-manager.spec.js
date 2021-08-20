@@ -297,13 +297,13 @@ describe('Test Modal-manager with test engine', function () {
                     onSuccess: [
                         {
                             priority: 6,
-                            callback: function (args) {
+                            callback: function (data, textStatus, jqXHR) {
                                 callbackSuccess1();
                             }
                         },
                         {
                             priority: -2,
-                            callback: function (args) {
+                            callback: function (data, textStatus, jqXHR) {
                                 callbackSuccess2();
                             }
                         }

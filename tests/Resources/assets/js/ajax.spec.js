@@ -44,14 +44,14 @@ describe('Test Ajax.sendRequest', function () {
 
         ajax.sendRequest({
             url: '/goodRequest',
-            onComplete: function (args) {
+            onComplete: function (jqXHR, textStatus) {
                 callbackComplete();
             },
-            onSuccess: function (args) {
-                callbackSuccess(args.data);
+            onSuccess: function (data, textStatus, jqXHR) {
+                callbackSuccess(data);
             },
-            onError: function (args) {
-                callbackError(args.jqXHR.responseText);
+            onError: function (jqXHR, textStatus, errorThrown) {
+                callbackError(jqXHR.responseText);
             }
         });
 
@@ -69,14 +69,14 @@ describe('Test Ajax.sendRequest', function () {
 
         ajax.sendRequest({
             url: '/error404',
-            onComplete: function (args) {
+            onComplete: function (jqXHR, textStatus) {
                 callbackComplete();
             },
-            onSuccess: function (args) {
-                callbackSuccess(args.data);
+            onSuccess: function (data, textStatus, jqXHR) {
+                callbackSuccess(data);
             },
-            onError: function (args) {
-                callbackError(args.jqXHR.responseText);
+            onError: function (jqXHR, textStatus, errorThrown) {
+                callbackError(jqXHR.responseText);
             }
         });
 
@@ -93,12 +93,12 @@ describe('Test Ajax.sendRequest', function () {
         ajax.sendRequest({
             url: '/goodRequest',
             onSuccess: [
-                function (args) {
+                function (data, textStatus, jqXHR) {
                     callbackSuccess1();
                 },
                 {
                     priority: 99,
-                    callback: function (args) {
+                    callback: function (data, textStatus, jqXHR) {
                         callbackSuccess2();
                     }
                 }
@@ -122,7 +122,7 @@ describe('Test Ajax.sendRequest', function () {
         ajax.sendRequest({
             url: '/goodRequest',
             onSuccess: {
-                callback: function (args) {
+                callback: function (data, textStatus, jqXHR) {
                     callbackSuccess($('#ajax-result').html());
                 },
                 priority: -99
@@ -174,10 +174,10 @@ describe('Test Ajax.sendRequest', function () {
 
         ajax.sendRequest({
             url: '/goodRequest',
-            onBeforeSend: function (args) {
+            onBeforeSend: function (options) {
                 callbackBeforeSend();
             },
-            onSuccess: function (args) {
+            onSuccess: function (data, textStatus, jqXHR) {
                 callbackSuccess();
             }
         });
@@ -192,11 +192,11 @@ describe('Test Ajax.sendRequest', function () {
 
         ajax.sendRequest({
             url: '/goodRequest',
-            onBeforeSend: function (args) {
+            onBeforeSend: function (options) {
                 callbackBeforeSend();
-                args.stop = true;
+                options.stop = true;
             },
-            onSuccess: function (args) {
+            onSuccess: function (data, textStatus, jqXHR) {
                 callbackSuccess();
             }
         });
@@ -226,7 +226,7 @@ describe('Test Ajax.sendRequest', function () {
         ajax.sendRequest({
             url: '/resultJS',
             onSuccess: {
-                callback: function (args) {
+                callback: function (data, textStatus, jqXHR) {
                     callbackSuccess($('#ajax-result').html());
                 },
                 priority: -99
@@ -244,7 +244,7 @@ describe('Test Ajax.sendRequest', function () {
         ajax.sendRequest({
             url: '/goodRequest',
             onSuccess: {
-                callback: function (args) {
+                callback: function (data, textStatus, jqXHR) {
                     callbackSuccess($('#ajax-result').html());
                 },
                 priority: -99
@@ -280,7 +280,7 @@ describe('Test Ajax.click', function () {
 
         ajax.click($('#buttonToTest'), {
             url: '/goodRequest',
-            onSuccess: function (args) {
+            onSuccess: function (data, textStatus, jqXHR) {
                 callbackSuccess();
             }
         });
@@ -294,8 +294,8 @@ describe('Test Ajax.click', function () {
 
         const callbackSuccess = jasmine.createSpy('success');
 
-        callbackManager.registerCallback('my_callback_on_success', function (args) {
-            callbackSuccess(args);
+        callbackManager.registerCallback('my_callback_on_success', function (data, textStatus, jqXHR) {
+            callbackSuccess();
         });
 
         ajax.click($('#buttonToTest'));
@@ -311,17 +311,17 @@ describe('Test Ajax.click', function () {
         const callbackSuccess2 = jasmine.createSpy('success2');
         const callbackComplete = jasmine.createSpy('complete');
 
-        callbackManager.registerCallback('my_callback_on_success_1', function (args) {
-            callbackSuccess1(args);
+        callbackManager.registerCallback('my_callback_on_success_1', function (data, textStatus, jqXHR) {
+            callbackSuccess1();
         });
 
         ajax.click($('#buttonToTest'), {
             url: '/badRequest', // overridden by data-ec-crud-ajax-url
             method: 'GET', // overridden by data-ec-crud-ajax-method
-            onSuccess: function (args) { // overridden by data-ec-crud-ajax-on-success
+            onSuccess: function (data, textStatus, jqXHR) { // overridden by data-ec-crud-ajax-on-success
                 callbackSuccess2();
             },
-            onComplete: function (args) {
+            onComplete: function (jqXHR, textStatus) {
                 callbackComplete();
             }
         });
@@ -357,8 +357,8 @@ describe('Test Ajax.click', function () {
     it('Send auto-request canceled by onBeforeSend option', function () {
         $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="clickToTest" data-ec-crud-ajax-url="/goodRequest" data-ec-crud-ajax-on-before-send="my_callback_on_before_send">Go !</button>');
 
-        callbackManager.registerCallback('my_callback_on_before_send', function (args) {
-            args.stop = true;
+        callbackManager.registerCallback('my_callback_on_before_send', function (options) {
+            options.stop = true;
         });
 
         $('#clickToTest').click();
@@ -391,7 +391,7 @@ describe('Test Ajax.link', function () {
         const callbackSuccess = jasmine.createSpy('success');
 
         ajax.link($('#linkToTest'), {
-            onSuccess: function (args) {
+            onSuccess: function (data, textStatus, jqXHR) {
                 callbackSuccess();
             }
         });
@@ -405,8 +405,8 @@ describe('Test Ajax.link', function () {
 
         const callbackSuccess = jasmine.createSpy('success');
 
-        callbackManager.registerCallback('my_callback_on_success', function (args) {
-            callbackSuccess(args);
+        callbackManager.registerCallback('my_callback_on_success', function (data, textStatus, jqXHR) {
+            callbackSuccess();
         });
 
         ajax.link($('#linkToTest'));
@@ -423,17 +423,17 @@ describe('Test Ajax.link', function () {
         const callbackSuccess2 = jasmine.createSpy('success2');
         const callbackComplete = jasmine.createSpy('complete');
 
-        callbackManager.registerCallback('my_callback_on_success_1', function (args) {
-            callbackSuccess1(args);
+        callbackManager.registerCallback('my_callback_on_success_1', function (data, textStatus, jqXHR) {
+            callbackSuccess1();
         });
 
         ajax.link($('#linkToTest'), {
             url: '/badRequest', // overridden by data-ec-crud-ajax-url
             method: 'GET', // overridden by data-ec-crud-ajax-method
-            onSuccess: function (args) { // overridden by data-ec-crud-ajax-on-success
+            onSuccess: function (data, textStatus, jqXHR) { // overridden by data-ec-crud-ajax-on-success
                 callbackSuccess2();
             },
-            onComplete: function (args) {
+            onComplete: function (jqXHR, textStatus) {
                 callbackComplete();
             }
         });
@@ -491,7 +491,7 @@ describe('Test Ajax.form', function () {
         const callbackSuccess = jasmine.createSpy('success');
 
         ajax.sendForm($('#formToTest'), {
-            onSuccess: function (args) {
+            onSuccess: function (data, textStatus, jqXHR) {
                 callbackSuccess();
             }
         });
@@ -512,7 +512,7 @@ describe('Test Ajax.form', function () {
         const callbackSuccess = jasmine.createSpy('success');
 
         ajax.sendForm($('#formToTest'), {
-            onSuccess: function (args) {
+            onSuccess: function (data, textStatus, jqXHR) {
                 callbackSuccess();
             }
         });
@@ -531,8 +531,8 @@ describe('Test Ajax.form', function () {
         $('#formToTest input[name=var2]').val('My value 2');
 
         const callbackSuccess = jasmine.createSpy('success');
-        callbackManager.registerCallback('my_callback_on_success', function (args) {
-            callbackSuccess(args);
+        callbackManager.registerCallback('my_callback_on_success', function (data, textStatus, jqXHR) {
+            callbackSuccess();
         });
 
         ajax.sendForm($('#formToTest'));
@@ -555,17 +555,17 @@ describe('Test Ajax.form', function () {
         const callbackSuccess2 = jasmine.createSpy('success2');
         const callbackComplete = jasmine.createSpy('complete');
 
-        callbackManager.registerCallback('my_callback_on_success_1', function (args) {
+        callbackManager.registerCallback('my_callback_on_success_1', function (data, textStatus, jqXHR) {
             callbackSuccess1();
         });
 
         ajax.sendForm($('#formToTest'), {
             url: '/badRequest', // overridden by data-ec-crud-ajax-url
             method: 'GET', // overridden by data-ec-crud-ajax-method
-            onSuccess: function (args) { // overridden by data-ec-crud-ajax-on-success
+            onSuccess: function (data, textStatus, jqXHR) { // overridden by data-ec-crud-ajax-on-success
                 callbackSuccess2();
             },
-            onComplete: function (args) {
+            onComplete: function (jqXHR, textStatus) {
                 callbackComplete();
             }
         });

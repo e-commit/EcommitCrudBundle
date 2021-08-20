@@ -22,10 +22,10 @@ Options :
 | url | Url de l'action Ajax | Oui |  |
 | update | Si défini, mise à jour du DOM avec le résultat. (voir doc de la fonction `updateDom` plus bas) | Non | |
 | updateMode | Méthode à utiliser pour la mise à jour du DOM (voir doc de la fonction `updateDom` plus bas) | Non | update |
-| onBeforeSend | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) avant l'envoi de la requête | Non | |
-| onSuccess | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) en cas de succès de la réponse | Non | |
-| onError | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) en cas d'erreur lors de la réponse | Non | |
-| onComplete | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) après réponse | Non | |
+| onBeforeSend | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) avant l'envoi de la requête. `Function(options)`. Dans le callback peut passer `options.stop = false` pour annuler la requête. | Non | |
+| onSuccess | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) en cas de succès de la réponse. `Function(data, textStatus, jqXHR)` | Non | |
+| onError | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) en cas d'erreur lors de la réponse. `Function(jqXHR, textStatus, errorThrown)` | Non | |
+| onComplete | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) après réponse. `Function(jqXHR, textStatus)` | Non | |
 | dataType | Type de données attendu (html, xml, json, jsonp, text) | Non | html |
 | method | Méthode HTTP | Non | POST |
 | data | Données envoyées dans la requête | Non | |

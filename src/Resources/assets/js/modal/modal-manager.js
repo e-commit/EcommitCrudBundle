@@ -130,7 +130,7 @@ export function openRemoteModal (options) {
     const callbacksSuccess = [
         {
             priority: 1,
-            callback: function (args) {
+            callback: function (data, textStatus, jqXHR) {
                 openModal(options);
             }
         }

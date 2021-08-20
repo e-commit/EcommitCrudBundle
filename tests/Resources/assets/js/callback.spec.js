@@ -133,4 +133,14 @@ describe('Test callback', function () {
 
         callbackManager.clear();
     });
+
+    it('Test callback with many arguments', function () {
+        const callback = jasmine.createSpy('callback');
+
+        runCallback(function (arg1, arg2) {
+            callback(arg1, arg2);
+        }, 2, 4);
+
+        expect(callback).toHaveBeenCalledWith(2, 4);
+    });
 });

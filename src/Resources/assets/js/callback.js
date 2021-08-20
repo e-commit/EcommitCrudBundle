@@ -10,7 +10,7 @@
 import $ from 'jquery';
 import * as callbackManager from './callback-manager';
 
-export default function (callbacks, arg) {
+export default function (callbacks, ...args) {
     if (undefined === callbacks || callbacks === null) {
         return;
     }
@@ -37,7 +37,7 @@ export default function (callbacks, arg) {
     });
 
     $.each(newCallbacks, function (key, value) {
-        processCallback(value.callback, arg);
+        processCallback(value.callback, args);
     });
 }
 
@@ -59,19 +59,19 @@ function addCallbacksToStack (value, stack) {
     }
 }
 
-function processCallback (callback, arg) {
-    if (callback instanceof Function) {
-        callback(arg);
+function processCallback (subject, args) {
+    if (subject instanceof Function) {
+        subject(...args);
 
         return;
     }
 
-    if (typeof callback !== 'string' && !(callback instanceof String)) {
+    if (typeof subject !== 'string' && !(subject instanceof String)) {
         return;
     }
 
-    callback = callbackManager.getRegistredCallback(callback);
-    if (callback) {
-        callback(arg);
+    subject = callbackManager.getRegistredCallback(subject);
+    if (subject) {
+        subject(...args);
     }
 }

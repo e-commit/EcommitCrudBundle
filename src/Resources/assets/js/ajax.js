@@ -84,8 +84,8 @@ export function sendRequest (options) {
     if (optionsResolver.isNotBlank(options.update)) {
         callbacksSuccess.push({
             priority: 10,
-            callback: function (args) {
-                updateDom(options.update, options.updateMode, args.data);
+            callback: function (data, textStatus, jqXHR) {
+                updateDom(options.update, options.updateMode, data);
             }
         })
     }
@@ -100,24 +100,13 @@ export function sendRequest (options) {
         cache: options.cache,
         data: options.data,
         success: function (data, textStatus, jqXHR) {
-            runCallback(callbacksSuccess, {
-                data: data,
-                textStatus: textStatus,
-                jqXHR: jqXHR
-            });
+            runCallback(callbacksSuccess, data, textStatus, jqXHR);
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            runCallback(options.onError, {
-                jqXHR: jqXHR,
-                textStatus: textStatus,
-                errorThrown: errorThrown
-            });
+            runCallback(options.onError, jqXHR, textStatus, errorThrown);
         },
         complete: function (jqXHR, textStatus) {
-            runCallback(options.onComplete, {
-                jqXHR: jqXHR,
-                textStatus: textStatus
-            });
+            runCallback(options.onComplete, jqXHR, textStatus);
         }
     });
 }

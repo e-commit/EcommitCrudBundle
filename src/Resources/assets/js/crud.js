@@ -18,8 +18,8 @@ $(document).on('submit', 'form.ec-crud-search-form', function (event) {
     const listId = $(this).attr('data-crud-list-id');
 
     sendForm(this, {
-        onSuccess: function (args) {
-            const json = $.parseJSON(args.data);
+        onSuccess: function (data, textStatus, jqXHR) {
+            const json = $.parseJSON(data);
 
             updateDom($('#' + searchId), 'update', json.render_search);
             updateDom($('#' + listId), 'update', json.render_list);
@@ -32,8 +32,8 @@ $(document).on('click', 'button.ec-crud-search-reset', function (event) {
     const listId = $(this).attr('data-crud-list-id');
 
     click(this, {
-        onSuccess: function (args) {
-            const json = $.parseJSON(args.data);
+        onSuccess: function (data, textStatus, jqXHR) {
+            const json = $.parseJSON(data);
 
             updateDom($('#' + searchId), 'update', json.render_search);
             updateDom($('#' + listId), 'update', json.render_list);
@@ -93,8 +93,8 @@ $(document).on('submit', '.ec-crud-display-settings form', function (event) {
     closeDisplaySettings($('#' + displaySettingsContainerId));
 
     sendForm(this, {
-        onSuccess: function (args) {
-            const json = $.parseJSON(args.data);
+        onSuccess: function (data, textStatus, jqXHR) {
+            const json = $.parseJSON(data);
 
             updateDom($('#' + listId), 'update', json.render_list);
             if (!json.form_is_valid) {
