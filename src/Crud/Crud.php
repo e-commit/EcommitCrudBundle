@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud;
 
-use Ecommit\CrudBundle\DoctrineExtension\Paginate;
 use Ecommit\CrudBundle\Entity\UserCrudSettings;
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 use Ecommit\CrudBundle\Form\Type\DisplaySettingsType;
+use Ecommit\DoctrineUtils\Paginator\DoctrinePaginatorBuilder;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Form;
@@ -777,13 +777,12 @@ class Crud
                     $paginatorOptions = $this->buildPaginator;
                 }
 
-                $this->paginator = Paginate::createDoctrinePaginator(
+                $this->paginator = DoctrinePaginatorBuilder::createDoctrinePaginator(
                     $this->queryBuilder,
                     $this->sessionValues->page,
                     $this->sessionValues->resultsPerPage,
                     $paginatorOptions
                 );
-                $this->paginator->init();
             }
         }
     }

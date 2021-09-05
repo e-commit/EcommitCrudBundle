@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Ecommit\CrudBundle\Twig;
 
 use Ecommit\CrudBundle\Crud\Crud;
-use Ecommit\CrudBundle\Paginator\AbstractPaginator;
+use Ecommit\Paginator\PaginatorInterface;
 use Symfony\Component\Form\FormRendererInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -158,7 +158,7 @@ class CrudExtension extends AbstractExtension
      *                            * theme: Theme used. If null, default theme is used
      *                            * block: Twig block used. Default: paginator_links
      */
-    public function paginatorLinks(Environment $environment, AbstractPaginator $paginator, string $routeName, array $routeParams = [], array $options = []): string
+    public function paginatorLinks(Environment $environment, PaginatorInterface $paginator, string $routeName, array $routeParams = [], array $options = []): string
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([

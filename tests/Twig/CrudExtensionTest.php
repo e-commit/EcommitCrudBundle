@@ -16,8 +16,8 @@ namespace Ecommit\CrudBundle\Tests\Twig;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Crud\CrudColumn;
 use Ecommit\CrudBundle\Crud\CrudSession;
-use Ecommit\CrudBundle\Paginator\ArrayPaginator;
 use Ecommit\CrudBundle\Twig\CrudExtension;
+use Ecommit\Paginator\ArrayPaginator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -157,9 +157,10 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testPaginatorLinksWithNoResult(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData([]);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => [],
+        ]);
 
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud');
 
@@ -168,9 +169,10 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testPaginatorLinksWithOnePage(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(['val']);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => ['val'],
+        ]);
 
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud');
 
@@ -182,10 +184,11 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testPaginatorWithDefaultOptions(int $page, string $expected): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage($page);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => $page,
+        ]);
 
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud');
 
@@ -208,10 +211,11 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testPaginatorWithMaxPagesOptions(int $page, string $expected): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage($page);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => $page,
+        ]);
 
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
             'max_pages_before' => 4,
@@ -237,10 +241,11 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testPaginatorWithTypeOption(int $page, string $type, string $expected): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage($page);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => $page,
+        ]);
 
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
             'type' => $type,
@@ -278,10 +283,11 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testPaginatorWithEmptyArrayAjaxOption(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage(1);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => 1,
+        ]);
 
         $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" class="ec-crud-ajax-link-auto">1</a></li><li><a href="/user?page=2" class="ec-crud-ajax-link-auto">2</a></li><li class="next"><a href="/user?page=2" class="ec-crud-ajax-link-auto">›</a></li><li class="last"><a href="/user?page=20" class="ec-crud-ajax-link-auto">»</a></li></ul></nav>';
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
@@ -295,10 +301,11 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testPaginatorWithAjaxOption(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage(1);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => 1,
+        ]);
 
         $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">1</a></li><li><a href="/user?page=2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">2</a></li><li class="next"><a href="/user?page=2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">›</a></li><li class="last"><a href="/user?page=20" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">»</a></li></ul></nav>';
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
@@ -314,10 +321,11 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testPaginatorWithAttributePageOption(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage(1);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => 1,
+        ]);
 
         $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?p=1">1</a></li><li><a href="/user?p=2">2</a></li><li class="next"><a href="/user?p=2">›</a></li><li class="last"><a href="/user?p=20">»</a></li></ul></nav>';
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
@@ -331,10 +339,11 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testPaginatorWithAttrOptions(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage(10);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => 10,
+        ]);
 
         $expected = '<nav class="navattr" data-nav="val"><ul class="ulattr ec-crud-pagination" data-ul="val"><li class="lifirstpageattr first" data-li-first="val"><a href="/user?page=1" class="afirstpageattr" data-a-first="val">«</a></li><li class="lipreviouspageattr previous"><a href="/user?page=9" class="apreviouspageattr">‹</a></li><li class="liotherpageattr"><a href="/user?page=9" class="aotherpageattr">9</a></li><li class="liccurentpageattr current"><a href="/user?page=10" class="accurentpageattr">10</a></li><li class="liotherpageattr"><a href="/user?page=11" class="aotherpageattr">11</a></li><li class="linextpageattr next"><a href="/user?page=11" class="anextpageattr">›</a></li><li class="lilastpageattr last"><a href="/user?page=20" class="alastpageattr">»</a></li></ul></nav>';
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
@@ -365,10 +374,11 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testPaginatorWithRenderOption(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage(1);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => 1,
+        ]);
 
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
             'render' => 'render.html.twig',
@@ -379,10 +389,11 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testPaginatorWithThemeAndBlockOptions(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage(1);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => 1,
+        ]);
 
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
             'theme' => 'theme.html.twig',
@@ -395,10 +406,11 @@ class CrudExtensionTest extends KernelTestCase
     public function testPaginatorWithBadOptions(): void
     {
         $this->expectException(UndefinedOptionsException::class);
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage(1);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => 1,
+        ]);
 
         $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
             'bad_option' => 'bad',
@@ -407,10 +419,11 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testCrudPaginatorLinks(): void
     {
-        $paginator = new ArrayPaginator(5);
-        $paginator->setData(range(1, 100));
-        $paginator->setPage(1);
-        $paginator->init();
+        $paginator = new ArrayPaginator([
+            'max_per_page' => 5,
+            'data' => range(1, 100),
+            'page' => 1,
+        ]);
 
         $crud = $this->getMockBuilder(Crud::class)
             ->disableOriginalConstructor()

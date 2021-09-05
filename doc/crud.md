@@ -256,7 +256,7 @@ La classe Searcher représente les champs du formulaire de recherche.
 
 Si vous ne désirez pas activer le formulaire de recherche sur le CRUD, passez ce paragraphe.
 
-Note classe doit hériter de `Ecommit\CrudBundle\Form\Searcher\AbstractSearcher` (ou implémenter `Ecommit\CrudBundle\Form\Searcher\SearcherInterface`) :
+Notre classe doit hériter de `Ecommit\CrudBundle\Form\Searcher\AbstractSearcher` (ou implémenter `Ecommit\CrudBundle\Form\Searcher\SearcherInterface`) :
 
 ```php
 <?php

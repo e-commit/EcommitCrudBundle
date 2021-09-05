@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Form\Filter;
 
-use Ecommit\CrudBundle\DoctrineExtension\QueryBuilderFilter;
+use Ecommit\DoctrineUtils\QueryBuilderFilter;
 use Ecommit\ScalarValues\ScalarValues;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
