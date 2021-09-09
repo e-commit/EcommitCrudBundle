@@ -1,6 +1,8 @@
 {% autoescape 'js' %}
 <script type="text/javascript">
     jQuery('#{{ id_search|default('crud_search') }}').html('{{ render_search }}');
+    var eventSearch = jQuery.Event('ec-crud-update-search-after', {element: '#{{ id_search|default('crud_search') }}'}); jQuery('#{{ id_search|default('crud_search') }}').trigger(eventSearch);
     jQuery('#{{ id_list|default('crud_list') }}').html('{{ render_list }}');
+    var eventList = jQuery.Event('ec-crud-update-list-after', {element: '#{{ id_list|default('crud_list') }}'}); jQuery('#{{ id_list|default('crud_list') }}').trigger(eventList);
 </script>
 {% endautoescape %}
