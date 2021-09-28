@@ -69,11 +69,16 @@ final class SearchFormBuilder
     {
         $formFactory = $this->container->get('form.factory');
 
+        $formOptions = $this->options['form_options'];
+        if (!isset($formOptions['validation_groups']) && null !== $this->options['validation_groups']) {
+            $formOptions['validation_groups'] = $this->options['validation_groups'];
+        }
+
         if ($type) {
-            $this->form = $formFactory->createBuilder($type, null, $this->options['form_options']);
+            $this->form = $formFactory->createBuilder($type, null, $formOptions);
         } else {
             $formName = sprintf('crud_search_%s', $this->crud->getSessionName());
-            $this->form = $formFactory->createNamedBuilder($formName, FormSearchType::class, null, $this->options['form_options']);
+            $this->form = $formFactory->createNamedBuilder($formName, FormSearchType::class, null, $formOptions);
         }
 
         $this->defaultData->buildForm($this, $this->options);
