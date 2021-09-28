@@ -485,6 +485,7 @@ class CrudExtension extends AbstractExtension
                 'data-crud-search-id' => $crud->getDivIdSearch(),
                 'data-crud-list-id' => $crud->getDivIdList(),
             ],
+            $crud->getSearchForm()->vars['attr'],
             $options['form_attr'],
             $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options']))
         );
