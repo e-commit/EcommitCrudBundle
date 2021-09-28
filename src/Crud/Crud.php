@@ -938,7 +938,7 @@ class Crud
     public function getTwigFunctionConfiguration(string $function): array
     {
         if (isset($this->twigFunctionsConfiguration[$function])) {
-            return $this->twigFunctionsConfiguration;
+            return $this->twigFunctionsConfiguration[$function];
         }
 
         return [];
