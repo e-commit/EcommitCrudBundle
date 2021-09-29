@@ -31,22 +31,17 @@ trait CrudControllerTrait
 
     public function getCrudResponse(): Response
     {
-        return $this->container->get(CrudResponseGenerator::class)->getResponse($this->getCrud(), [
-            'template_generator' => function (string $action) {
-                return $this->getTemplateName($action);
-            },
-            'before_build_query' => function (Crud $crud, $data) {
-                return $this->beforeBuildQuery($crud, $data);
-            },
-            'after_build_query' => function (Crud $crud, $data) {
-                return $this->afterBuildQuery($crud, $data);
-            },
-        ]);
+        return $this->container->get(CrudResponseGenerator::class)->getResponse($this->getCrud(), $this->getCrudOptions());
     }
 
     public function getAjaxCrudResponse(): Response
     {
-        return $this->container->get(CrudResponseGenerator::class)->getAjaxResponse($this->getCrud(), [
+        return $this->container->get(CrudResponseGenerator::class)->getAjaxResponse($this->getCrud(), $this->getCrudOptions());
+    }
+
+    protected function getCrudOptions(): array
+    {
+        return [
             'template_generator' => function (string $action) {
                 return $this->getTemplateName($action);
             },
@@ -56,7 +51,7 @@ trait CrudControllerTrait
             'after_build_query' => function (Crud $crud, $data) {
                 return $this->afterBuildQuery($crud, $data);
             },
-        ]);
+        ];
     }
 
     protected function beforeBuildQuery(Crud $crud, array $data): array
