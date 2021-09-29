@@ -374,7 +374,7 @@ class Crud
             }
             $searchForm = $this->searchForm->getForm();
             $searchForm->handleRequest($request);
-            if ($searchForm->isSubmitted() && $searchForm->isValid()) {
+            if ($searchForm->isSubmitted() && $searchForm->isValid() && false !== $this->buildPaginator) {
                 $this->displayResults = true;
                 $this->sessionValues->searchFormIsSubmittedAndValid = true;
                 $this->changeFilterValues($searchForm->getData());
