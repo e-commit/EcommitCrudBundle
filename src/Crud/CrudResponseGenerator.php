@@ -90,6 +90,9 @@ class CrudResponseGenerator implements ServiceSubscriberInterface
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
 
+        if (!$crud->isInitialized()) {
+            $crud->init();
+        }
         if ($request->query->has('search')) {
             $crud->processForm();
         }

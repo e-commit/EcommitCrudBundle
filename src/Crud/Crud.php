@@ -47,6 +47,7 @@ class Crud
      */
     protected $displaySettingsForm = null;
 
+    protected $isInitialized = false;
     protected $availableColumns = [];
     protected $availableVirtualColumns = [];
     protected $availableResultsPerPage = [];
@@ -96,6 +97,10 @@ class Crud
      */
     public function init(): void
     {
+        if ($this->isInitialized) {
+            throw new \Exception('CRUD already initialized');
+        }
+
         //Cheks not empty values
         $checkValues = [
             'availableColumns',
@@ -145,6 +150,13 @@ class Crud
 
         //Saves
         $this->save();
+
+        $this->isInitialized = true;
+    }
+
+    public function isInitialized(): bool
+    {
+        return $this->isInitialized;
     }
 
     /**
