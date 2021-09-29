@@ -65,6 +65,23 @@ class CrudResponseGenerator implements ServiceSubscriberInterface
         return $this->renderCrud($this->getTemplateName($options['template_generator'], 'list'), $data);
     }
 
+    public function getCrudData(Crud $crud, array $options = []): array
+    {
+        $options = $this->getOptions($options);
+
+        return $this->processCrud($crud, $options);
+    }
+
+    public function getCrudContents(Crud $crud, array $options = []): array
+    {
+        $data = $this->getCrudData($crud, $options);
+
+        return [
+            'render_search' => $this->renderCrudView($this->getTemplateName($options['template_generator'], 'search'), $data),
+            'render_list' => $this->renderCrudView($this->getTemplateName($options['template_generator'], 'list'), $data),
+        ];
+    }
+
     protected function processCrud(Crud $crud, array $options): array
     {
         $data = [
