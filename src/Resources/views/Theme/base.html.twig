@@ -185,9 +185,10 @@
 {% endblock %}
 
 {% block display_settings_button %}
+    {% set display_settings_text = display_settings_text|default('display_settings.title'|trans({}, 'EcommitCrudBundle')) %}
     {% set button_attr = button_attr|default([])|merge({class: (button_attr.class|default('') ~ ' ec-crud-display-settings-button')|trim, 'data-display-settings': 'ec-crud-display-settings-'~crud.sessionName}) %}
     <button{% with { attr: button_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-        {{ crud_icon('display_settings') }} {{ 'display_settings.title'|trans({}, 'EcommitCrudBundle') }}
+        {{ crud_icon('display_settings') }} {{ display_settings_text }}
     </button>
 {% endblock %}
 
@@ -210,15 +211,18 @@
 
 {% block display_settings_content_without_modal %}
     <div>
-        <h4>{{ 'display_settings.title'|trans({}, 'EcommitCrudBundle') }}</h4>
+        {% set display_settings_text = display_settings_text|default('display_settings.title'|trans({}, 'EcommitCrudBundle')) %}
+        {% set display_settings_check_all_text = display_settings_check_all_text|default('display_settings.check_all'|trans({}, 'EcommitCrudBundle')) %}
+        {% set display_settings_uncheck_all_text = display_settings_uncheck_all_text|default('display_settings.uncheck_all'|trans({}, 'EcommitCrudBundle')) %}
+        <h4>{{ display_settings_text }}</h4>
 
         {{ form_start(form) }}
             {{ form_row(form.resultsPerPage) }}
             {{ form_row(form.displayedColumns) }}
             <div>
-                <button type="button" class="ec-crud-display-settings-check-all-columns">{{ 'display_settings.check_all'|trans({}, 'EcommitCrudBundle') }}</button>
+                <button type="button" class="ec-crud-display-settings-check-all-columns">{{ display_settings_check_all_text }}</button>
                 &nbsp;
-                <button type="button" class="ec-crud-display-settings-uncheck-all-columns">{{ 'display_settings.uncheck_all'|trans({}, 'EcommitCrudBundle') }}</button>
+                <button type="button" class="ec-crud-display-settings-uncheck-all-columns">{{ display_settings_uncheck_all_text }}</button>
             </div>
             <div style="text-align: center;">
                 {{ form_row(form.reset) }}
@@ -240,8 +244,9 @@
 
 {% block search_form_submit %}
     {% apply spaceless %}
+        {% set submit_text = submit_text|default('search.submit'|trans({}, 'EcommitCrudBundle')) %}
         <button type="submit" {% with { attr: button_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-            {{ crud_icon('search') }} {{ 'search.submit'|trans({}, 'EcommitCrudBundle') }}
+            {{ crud_icon('search') }} {{ submit_text }}
         </button>
     {% endapply %}
 {% endblock %}
@@ -250,8 +255,9 @@
 
 {% block search_form_reset %}
 {% apply spaceless %}
+    {% set reset_text = reset_text|default('search.reset'|trans({}, 'EcommitCrudBundle')) %}
     <button type="button" {% with { attr: button_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-        {{ crud_icon('reset') }} {{ 'search.reset'|trans({}, 'EcommitCrudBundle') }}
+        {{ crud_icon('reset') }} {{ reset_text }}
     </button>
 {% endapply %}
 {% endblock %}

@@ -34,10 +34,13 @@
 
 {% block display_settings_content_modal %}
     {% form_theme form 'bootstrap_3_layout.html.twig' %}
+    {% set display_settings_text = display_settings_text|default('display_settings.title'|trans({}, 'EcommitCrudBundle')) %}
+    {% set display_settings_check_all_text = display_settings_check_all_text|default('display_settings.check_all'|trans({}, 'EcommitCrudBundle')) %}
+    {% set display_settings_uncheck_all_text = display_settings_uncheck_all_text|default('display_settings.uncheck_all'|trans({}, 'EcommitCrudBundle')) %}
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4>{{ 'display_settings.title'|trans({}, 'EcommitCrudBundle') }}</h4>
+                <h4>{{ display_settings_text }}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -47,9 +50,9 @@
                     {{ form_row(form.resultsPerPage) }}
                     {{ form_row(form.displayedColumns) }}
                     <div>
-                        <button type="button" class="btn btn-default btn-xs ec-crud-display-settings-check-all-columns">{{ 'display_settings.check_all'|trans({}, 'EcommitCrudBundle') }}</button>
+                        <button type="button" class="btn btn-default btn-xs ec-crud-display-settings-check-all-columns">{{ display_settings_check_all_text }}</button>
                         &nbsp;
-                        <button type="button" class="btn btn-default btn-xs ec-crud-display-settings-uncheck-all-columns">{{ 'display_settings.uncheck_all'|trans({}, 'EcommitCrudBundle') }}</button>
+                        <button type="button" class="btn btn-default btn-xs ec-crud-display-settings-uncheck-all-columns">{{ display_settings_uncheck_all_text }}</button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -63,16 +66,19 @@
 
 {% block display_settings_content_without_modal %}
     {% form_theme form 'bootstrap_3_layout.html.twig' %}
+    {% set display_settings_text = display_settings_text|default('display_settings.title'|trans({}, 'EcommitCrudBundle')) %}
+    {% set display_settings_check_all_text = display_settings_check_all_text|default('display_settings.check_all'|trans({}, 'EcommitCrudBundle')) %}
+    {% set display_settings_uncheck_all_text = display_settings_uncheck_all_text|default('display_settings.uncheck_all'|trans({}, 'EcommitCrudBundle')) %}
     <div>
-        <h4>{{ 'display_settings.title'|trans({}, 'EcommitCrudBundle') }}</h4>
+        <h4>{{ display_settings_text }}</h4>
 
         {{ form_start(form) }}
             {{ form_row(form.resultsPerPage) }}
             {{ form_row(form.displayedColumns) }}
             <div>
-                <button type="button" class="btn btn-default btn-xs ec-crud-display-settings-check-all-columns">{{ 'display_settings.check_all'|trans({}, 'EcommitCrudBundle') }}</button>
+                <button type="button" class="btn btn-default btn-xs ec-crud-display-settings-check-all-columns">{{ display_settings_check_all_text }}</button>
                 &nbsp;
-                <button type="button" class="btn btn-default btn-xs ec-crud-display-settings-uncheck-all-columns">{{ 'display_settings.uncheck_all'|trans({}, 'EcommitCrudBundle') }}</button>
+                <button type="button" class="btn btn-default btn-xs ec-crud-display-settings-uncheck-all-columns">{{ display_settings_uncheck_all_text }}</button>
             </div>
 
             <div style="text-align: center;">
