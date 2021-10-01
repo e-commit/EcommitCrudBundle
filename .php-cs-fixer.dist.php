@@ -11,6 +11,7 @@ COMMENT;
 
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
+    ->exclude('node_modules')
     ->exclude('tests/Functional/App/var')
 ;
 $config = new PhpCsFixer\Config();
