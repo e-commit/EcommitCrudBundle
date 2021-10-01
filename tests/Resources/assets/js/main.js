@@ -7,5 +7,5 @@
  * file that was distributed with this source code.
  */
 
-const testsContext = require.context('.', true, /\.spec\.js$/);
-testsContext.keys().forEach(testsContext);
+const testsContext = require.context('.', true, /\.spec\.js$/)
+testsContext.keys().forEach(testsContext)

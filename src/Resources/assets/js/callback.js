@@ -7,71 +7,71 @@
  * file that was distributed with this source code.
  */
 
-import $ from 'jquery';
-import * as callbackManager from './callback-manager';
+import $ from 'jquery'
+import * as callbackManager from './callback-manager'
 
 export default function (callbacks, ...args) {
-    if (undefined === callbacks || callbacks === null) {
-        return;
+  if (undefined === callbacks || callbacks === null) {
+    return
+  }
+
+  if (typeof callbacks === 'string' || callbacks instanceof String || callbacks instanceof Function) {
+    callbacks = [callbacks]
+  }
+
+  if (Array !== callbacks.constructor) {
+    return
+  }
+
+  const newCallbacks = []
+  $.each(callbacks, function (key, value) {
+    addCallbacksToStack(value, newCallbacks)
+  })
+
+  newCallbacks.sort(function (a, b) {
+    if (parseInt(a.priority, 10) >= parseInt(b.priority, 10)) {
+      return -1
     }
 
-    if (typeof callbacks === 'string' || callbacks instanceof String || callbacks instanceof Function) {
-        callbacks = [callbacks];
-    }
+    return 1
+  })
 
-    if (Array !== callbacks.constructor) {
-        return;
-    }
-
-    const newCallbacks = [];
-    $.each(callbacks, function (key, value) {
-        addCallbacksToStack(value, newCallbacks);
-    });
-
-    newCallbacks.sort(function (a, b) {
-        if (parseInt(a.priority, 10) >= parseInt(b.priority, 10)) {
-            return -1;
-        }
-
-        return 1;
-    });
-
-    $.each(newCallbacks, function (key, value) {
-        processCallback(value.callback, args);
-    });
+  $.each(newCallbacks, function (key, value) {
+    processCallback(value.callback, args)
+  })
 }
 
 function addCallbacksToStack (value, stack) {
-    if (typeof value === 'string' || value instanceof String || value instanceof Function) {
-        stack.push({
-            callback: value,
-            priority: 0
-        });
-    } else if (Array === value.constructor) {
-        $.each(value, function (key, subValue) {
-            addCallbacksToStack(subValue, stack);
-        });
-    } else if (undefined !== value.callback) {
-        stack.push({
-            callback: value.callback,
-            priority: (value.priority !== undefined) ? value.priority : 0
-        });
-    }
+  if (typeof value === 'string' || value instanceof String || value instanceof Function) {
+    stack.push({
+      callback: value,
+      priority: 0
+    })
+  } else if (Array === value.constructor) {
+    $.each(value, function (key, subValue) {
+      addCallbacksToStack(subValue, stack)
+    })
+  } else if (undefined !== value.callback) {
+    stack.push({
+      callback: value.callback,
+      priority: (value.priority !== undefined) ? value.priority : 0
+    })
+  }
 }
 
 function processCallback (subject, args) {
-    if (subject instanceof Function) {
-        subject(...args);
+  if (subject instanceof Function) {
+    subject(...args)
 
-        return;
-    }
+    return
+  }
 
-    if (typeof subject !== 'string' && !(subject instanceof String)) {
-        return;
-    }
+  if (typeof subject !== 'string' && !(subject instanceof String)) {
+    return
+  }
 
-    subject = callbackManager.getRegistredCallback(subject);
-    if (subject) {
-        subject(...args);
-    }
+  subject = callbackManager.getRegistredCallback(subject)
+  if (subject) {
+    subject(...args)
+  }
 }

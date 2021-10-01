@@ -2,6 +2,7 @@
 
 
 ![Tests](https://github.com/e-commit/EcommitCrudBundle/workflows/Tests/badge.svg)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 
 **WARNING: This branch is under development. Not use in production. You can use stable versions or 2.6 branch.**
