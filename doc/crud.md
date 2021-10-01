@@ -129,8 +129,7 @@ class MyCrudController extends AbstractCrudController
             ->setAvailableResultsPerPage([2, 5, 10], 5)
             ->setDefaultSort('id', Crud::ASC)
             ->setRoute('my_crud_ajax')
-            ->setPersistentSettings(true) //Enregistre les paramètres d'affichage en base de données. Par défaut: false
-            ->init();
+            ->setPersistentSettings(true); //Enregistre les paramètres d'affichage en base de données. Par défaut: false
 
         return $crud;
     }
@@ -179,7 +178,6 @@ Explications de configCrud():
     * Le sens du tri par défaut (`Crud::ASC` ou `Crud::DESC`). **Requis**
 * On définit par la fonction `setRoute` la route Ajax utilisée pour mettre à jour notre liste
 * On active par la fonction `setPersistentSettings` l'enregistrement des propriétés d'affichage des utilisateurs en base de données. Par défaut, désactivé.
-* On initialise le Crud par la méthode `init()`.
 * On retourne notre objet créé
 
 ## Ajout templates
@@ -365,7 +363,6 @@ class MyCrudController extends AbstractCrudController
             ->setRoute('my_crud_ajax')
 +           ->createSearchForm(new CarSearcher())
             //...
-            ->init();
 
         return $crud;
     }

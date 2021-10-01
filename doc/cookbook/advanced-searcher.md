@@ -115,10 +115,12 @@ class MyCrudController extends AbstractCrudController
             ->setRoute('my_crud_ajax')
 -           ->createSearchForm(new CarSearcher())
 +           ->createSearchForm(new CarSearcher(), CarSearcherType::class , [
-+               //Options
++               //Searcher options
++               'form_options' => [
++                   //Form type options
++               ],
 +           ])
             //...
-            ->init();
 
         return $crud;
     }
@@ -178,7 +180,6 @@ class MyCrudController extends AbstractCrudController
 +               'my_option' => 'my_value',
 +           ])
             //...
-            ->init();
 
         return $crud;
     }

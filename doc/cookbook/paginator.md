@@ -1,6 +1,6 @@
 # Création manuelle du paginator
 
-Par défaut, un paginator `Ecommit\CrudBundle\Paginator\AbstractDoctrinePaginator` est automatiquement créé. Le comportement par défaut peut être modifié par
+Par défaut, un paginator `Ecommit\DoctrineUtils\Paginator\AbstractDoctrinePaginator` est automatiquement créé. Le comportement par défaut peut être modifié par
 la méthode `setBuildPaginator`.
 
 **Exemple 1 - Options de génération :**
@@ -23,16 +23,14 @@ class MyCrudController extends AbstractCrudController
             //...
             ->setRoute('my_crud_ajax')
 +           ->setBuildPaginator([
-+               //Options de Ecommit\CrudBundle\DoctrineExtension\Paginate::createDoctrinePaginator
-+               'behavior' => 'identifier_by_sub_request',
-+               'identifier' => 'c1.id',
-+               'count_options' => [
++               //Options de Ecommit\DoctrineUtils\Paginator\DoctrinePaginatorBuilder::createDoctrinePaginator
++               'by_identifier' => 'c1.id',
++               'count' => [
 +                   'behavior' => 'count_by_alias',
 +                   'alias' => 'c1.id',
 +               ],
 +           ])
             //...
-            ->init();
 
         return $crud;
     }
@@ -48,7 +46,7 @@ class MyCrudController extends AbstractCrudController
 //src/Controller/MyCrudController
 namespace App\Controller;
 
-+ use Ecommit\CrudBundle\Paginator\DoctrineORMPaginator;
++ use Ecommit\DoctrineUtils\Paginator\DoctrineORMPaginator;
 
 //...
 
@@ -63,17 +61,16 @@ class MyCrudController extends AbstractCrudController
             //...
             ->setRoute('my_crud_ajax')
 +           ->setBuildPaginator(function ($queryBuilder, $page, $resultsPerPage) {
-+               $paginator = new DoctrineORMPaginator($resultsPerPage);
-+               
 +               $queryBuilder->andWhere('c1.active = 1');
-+               $paginator->setQueryBuilder($queryBuilder);
-+               $paginator->setPage($page);
-+               $paginator->init();
++               $paginator = new DoctrineORMPaginator([
++                   'query_builder' => $queryBuilder,
++                   'page' => $page,
++                   'max_per_page' => $resultsPerPage,
++               ]);
 +
 +               return $paginator;
 +           })
             //...
-            ->init();
 
         return $crud;
     }

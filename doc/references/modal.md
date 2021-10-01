@@ -78,7 +78,7 @@ Options disponibles :
 | onOpen | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) avant l'ouverture de la modale | Non | |
 | onClose | [Callback(s)](js-callbacks.md#définition-des-callbacks) lancé(s) avant la fermeture de la modale | Non | |
 | method | Méthode HTTP | Non | POST |
-| ajaxOptions | Options Ajax (voir [sendRequest](ajax.md#sendrequest) | Non | { } |
+| ajaxOptions | Options Ajax (voir [sendRequest](ajax.md#sendrequest)) | Non | { } |
 
 
 ### Ouverture automatique

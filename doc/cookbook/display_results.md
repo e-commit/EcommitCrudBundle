@@ -27,7 +27,6 @@ class MyCrudController extends AbstractCrudController
             ->setRoute('my_crud_ajax')
 +           ->setDisplayResultsOnlyIfSearch(true)
             //...
-            ->init();
 
         return $crud;
     }

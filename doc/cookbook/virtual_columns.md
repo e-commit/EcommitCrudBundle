@@ -28,7 +28,6 @@ class MyCrudController extends AbstractCrudController
 +           ->addVirtualColumn('my_virtual_column', 'c1.name')
             ->setRoute('my_crud_ajax')
             //...
-            ->init();
 
         return $crud;
     }

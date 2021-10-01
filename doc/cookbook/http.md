@@ -12,7 +12,7 @@ use Ecommit\CrudBundle\Controller\AbstractCrudController;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Crud\Http\QueryBuilder;
 use Ecommit\CrudBundle\Crud\Http\QueryBuilderQueryParameter;
-use Ecommit\CrudBundle\Paginator\ArrayPaginator;
+use Ecommit\Paginator\ArrayPaginator;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -86,16 +86,17 @@ class MyHttpController extends AbstractCrudController
                 $response = json_decode($queryBuilder->getResponse($page, $resultsPerPage)->getContent());
 
                 //Création du paginator
-                $paginator = new ArrayPaginator($resultsPerPage);
-                $paginator->setDataWithoutSlice($response->records, $response->nhits);
-                $paginator->setPage($page);
-                $paginator->init();
+                $paginator = new ArrayPaginator([
+                    'page' => $page,
+                    'max_per_page' => $resultsPerPage,
+                    'data' => $response->records,
+                    'count' => $response->nhits,
+                ]);
 
                 return $paginator;
             })
             ->createSearchForm(new CitySearcher())
-            ->setPersistentSettings(true)
-            ->init();
+            ->setPersistentSettings(true);
 
         return $crud;
     }

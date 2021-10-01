@@ -22,7 +22,6 @@ class MyCrudController extends AbstractCrudController
             ->setRoute('my_crud_ajax')
             ->setDefaultSort('id', Crud::ASC)
             //...
-            ->init();
 
         return $crud;
     }
@@ -53,7 +52,6 @@ class MyCrudController extends AbstractCrudController
             ->setRoute('my_crud_ajax')
             ->setDefaultSort('id', Crud::ASC)
             //...
-            ->init();
 
         return $crud;
     }
@@ -87,7 +85,6 @@ class MyCrudController extends AbstractCrudController
                 'c1.id' => Crud::ASC,
             ])
             //...
-            ->init();
 
         return $crud;
     }

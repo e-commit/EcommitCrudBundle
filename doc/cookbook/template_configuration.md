@@ -60,7 +60,6 @@ class MyCrudController extends AbstractCrudController
 +               ],
 +           ])
             //...
-            ->init();
 
         return $crud;
     }

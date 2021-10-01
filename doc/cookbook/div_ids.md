@@ -29,7 +29,6 @@ class MyCrudController extends AbstractCrudController
 +           ->setDivIdList('my_div1')
 +           ->setDivIdSearch('my_div2')
             //...
-            ->init();
 
         return $crud;
     }
