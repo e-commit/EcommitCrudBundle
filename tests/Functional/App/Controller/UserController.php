@@ -37,8 +37,15 @@ class UserController extends AbstractCrudController
             ->setDefaultSort('firstName', Crud::ASC)
             ->createSearchForm(new UserSearcher())
             ->setRoute('user_ajax_crud')
-            ->setPersistentSettings(true)
-            ->init();
+            ->setPersistentSettings(true);
+
+        $request = $this->get('request_stack')->getCurrentRequest();
+        if ($request->query->has('manual-reset')) {
+            $crud->raz();
+        }
+        if ($request->query->has('manual-reset-sort')) {
+            $crud->razSort();
+        }
 
         return $crud;
     }

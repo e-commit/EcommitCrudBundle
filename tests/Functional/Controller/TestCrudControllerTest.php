@@ -299,6 +299,76 @@ class TestCrudControllerTest extends PantherTestCase
         return $client;
     }
 
+    /**
+     * @depends testPersistentValuesAfterResetSettings
+     */
+    public function testManualRaz(Client $client): Client
+    {
+        $client->request('GET', static::URL);
+
+        //Display username column
+        $button = $client->getCrawler()->filterXPath('//button[contains(.,"Display Settings")]');
+        $button->first()->click();
+        $client->getCrawler()->filterXPath('//form[@name="crud_display_settings_'.static::SESSION_NAME.'"]/descendant::input[@value="username"]')->click();
+        $client->getCrawler()->filterXPath('//form[@name="crud_display_settings_'.static::SESSION_NAME.'"]/descendant::button[@type="submit"]')->click();
+        $this->waitForAjax($client);
+        $this->assertSame([5, 3], $this->countRowsAndColumns($client->getCrawler()));
+
+        //Search
+        $form = $client->getCrawler()->filterXPath('//div[@id="crud_search"]/descendant::button[@type="submit" and contains(text(), "Search")]')->form();
+        $form['crud_search_'.static::SESSION_NAME.'[firstName]'] = 'Henri';
+        $client->submit($form);
+        $this->waitForAjax($client);
+        $this->assertSame([2, 3], $this->countRowsAndColumns($client->getCrawler()));
+
+        //Manuel RAZ (before CRUD initialization)
+        if (parse_url(static::URL, \PHP_URL_QUERY)) {
+            $resetUrl = static::URL.'&manual-reset=1';
+        } else {
+            $resetUrl = static::URL.'?manual-reset=1';
+        }
+        $client->request('GET', $resetUrl);
+
+        $this->assertSame([5, 3], $this->countRowsAndColumns($client->getCrawler())); //Reset rows but not columns
+
+        return $client;
+    }
+
+    /**
+     * @depends testManualRaz
+     */
+    public function testManualRazSort(Client $client): Client
+    {
+        $client->request('GET', static::URL);
+
+        //Search
+        $form = $client->getCrawler()->filterXPath('//div[@id="crud_search"]/descendant::button[@type="submit" and contains(text(), "Search")]')->form();
+        $form['crud_search_'.static::SESSION_NAME.'[firstName]'] = 'Henri';
+        $client->submit($form);
+        $this->waitForAjax($client);
+        $this->assertSame([2, 3], $this->countRowsAndColumns($client->getCrawler()));
+
+        //Sort
+        $link = $client->getCrawler()->filterXPath('//table[@class="result"]/thead/tr/th/a[text()="last_name"]');
+        $link->click();
+        $this->waitForAjax($client);
+        $this->assertSame([2, 3], $this->countRowsAndColumns($client->getCrawler()));
+        $this->assertSame(['last_name', Crud::ASC], $this->getSort($client->getCrawler()));
+
+        //Manuel RAZ (before CRUD initialization)
+        if (parse_url(static::URL, \PHP_URL_QUERY)) {
+            $resetUrl = static::URL.'&manual-reset-sort=1';
+        } else {
+            $resetUrl = static::URL.'?manual-reset-sort=1';
+        }
+        $client->request('GET', $resetUrl);
+
+        $this->assertSame([2, 3], $this->countRowsAndColumns($client->getCrawler())); //Not reset display settings and search
+        $this->assertSame(['first_name', Crud::ASC], $this->getSort($client->getCrawler()));
+
+        return $client;
+    }
+
     protected function checkBeforeAndAfterBuildQuery(Crawler $crawler): void
     {
         if (null === static::SEARCH_IN_LIST) {

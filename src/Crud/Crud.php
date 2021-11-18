@@ -48,6 +48,7 @@ class Crud
     protected $displaySettingsForm = null;
 
     protected $isInitialized = false;
+    protected $initializationInProgress = false;
     protected $availableColumns = [];
     protected $availableVirtualColumns = [];
     protected $availableResultsPerPage = [];
@@ -100,6 +101,7 @@ class Crud
         if ($this->isInitialized) {
             throw new \Exception('CRUD already initialized');
         }
+        $this->initializationInProgress = true;
 
         //Cheks not empty values
         $checkValues = [
@@ -151,12 +153,20 @@ class Crud
         //Saves
         $this->save();
 
+        $this->initializationInProgress = false;
         $this->isInitialized = true;
     }
 
     public function isInitialized(): bool
     {
         return $this->isInitialized;
+    }
+
+    public function initIfNecessary(): void
+    {
+        if (!$this->isInitialized && !$this->initializationInProgress) {
+            $this->init();
+        }
     }
 
     /**
@@ -709,6 +719,7 @@ class Crud
      */
     public function raz(): void
     {
+        $this->initIfNecessary();
         if ($this->searchForm) {
             $newValue = clone $this->searchForm->getDefaultData();
             $this->changeFilterValues($newValue);
@@ -727,6 +738,7 @@ class Crud
      */
     public function razSort(): void
     {
+        $this->initIfNecessary();
         $this->sessionValues->sense = $this->defaultSense;
         $this->sessionValues->sort = $this->defaultSort;
         $this->save();

@@ -40,8 +40,15 @@ class UserWithoutTraitController extends AbstractController
             ->setDefaultSort('firstName', Crud::ASC)
             ->createSearchForm(new UserSearcher())
             ->setRoute('user_without_trait_ajax_crud', $routeParams)
-            ->setPersistentSettings(true)
-            ->init();
+            ->setPersistentSettings(true);
+
+        $request = $this->get('request_stack')->getCurrentRequest();
+        if ($request->query->has('manual-reset')) {
+            $crud->raz();
+        }
+        if ($request->query->has('manual-reset-sort')) {
+            $crud->razSort();
+        }
 
         return $crud;
     }
