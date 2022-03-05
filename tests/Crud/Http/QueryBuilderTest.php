@@ -260,6 +260,13 @@ class QueryBuilderTest extends TestCase
         ksort($expectedOptions);
         ksort($options);
 
+        //Remove Content-Length header
+        foreach ($options['headers'] as $index => $header) {
+            if (preg_match('/^Content-Length/', $header)) {
+                unset($options['headers'][$index]);
+            }
+        }
+
         $this->assertSame($expectedOptions, $options);
     }
 }
