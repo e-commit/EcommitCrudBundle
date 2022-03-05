@@ -43,7 +43,7 @@
         "dbrekelmans/bdi": "^0.3.0",
         "doctrine/annotations": "^1.7",
         "doctrine/doctrine-fixtures-bundle": "^3.3",
-        "friendsofphp/php-cs-fixer": "^2.18.0",
+        "friendsofphp/php-cs-fixer": "^3.0",
         "phpunit/phpunit": "^8.4.1",
         "symfony/dom-crawler": "^4.4|^5.0",
         "symfony/panther": "^1.0",

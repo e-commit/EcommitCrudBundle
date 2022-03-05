@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher;
 
 use Ecommit\CrudBundle\Crud\SearchFormBuilder;
-use Ecommit\CrudBundle\Form\Filter as Filter;
+use Ecommit\CrudBundle\Form\Filter;
 use Ecommit\CrudBundle\Form\Searcher\AbstractSearcher;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
