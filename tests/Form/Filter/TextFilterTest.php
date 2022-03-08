@@ -38,25 +38,25 @@ class TextFilterTest extends AbstractFilterTest
     public function getTestViewAndQueryBuilderProvider(): array
     {
         return [
-            //Null value
+            // Null value
             [null, false, false, '', null, []],
             [null, false, true, '', null, []],
             [null, true, false, '', null, []],
             [null, true, true, '', null, []],
 
-            //Empty value
+            // Empty value
             ['', false, false, '', null, []],
             ['', false, true, '', null, []],
             ['', true, false, '', null, []],
             ['', true, true, '', null, []],
 
-            //Not empty value
+            // Not empty value
             ['val', false, false, 'val', 'e.name LIKE :value_text_propertyName', ['value_text_propertyName' => '%val%']],
             ['val', false, true, 'val', 'e.name LIKE :value_text_propertyName', ['value_text_propertyName' => '%val']],
             ['val', true, false, 'val', 'e.name LIKE :value_text_propertyName', ['value_text_propertyName' => 'val%']],
             ['val', true, true, 'val', 'e.name = :value_text_propertyName', ['value_text_propertyName' => 'val']],
 
-            //Escape
+            // Escape
             ['v%a_l', false, false, 'v%a_l', 'e.name LIKE :value_text_propertyName', ['value_text_propertyName' => '%v\%a\_l%']],
         ];
     }

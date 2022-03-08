@@ -46,7 +46,7 @@ class DateFilterTest extends AbstractFilterTest
     public function getTestViewAndQueryBuilderProvider(): array
     {
         $data = [
-            //Null value
+            // Null value
             [null, false, DateFilter::GREATER_THAN, ['year' => '', 'month' => '', 'day' => ''], null, []],
             [null, false, DateFilter::GREATER_EQUAL, ['year' => '', 'month' => '', 'day' => ''], null, []],
             [null, false, DateFilter::SMALLER_THAN, ['year' => '', 'month' => '', 'day' => ''], null, []],
@@ -60,7 +60,7 @@ class DateFilterTest extends AbstractFilterTest
             [null, true, DateFilter::EQUAL, ['date' => ['year' => '', 'month' => '', 'day' => ''], 'time' => ['hour' => '', 'minute' => '']], null, []],
         ];
 
-        //Not empty value
+        // Not empty value
         foreach ([new \DateTimeImmutable('2021-04-01 13:10:20'), new \DateTime('2021-04-01 13:10:20')] as $inputDate) {
             $data = array_merge($data, [
                 [$inputDate, false, DateFilter::GREATER_THAN, ['year' => '2021', 'month' => '4', 'day' => '1'], 'e.createdAt > :value_date_propertyName', ['value_date_propertyName' => '2021-04-01 23:59:59']],
@@ -129,12 +129,12 @@ class DateFilterTest extends AbstractFilterTest
     public function getTestSubmitProvider(): array
     {
         return [
-            //Without time
+            // Without time
             [false, null, null, ['year' => '', 'month' => '', 'day' => '']],
             [false, ['year' => '', 'month' => '', 'day' => ''], null, ['year' => '', 'month' => '', 'day' => '']],
             [false, ['year' => '2021', 'month' => '4', 'day' => '1'], new \DateTime('2021-04-01 00:00:00'), ['year' => '2021', 'month' => '4', 'day' => '1']],
 
-            //With time
+            // With time
             [true, null, null, ['date' => ['year' => '', 'month' => '', 'day' => ''], 'time' => ['hour' => '', 'minute' => '']]],
             [true, ['date' => ['year' => '', 'month' => '', 'day' => ''], 'time' => ['hour' => '', 'minute' => '']], null, ['date' => ['year' => '', 'month' => '', 'day' => ''], 'time' => ['hour' => '', 'minute' => '']]],
             [true, ['date' => ['year' => '2021', 'month' => '4', 'day' => '1'], 'time' => ['hour' => '13', 'minute' => '10']], new \DateTime('2021-04-01 13:10:00'), ['date' => ['year' => '2021', 'month' => '4', 'day' => '1'], 'time' => ['hour' => '13', 'minute' => '10']]],
@@ -166,7 +166,7 @@ class DateFilterTest extends AbstractFilterTest
     {
         return [
             ['bad-value'],
-            [['year' => '2021', 'month' => '2', 'day' => '31']], //the date does not exist
+            [['year' => '2021', 'month' => '2', 'day' => '31']], // the date does not exist
         ];
     }
 
@@ -197,11 +197,11 @@ class DateFilterTest extends AbstractFilterTest
         $inputValue = new \DateTime('2021-04-01 13:10:20');
 
         return [
-            //Null value
+            // Null value
             [null, false, DateFilter::GREATER_THAN, '', null, []],
             [null, true, DateFilter::GREATER_THAN, '', null, []],
 
-            //Not empty value
+            // Not empty value
             [$inputValue, false, DateFilter::GREATER_THAN, '01/04/2021', 'e.createdAt > :value_date_propertyName', ['value_date_propertyName' => '2021-04-01 23:59:59']],
             [$inputValue, true, DateFilter::GREATER_THAN, '01/04/2021 13:10', 'e.createdAt > :value_date_propertyName', ['value_date_propertyName' => '2021-04-01 13:10:20']],
         ];
@@ -238,12 +238,12 @@ class DateFilterTest extends AbstractFilterTest
     public function getTestSubmitWithSingleTextWidgetProvider(): array
     {
         return [
-            //Without time
+            // Without time
             [false, null, null, ''],
             [false, '', null, ''],
             [false, '01/04/2021', new \DateTime('2021-04-01 00:00:00'), '01/04/2021'],
 
-            //With time
+            // With time
             [true, null, null, ''],
             [true, '', null, ''],
             [true, '01/04/2021 13:10', new \DateTime('2021-04-01 13:10:00'), '01/04/2021 13:10'],

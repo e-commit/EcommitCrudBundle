@@ -216,7 +216,7 @@ class QueryBuilderTest extends TestCase
     protected function createQueryBuider(string $method = 'GET'): QueryBuilder
     {
         $callback = function ($method, $url, $options): MockResponse {
-            //Result : Returns request options
+            // Result : Returns request options
             $result = [
                 'method' => $method,
                 'url' => $url,
@@ -260,7 +260,7 @@ class QueryBuilderTest extends TestCase
         ksort($expectedOptions);
         ksort($options);
 
-        //Remove Content-Length header
+        // Remove Content-Length header
         foreach ($options['headers'] as $index => $header) {
             if (preg_match('/^Content-Length/', $header)) {
                 unset($options['headers'][$index]);

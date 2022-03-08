@@ -59,7 +59,7 @@ trait CollectionFilterTrait
             }
             QueryBuilderFilter::addMultiFilter($queryBuilder, QueryBuilderFilter::SELECT_IN, $value, $options['alias_search'], $parameterName);
         } else {
-            if (!is_scalar($value)) {
+            if (!\is_scalar($value)) {
                 return;
             }
             $queryBuilder->andWhere(sprintf('%s = :%s', $options['alias_search'], $parameterName))

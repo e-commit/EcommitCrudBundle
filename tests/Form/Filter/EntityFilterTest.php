@@ -53,18 +53,18 @@ class EntityFilterTest extends AbstractFilterTest
     public function getTestViewAndQueryBuilderProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, null, '', [1, 2, 3, 4, 5]],
             [false, 2, '2', [1]],
             [false, 5, '5', [4, 5]],
-            [false, 9999, '', []], //9999 : Entity not found
+            [false, 9999, '', []], // 9999 : Entity not found
 
-            //Multiple
+            // Multiple
             [true, [], [], [1, 2, 3, 4, 5]],
             [true, [2], ['2'], [1]],
             [true, [2, 3], ['2', '3'], [1, 2]],
-            [true, [2, 9999], ['2'], [1]], //9999 : Entity not found
-            [true, [9999], [], []], //9999 : Entity not found
+            [true, [2, 9999], ['2'], [1]], // 9999 : Entity not found
+            [true, [9999], [], []], // 9999 : Entity not found
         ];
     }
 
@@ -94,12 +94,12 @@ class EntityFilterTest extends AbstractFilterTest
     public function getTestSubmitProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, null, null, ''],
             [false, '', null, ''],
             [false, '2', '2', '2'],
 
-            //Multiple
+            // Multiple
             [true, [], [], []],
             [true, ['2'], ['2'], ['2']],
             [true, ['2', '3'], ['2', '3'], ['2', '3']],
@@ -129,11 +129,11 @@ class EntityFilterTest extends AbstractFilterTest
     public function getTestSubmitInvalidProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, []],
             [false, '99999'],
 
-            //Multiple
+            // Multiple
             [true, '1'],
             [true, ['99999']],
             [true, ['1', '99999']],
@@ -199,19 +199,19 @@ class EntityFilterTest extends AbstractFilterTest
     public function getTestViewWithQueryBuilderProvider(): array
     {
         return [
-            //No multiple - Valid
+            // No multiple - Valid
             [false, false, '4', '4', [3]],
             [true, false, '4', '4', [3]],
 
-            //No multiple - Invalid
+            // No multiple - Invalid
             [false, false, '2', '', [1]],
             [true, false, '2', '', [1]],
 
-            //Mutiple - valid
+            // Mutiple - valid
             [false, true, ['4'], ['4'], [3]],
             [true, true, ['4'], ['4'], [3]],
 
-            //Multiple - Invalid
+            // Multiple - Invalid
             [false, true, ['2'], [], [1]],
             [true, true, ['2'], [], [1]],
         ];
@@ -259,19 +259,19 @@ class EntityFilterTest extends AbstractFilterTest
     public function getTestSubmitWithQueryBuilderProvider(): array
     {
         return [
-            //No multiple - Valid
+            // No multiple - Valid
             [false, false, '4', true, '4', '4'],
             [true, false, '4', true, '4', '4'],
 
-            //No multiple - Invalid
+            // No multiple - Invalid
             [false, false, '2', false, null, '2'],
             [true, false, '2', false, null, '2'],
 
-            //Multiple - Valid
+            // Multiple - Valid
             [false, true, ['4'], true, ['4'], ['4']],
             [true, true, ['4'], true, ['4'], ['4']],
 
-            //Multiple - Invalid
+            // Multiple - Invalid
             [false, true, ['2'], false, [], []],
             [true, true, ['2'], false, [], []],
         ];

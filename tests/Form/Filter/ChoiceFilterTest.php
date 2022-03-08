@@ -38,17 +38,17 @@ class ChoiceFilterTest extends AbstractFilterTest
     public function getTestViewAndQueryBuilderProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [null, false, '', null, []],
             ['', false, '', null, []],
             ['2', false, '2', 'e.tag = :value_collectionpropertyName', ['value_collectionpropertyName' => '2']],
-            ['5', false, '', 'e.tag = :value_collectionpropertyName', ['value_collectionpropertyName' => '5']], //Not exists
+            ['5', false, '', 'e.tag = :value_collectionpropertyName', ['value_collectionpropertyName' => '5']], // Not exists
 
-            //Multiple
+            // Multiple
             [null, true, [], null, []],
             [[], true, [], null, []],
             [['2'], true, ['2'], 'e.tag IN (:value_collectionpropertyName)', ['value_collectionpropertyName' => ['2']]],
-            [['5'], true, [], 'e.tag IN (:value_collectionpropertyName)', ['value_collectionpropertyName' => ['5']]], //Not exists
+            [['5'], true, [], 'e.tag IN (:value_collectionpropertyName)', ['value_collectionpropertyName' => ['5']]], // Not exists
         ];
     }
 
@@ -104,12 +104,12 @@ class ChoiceFilterTest extends AbstractFilterTest
     public function getTestSubmitProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [null, false, null, ''],
             ['', false, null, ''],
             ['1', false, '1', '1'],
 
-            //Multiple
+            // Multiple
             [null, true, [], []],
             [[], true, [], []],
             [['1'], true, ['1'], ['1']],
@@ -141,10 +141,10 @@ class ChoiceFilterTest extends AbstractFilterTest
     public function getTestSubmitInvalidFormatProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [['not-scalar'], false],
 
-            //Multiple
+            // Multiple
             ['not-array', true],
         ];
     }

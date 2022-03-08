@@ -46,7 +46,7 @@ abstract class AbstractEntityTransformer implements DataTransformerInterface
         if (\is_array($id)) {
             $id = ScalarValues::filterScalarValues($id);
             $id = array_map(function ($child) {
-                return (string) $child; //Converts ids from integer to string => Parameters for transform and reverse functions must be identicals
+                return (string) $child; // Converts ids from integer to string => Parameters for transform and reverse functions must be identicals
             }, $id);
             sort($id);
         } else {

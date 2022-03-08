@@ -33,7 +33,7 @@ class IntegerFilter extends AbstractFilter
 
     public function updateQueryBuilder($queryBuilder, string $property, $value, array $options): void
     {
-        if (null === $value || '' === $value || !is_scalar($value) || !$this->testNumberValue($value)) {
+        if (null === $value || '' === $value || !\is_scalar($value) || !$this->testNumberValue($value)) {
             return;
         }
 

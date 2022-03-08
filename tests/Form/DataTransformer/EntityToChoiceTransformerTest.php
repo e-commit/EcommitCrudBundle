@@ -48,9 +48,9 @@ class EntityToChoiceTransformerTest extends AbstractEntityTransformerTest
         };
 
         return [
-            [null, ['3' => '3']], //Choice label: null
-            ['name', ['3' => '3']], //Choice label: property
-            [$closure, ['3' => 'name: 3']], //Choice label: closure
+            [null, ['3' => '3']], // Choice label: null
+            ['name', ['3' => '3']], // Choice label: property
+            [$closure, ['3' => 'name: 3']], // Choice label: closure
         ];
     }
 

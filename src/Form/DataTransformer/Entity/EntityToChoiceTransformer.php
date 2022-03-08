@@ -43,7 +43,7 @@ class EntityToChoiceTransformer extends AbstractEntityTransformer
             return null;
         }
 
-        if (!is_scalar($identifier)) {
+        if (!\is_scalar($identifier)) {
             throw new TransformationFailedException('Value is not scalar');
         }
 
@@ -51,7 +51,7 @@ class EntityToChoiceTransformer extends AbstractEntityTransformer
         if (\array_key_exists($hash, $this->cachedResults)) {
             $entity = $this->cachedResults[$hash];
         } else {
-            //Result not in cache
+            // Result not in cache
 
             try {
                 $queryBuilderLoader = new ORMQueryBuilderLoader($this->queryBuilder);
@@ -68,7 +68,7 @@ class EntityToChoiceTransformer extends AbstractEntityTransformer
             }
 
             $entity = $entities[0];
-            $this->cachedResults[$hash] = $entity; //Saves result in cache
+            $this->cachedResults[$hash] = $entity; // Saves result in cache
         }
 
         return $entity;

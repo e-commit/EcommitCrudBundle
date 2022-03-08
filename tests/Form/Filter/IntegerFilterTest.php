@@ -47,21 +47,21 @@ class IntegerFilterTest extends AbstractFilterTest
     public function getTestViewAndQueryBuilderProvider(): array
     {
         return [
-            //Null value
+            // Null value
             [null, IntegerFilter::GREATER_THAN, '', null, []],
             [null, IntegerFilter::GREATER_EQUAL, '', null, []],
             [null, IntegerFilter::SMALLER_THAN, '', null, []],
             [null, IntegerFilter::SMALLER_EQUAL, '', null, []],
             [null, IntegerFilter::EQUAL, '', null, []],
 
-            //String value
+            // String value
             ['5', IntegerFilter::GREATER_THAN, '5', 'e.name > :value_integer_propertyName', ['value_integer_propertyName' => '5']],
             ['5', IntegerFilter::GREATER_EQUAL, '5', 'e.name >= :value_integer_propertyName', ['value_integer_propertyName' => '5']],
             ['5', IntegerFilter::SMALLER_THAN, '5', 'e.name < :value_integer_propertyName', ['value_integer_propertyName' => '5']],
             ['5', IntegerFilter::SMALLER_EQUAL, '5', 'e.name <= :value_integer_propertyName', ['value_integer_propertyName' => '5']],
             ['5', IntegerFilter::EQUAL, '5', 'e.name = :value_integer_propertyName', ['value_integer_propertyName' => '5']],
 
-            //Int value
+            // Int value
             [5, IntegerFilter::GREATER_THAN, '5', 'e.name > :value_integer_propertyName', ['value_integer_propertyName' => '5']],
             [5, IntegerFilter::GREATER_EQUAL, '5', 'e.name >= :value_integer_propertyName', ['value_integer_propertyName' => '5']],
             [5, IntegerFilter::SMALLER_THAN, '5', 'e.name < :value_integer_propertyName', ['value_integer_propertyName' => '5']],

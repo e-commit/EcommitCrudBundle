@@ -103,7 +103,7 @@ class Crud
         }
         $this->initializationInProgress = true;
 
-        //Cheks not empty values
+        // Cheks not empty values
         $checkValues = [
             'availableColumns',
             'availableResultsPerPage',
@@ -123,34 +123,34 @@ class Crud
             $this->searchForm->createForm();
         }
 
-        //Loads user values inside this object
+        // Loads user values inside this object
         $this->load();
 
-        //Display or not results
+        // Display or not results
         if ($this->searchForm && $this->displayResultsOnlyIfSearch) {
             $this->displayResults = $this->sessionValues->searchFormIsSubmittedAndValid;
         }
 
         $this->createDisplaySettingsForm();
 
-        //Process request (resultsPerPage, sort, sense, change_columns)
+        // Process request (resultsPerPage, sort, sense, change_columns)
         $this->processRequest();
 
-        //Searcher form: Allocates object
+        // Searcher form: Allocates object
         if ($this->searchForm && !$this->container->get('request_stack')->getCurrentRequest()->query->has('raz')) {
-            //IMPORTANT
-            //We have not to allocate directelly the "$this->sessionValues->searchFormData" object
-            //because otherwise it will be linked to form, and will be updated when the "bind" function will
-            //be called (If form is not valid, the session values will still be updated: Undesirable behavior)
+            // IMPORTANT
+            // We have not to allocate directelly the "$this->sessionValues->searchFormData" object
+            // because otherwise it will be linked to form, and will be updated when the "bind" function will
+            // be called (If form is not valid, the session values will still be updated: Undesirable behavior)
             $values = clone $this->sessionValues->searchFormData;
             try {
                 $this->searchForm->getForm()->setData($values);
             } catch (TransformationFailedException $exception) {
-                //Avoid error if data stored in session is invalid
+                // Avoid error if data stored in session is invalid
             }
         }
 
-        //Saves
+        // Saves
         $this->save();
 
         $this->initializationInProgress = false;
@@ -284,7 +284,7 @@ class Crud
         $this->defaultPersonalizedSort = $criterias;
 
         $this->defaultSort = 'defaultPersonalizedSort';
-        $this->defaultSense = self::ASC; //Used if not defined in criterias
+        $this->defaultSense = self::ASC; // Used if not defined in criterias
 
         return $this;
     }
@@ -406,7 +406,7 @@ class Crud
      */
     protected function save(): void
     {
-        //Save in session
+        // Save in session
         $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
         $sessionValues = clone $this->sessionValues;
         if (\is_object($this->sessionValues->searchFormData)) {
@@ -414,7 +414,7 @@ class Crud
         }
         $session->set($this->sessionName, $sessionValues);
 
-        //Save in database
+        // Save in database
         if ($this->persistentSettings && $this->updateDatabase) {
             $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
                 [
@@ -425,11 +425,11 @@ class Crud
             $em = $this->container->get('doctrine')->getManager();
 
             if ($objectDatabase) {
-                //Update object in database
+                // Update object in database
                 $objectDatabase->updateFromSessionManager($this->sessionValues);
                 $em->flush();
             } else {
-                //Create object in database only if not default values
+                // Create object in database only if not default values
                 if ($this->sessionValues->displayedColumns != $this->getDefaultDisplayedColumns() ||
                     $this->sessionValues->resultsPerPage != $this->defaultResultsPerPage ||
                     $this->sessionValues->sense != $this->defaultSense ||
@@ -470,7 +470,7 @@ class Crud
     protected function load(): void
     {
         $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
-        $object = $session->get($this->sessionName); //Load from session
+        $object = $session->get($this->sessionName); // Load from session
 
         if (!empty($object)) {
             $this->sessionValues = $object;
@@ -479,8 +479,8 @@ class Crud
             return;
         }
 
-        //If session is null => Retrieve from database
-        //Only if persistent settings is enabled
+        // If session is null => Retrieve from database
+        // Only if persistent settings is enabled
         if ($this->persistentSettings) {
             $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
                 [
@@ -499,7 +499,7 @@ class Crud
             }
         }
 
-        //Session and database values are null: Default values;
+        // Session and database values are null: Default values;
         $this->sessionValues->displayedColumns = $this->getDefaultDisplayedColumns();
         $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
         $this->sessionValues->sense = $this->defaultSense;
@@ -514,7 +514,7 @@ class Crud
      */
     protected function checkCrudSession(): void
     {
-        //Forces change => checks
+        // Forces change => checks
         $this->changeNumberResultsDisplayed($this->sessionValues->resultsPerPage);
         $this->changeColumnsDisplayed($this->sessionValues->displayedColumns);
         $this->changeSort($this->sessionValues->sort);
@@ -573,8 +573,8 @@ class Crud
     {
         $oldValue = $this->sessionValues->sort;
         $availableColumns = $this->availableColumns;
-        if ((is_scalar($value) && \array_key_exists($value, $availableColumns) && $availableColumns[$value]->sortable)
-            || (is_scalar($value) && 'defaultPersonalizedSort' === $value && $this->defaultPersonalizedSort)) {
+        if ((\is_scalar($value) && \array_key_exists($value, $availableColumns) && $availableColumns[$value]->sortable)
+            || (\is_scalar($value) && 'defaultPersonalizedSort' === $value && $this->defaultPersonalizedSort)) {
             $this->sessionValues->sort = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
@@ -591,7 +591,7 @@ class Crud
     protected function changeSense($value): void
     {
         $oldValue = $this->sessionValues->sense;
-        if (is_scalar($value) && (self::ASC === $value || self::DESC === $value)) {
+        if (\is_scalar($value) && (self::ASC === $value || self::DESC === $value)) {
             $this->sessionValues->sense = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
@@ -624,7 +624,7 @@ class Crud
      */
     protected function changePage($value): void
     {
-        if (!is_scalar($value)) {
+        if (!\is_scalar($value)) {
             $value = 1;
         }
         $value = (int) $value;
@@ -641,7 +641,7 @@ class Crud
     {
         $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request->query->has('razsettings')) {
-            //Reset display settings
+            // Reset display settings
             $this->razDisplaySettings();
 
             return;
@@ -704,7 +704,7 @@ class Crud
         $this->sessionValues->sort = $this->defaultSort;
 
         if ($this->persistentSettings) {
-            //Remove settings in database
+            // Remove settings in database
             $qb = $this->container->get('doctrine')->getManager()->createQueryBuilder();
             $qb->delete('EcommitCrudBundle:UserCrudSettings', 's')
                 ->andWhere('s.user = :user AND s.crudName = :crud_name')
@@ -749,10 +749,10 @@ class Crud
      */
     public function buildQuery(): void
     {
-        //Builds query
+        // Builds query
         $columnSortId = $this->sessionValues->sort;
         if ('defaultPersonalizedSort' == $columnSortId) {
-            //Default personalised sort is used
+            // Default personalised sort is used
             foreach ($this->defaultPersonalizedSort as $key => $value) {
                 if (\is_int($key)) {
                     $sort = $value;
@@ -766,36 +766,36 @@ class Crud
         } else {
             $columnSortAlias = $this->availableColumns[$columnSortId]->aliasSort;
             if (empty($columnSortAlias)) {
-                //Sort alias is not defined. Alias is used
+                // Sort alias is not defined. Alias is used
                 $columnSortAlias = $this->availableColumns[$columnSortId]->alias;
                 $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
             } elseif (\is_array($columnSortAlias)) {
-                //Sort alias is defined in many columns
+                // Sort alias is defined in many columns
                 foreach ($columnSortAlias as $oneColumnSortAlias) {
                     $this->queryBuilder->addOrderBy($oneColumnSortAlias, $this->sessionValues->sense);
                 }
             } else {
-                //Sort alias is defined in one column
+                // Sort alias is defined in one column
                 $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
             }
         }
 
-        //Adds form searcher filters
+        // Adds form searcher filters
         if ($this->searchForm) {
             $this->searchForm->updateQueryBuilder($this->queryBuilder, $this->sessionValues->searchFormData);
         }
 
-        //Builds paginator
+        // Builds paginator
         if ($this->displayResults) {
             if (\is_object($this->buildPaginator) && $this->buildPaginator instanceof \Closure) {
-                //Case: Manual paginator (by closure) is enabled
+                // Case: Manual paginator (by closure) is enabled
                 $this->paginator = $this->buildPaginator->__invoke(
                     $this->queryBuilder,
                     $this->sessionValues->page,
                     $this->sessionValues->resultsPerPage
                 );
             } elseif (true === $this->buildPaginator || \is_array($this->buildPaginator)) {
-                //Case: Auto paginator is enabled
+                // Case: Auto paginator is enabled
                 $paginatorOptions = [];
                 if (\is_array($this->buildPaginator)) {
                     $paginatorOptions = $this->buildPaginator;

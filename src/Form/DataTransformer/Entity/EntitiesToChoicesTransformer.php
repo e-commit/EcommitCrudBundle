@@ -77,7 +77,7 @@ class EntitiesToChoicesTransformer extends AbstractEntityTransformer
         if (\array_key_exists($hash, $this->cachedResults)) {
             $collection = $this->cachedResults[$hash];
         } else {
-            //Result not in cache
+            // Result not in cache
 
             try {
                 $queryBuilderLoader = new ORMQueryBuilderLoader($this->queryBuilder);
@@ -93,7 +93,7 @@ class EntitiesToChoicesTransformer extends AbstractEntityTransformer
                 throw new TransformationFailedException('Entities not found');
             }
 
-            $this->cachedResults[$hash] = $collection; //Saves result in cache
+            $this->cachedResults[$hash] = $collection; // Saves result in cache
         }
 
         return $collection;

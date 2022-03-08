@@ -22,13 +22,13 @@ class NotNullFilterTest extends NullFilterTest
     public function getTestViewAndQueryBuilderProvider(): array
     {
         return [
-            //Null value
+            // Null value
             [null, false, null, []],
 
-            //Not checked
+            // Not checked
             [false, false, null, []],
 
-            //Checked
+            // Checked
             [true, true, 'e.name IS NOT NULL', []],
         ];
     }

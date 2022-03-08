@@ -87,11 +87,11 @@ class EntityAjaxTypeTest extends KernelTestCase
     public function getTestViewProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, null, 'no-transformation', null],
             [false, 2, 'entity', ['2' => 'tag2']],
 
-            //Multiple
+            // Multiple
             [true, [], 'collection', []],
             [true, [2], 'collection', ['2' => 'tag2']],
             [true, [2, 3], 'collection', ['2' => 'tag2', '3' => '3']],
@@ -121,16 +121,16 @@ class EntityAjaxTypeTest extends KernelTestCase
     public function getTestSubmitProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, null, null, 'no-transformation', null],
             [false, '', null, 'no-transformation', null],
             [false, '2', 2, 'entity', ['2' => 'tag2']],
 
-            //Multiple
+            // Multiple
             [true, [], [], 'collection', []],
             [true, ['2'], [2], 'collection', ['2' => 'tag2']],
             [true, ['2', '3'], [2, 3], 'collection', ['2' => 'tag2', '3' => '3']],
-            [true, ['2', ['1']], [2], 'collection', ['2' => 'tag2']], //Ignore not scalar
+            [true, ['2', ['1']], [2], 'collection', ['2' => 'tag2']], // Ignore not scalar
         ];
     }
 
@@ -151,21 +151,21 @@ class EntityAjaxTypeTest extends KernelTestCase
         $this->assertFalse($field->isSynchronized());
         $this->assertFalse($field->isValid());
         $this->assertNull($field->getData());
-        $this->assertSame($submittedData, $field->getViewData()); //Twig doesn't display invalid list
+        $this->assertSame($submittedData, $field->getViewData()); // Twig doesn't display invalid list
     }
 
     public function getTestSubmitInvalidProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, []],
             [false, '99999'],
 
-            //Multiple
+            // Multiple
             [true, '1'],
             [true, ['99999']],
             [true, ['1', '99999']],
-            [true, ['1', '2', '3']], //max elements
+            [true, ['1', '2', '3']], // max elements
         ];
     }
 
@@ -199,25 +199,25 @@ class EntityAjaxTypeTest extends KernelTestCase
         $this->assertSame($expectedValid, $field->isValid());
         $expectedModelData = $this->buildData($this->em, $expectedModelData, $expectedDataBuilderName);
         $this->assertEquals($expectedModelData, $field->getData());
-        $this->assertEquals($expectedViewData, $field->getViewData()); //Twig doesn't display invalid list
+        $this->assertEquals($expectedViewData, $field->getViewData()); // Twig doesn't display invalid list
     }
 
     public function getTestSubmitWithQueryBuilderProvider(): array
     {
         return [
-            //No multiple - Valid
+            // No multiple - Valid
             [false, false, '4', true, 4, 'entity', ['4' => 'tag_name']],
             [true, false, '4', true, 4, 'entity', ['4' => 'tag_name']],
 
-            //No multiple - Invalid
+            // No multiple - Invalid
             [false, false, '2', false, null, 'no-transformation', '2'],
             [true, false, '2', false, null, 'no-transformation', '2'],
 
-            //Multiple - Valid
+            // Multiple - Valid
             [false, true, ['4', '5'], true, [4, 5], 'collection', ['4' => 'tag_name', '5' => 'tag_name']],
             [true, true, ['4', '5'], true, [4, 5], 'collection', ['4' => 'tag_name', '5' => 'tag_name']],
 
-            //Multiple - Invalid
+            // Multiple - Invalid
             [false, true, ['2', '5'], false, null, 'no-transformation', ['2', '5']],
             [true, true, ['2', '5'], false, null, 'no-transformation', ['2', '5']],
         ];

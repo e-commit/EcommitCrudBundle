@@ -36,7 +36,7 @@ class BooleanFilter extends AbstractFilter
 
     public function updateQueryBuilder($queryBuilder, string $property, $value, array $options): void
     {
-        if (null === $value || '' === $value || !is_scalar($value)) {
+        if (null === $value || '' === $value || !\is_scalar($value)) {
             return;
         }
 

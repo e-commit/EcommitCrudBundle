@@ -151,9 +151,9 @@ final class SearchFormBuilder
 
     public function createForm(): void
     {
-        //Add filters
+        // Add filters
         foreach ($this->filters as $property => $filter) {
-            //Check if column exists
+            // Check if column exists
             $columnId = $filter['options']['column_id'];
             if (!\array_key_exists($columnId, $this->crud->getColumns()) && !\array_key_exists($columnId, $this->crud->getVirtualColumns())) {
                 throw new \Exception(sprintf('Column "%s" not found', $columnId));

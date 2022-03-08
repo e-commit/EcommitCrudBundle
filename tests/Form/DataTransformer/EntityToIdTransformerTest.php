@@ -32,9 +32,9 @@ class EntityToIdTransformerTest extends EntityToChoiceTransformerTest
         };
 
         return [
-            [null, '3'], //Choice label: null
-            ['name', '3'], //Choice label: property
-            [$closure, '3'], //Choice label: closure
+            [null, '3'], // Choice label: null
+            ['name', '3'], // Choice label: property
+            [$closure, '3'], // Choice label: closure
         ];
     }
 
@@ -45,7 +45,7 @@ class EntityToIdTransformerTest extends EntityToChoiceTransformerTest
         $queryBuilder = $this->em->getRepository(EntityManyToOne::class)->createQueryBuilder('e')->select('e');
         $transformer = $this->createTransformer($queryBuilder, 'id', null, false);
 
-        //No throws exception
+        // No throws exception
         $this->assertSame('1', $transformer->transform($entity));
     }
 }

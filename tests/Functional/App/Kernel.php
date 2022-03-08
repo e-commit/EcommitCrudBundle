@@ -43,7 +43,7 @@ class Kernel extends BaseKernel implements CompilerPassInterface
 
     public function process(ContainerBuilder $container): void
     {
-        //Bug with tests and symfony/stopwatch
+        // Bug with tests and symfony/stopwatch
         $container->removeDefinition('debug.event_dispatcher');
         $container->removeDefinition('debug.controller_resolver');
         $container->removeDefinition('debug.argument_resolver');

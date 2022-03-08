@@ -150,17 +150,17 @@ class QueryBuilder implements QueryBuilderInterface
 
     public function getResponse(int $page, int $resultsPerPage, array $options = []): ResponseInterface
     {
-        //Add paginator parameters
+        // Add paginator parameters
         if ($this->paginationBuilder) {
             $this->paginationBuilder->__invoke($this, $page, $resultsPerPage);
         }
 
-        //Add sort parameters
+        // Add sort parameters
         if (\count($this->orders) > 0 && $this->orderBuilder) {
             $this->orderBuilder->__invoke($this, $this->orders);
         }
 
-        //Add parameters to client options
+        // Add parameters to client options
         /** @var QueryBuilderQueryParameter $parameter */
         foreach ($this->queryParameters as $parameter) {
             $options['query'][$parameter->name] = $parameter->value;

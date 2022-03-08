@@ -81,7 +81,7 @@ class EntityAjaxType extends AbstractType
             'choice_label' => null,
             'route_params' => [],
             'max_elements' => 10000,
-            'identifier' => null, //Internal
+            'identifier' => null, // Internal
         ]);
 
         $emNormalizer = function (Options $options, $em) {

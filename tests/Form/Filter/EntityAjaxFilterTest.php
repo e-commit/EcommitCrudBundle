@@ -54,18 +54,18 @@ class EntityAjaxFilterTest extends AbstractFilterTest
     public function getTestViewAndQueryBuilderProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, null, null, [1, 2, 3, 4, 5]],
             [false, 2, ['2' => 'tag2'], [1]],
             [false, 5, ['5' => 'tag_name'], [4, 5]],
-            [false, 9999, null, []], //9999 : Entity not found
+            [false, 9999, null, []], // 9999 : Entity not found
 
-            //Multiple
+            // Multiple
             [true, [], [], [1, 2, 3, 4, 5]],
             [true, [2], ['2' => 'tag2'], [1]],
             [true, [2, 3], ['2' => 'tag2', '3' => '3'], [1, 2]],
-            [true, [2, 9999], ['2' => 'tag2'], [1]], //9999 : Entity not found
-            [true, [9999], [], []], //9999 : Entity not found
+            [true, [2, 9999], ['2' => 'tag2'], [1]], // 9999 : Entity not found
+            [true, [9999], [], []], // 9999 : Entity not found
         ];
     }
 
@@ -96,16 +96,16 @@ class EntityAjaxFilterTest extends AbstractFilterTest
     public function getTestSubmitProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, null, null, null],
             [false, '', null, null],
             [false, '2', '2', ['2' => 'tag2']],
 
-            //Multiple
+            // Multiple
             [true, [], [], []],
             [true, ['2'], ['2'], ['2' => 'tag2']],
             [true, ['2', '3'], ['2', '3'], ['2' => 'tag2', '3' => '3']],
-            [true, ['2', ['1']], ['2'], ['2' => 'tag2']], //Ignore not scalar
+            [true, ['2', ['1']], ['2'], ['2' => 'tag2']], // Ignore not scalar
         ];
     }
 
@@ -136,15 +136,15 @@ class EntityAjaxFilterTest extends AbstractFilterTest
     public function getTestSubmitInvalidProvider(): array
     {
         return [
-            //No multiple
+            // No multiple
             [false, []],
             [false, '99999'],
 
-            //Multiple
+            // Multiple
             [true, '1'],
             [true, ['99999']],
             [true, ['1', '99999']],
-            [true, ['1', '2', '3']], //max elements
+            [true, ['1', '2', '3']], // max elements
         ];
     }
 
@@ -176,7 +176,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
         ]);
         $view = $this->initCrudAndGetFormView($crud);
 
-        $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']); //Twig doesn't display invalid list
+        $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']); // Twig doesn't display invalid list
 
         $crud->buildQuery();
         $idsFound = [];
@@ -189,19 +189,19 @@ class EntityAjaxFilterTest extends AbstractFilterTest
     public function getTestViewWithQueryBuilderProvider(): array
     {
         return [
-            //No multiple - Valid
+            // No multiple - Valid
             [false, false, '4', ['4' => 'tag_name'], [3]],
             [true, false, '4', ['4' => 'tag_name'], [3]],
 
-            //No multiple - Invalid but display results
+            // No multiple - Invalid but display results
             [false, false, '2', null, [1]],
             [true, false, '2', null, [1]],
 
-            //Mutiple - valid
+            // Mutiple - valid
             [false, true, ['4'], ['4' => 'tag_name'], [3]],
             [true, true, ['4'], ['4' => 'tag_name'], [3]],
 
-            //Multiple - Invalid but display results
+            // Multiple - Invalid but display results
             [false, true, ['2'], [], [1]],
             [true, true, ['2'], [], [1]],
         ];
@@ -243,25 +243,25 @@ class EntityAjaxFilterTest extends AbstractFilterTest
         $this->assertSame($expectedValid, $field->isSynchronized());
         $this->assertSame($expectedValid, $field->isValid());
         $this->assertSame($expectedModelData, $field->getData());
-        $this->assertSame($expectedViewData, $field->getViewData()); //Twig doesn't display invalid list
+        $this->assertSame($expectedViewData, $field->getViewData()); // Twig doesn't display invalid list
     }
 
     public function getTestSubmitWithQueryBuilderProvider(): array
     {
         return [
-            //No multiple - Valid
+            // No multiple - Valid
             [false, false, '4', true, '4', ['4' => 'tag_name']],
             [true, false, '4', true, '4', ['4' => 'tag_name']],
 
-            //No multiple - Invalid
+            // No multiple - Invalid
             [false, false, '2', false, null, '2'],
             [true, false, '2', false, null, '2'],
 
-            //Multiple - Valid
+            // Multiple - Valid
             [false, true, ['4'], true, ['4'], ['4' => 'tag_name']],
             [true, true, ['4'], true, ['4'], ['4' => 'tag_name']],
 
-            //Multiple - Valid
+            // Multiple - Valid
             [false, true, ['2'], false, null, ['2']],
             [true, true, ['2'], false, null, ['2']],
         ];

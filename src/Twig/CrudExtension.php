@@ -224,7 +224,7 @@ class CrudExtension extends AbstractExtension
             'last' => ($paginator->getPage() !== $paginator->getLastPage()) ? $paginator->getLastPage() : null,
         ];
 
-        //Pages before the current page
+        // Pages before the current page
         $limit = ('sliding' == $options['type']) ? $paginator->getPage() - $options['max_pages_before'] : 1;
         for ($page = $limit; $page < $paginator->getPage(); ++$page) {
             if ($page <= $paginator->getLastPage() && $page >= $paginator->getFirstPage()) {
@@ -232,7 +232,7 @@ class CrudExtension extends AbstractExtension
             }
         }
 
-        //Pages after the current page
+        // Pages after the current page
         $limit = ('sliding' == $options['type']) ? $paginator->getPage() + $options['max_pages_after'] : $paginator->getLastPage();
         for ($page = $paginator->getPage() + 1; $page <= $limit; ++$page) {
             if ($page <= $paginator->getLastPage() && $page >= $paginator->getFirstPage()) {
@@ -313,7 +313,7 @@ class CrudExtension extends AbstractExtension
         $resolver->setAllowedTypes('label', ['null', 'string']);
         $options = $resolver->resolve($this->buildOptions('crud_th', $options, $crud));
 
-        //If the column is not to be shown, returns empty
+        // If the column is not to be shown, returns empty
         $sessionValues = $crud->getSessionValues();
         if (!\in_array($columnId, $sessionValues->displayedColumns)) {
             return '';
@@ -332,7 +332,7 @@ class CrudExtension extends AbstractExtension
             $options['ajax_options']['update'] = '#'.$crud->getDivIdList();
         }
 
-        //If the label was not defined, we take default label
+        // If the label was not defined, we take default label
         $label = $options['label'];
         if (null === $label) {
             $label = $column->label;
@@ -374,7 +374,7 @@ class CrudExtension extends AbstractExtension
         $resolver->setAllowedTypes('td_attr', ['null', 'array']);
         $options = $resolver->resolve($this->buildOptions('crud_td', $options, $crud));
 
-        //If the column is not to be shown, returns empty
+        // If the column is not to be shown, returns empty
         $sessionValues = $crud->getSessionValues();
         if (!\in_array($columnId, $sessionValues->displayedColumns)) {
             return '';
@@ -392,7 +392,7 @@ class CrudExtension extends AbstractExtension
 
         $repeatedValue = false;
         if (null !== $options['repeated_values_string']) {
-            $value = (string) $value; //transform to string is important : eg: Twig Markup
+            $value = (string) $value; // transform to string is important : eg: Twig Markup
             if (isset($this->lastTdValues[$crud->getSessionName()][$columnId]) && $this->lastTdValues[$crud->getSessionName()][$columnId] === $value) {
                 if ('' !== $value) {
                     $repeatedValue = true;
