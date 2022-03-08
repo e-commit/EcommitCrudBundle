@@ -39,8 +39,8 @@ class EntityAjaxTypeTest extends KernelTestCase
     {
         static::bootKernel();
 
-        $this->em = static::$container->get(ManagerRegistry::class)->getManager();
-        $this->factory = static::$container->get(FormFactoryInterface::class);
+        $this->em = static::getContainer()->get(ManagerRegistry::class)->getManager();
+        $this->factory = static::getContainer()->get(FormFactoryInterface::class);
     }
 
     protected function tearDown(): void

@@ -26,7 +26,7 @@ class EcommitCrudExtensionTest extends KernelTestCase
 
     public function testAutoconfigureTag(): void
     {
-        $crudFilters = self::$container->get(CrudFilters::class);
+        $crudFilters = self::getContainer()->get(CrudFilters::class);
 
         $this->assertTrue($crudFilters->has(MyFilter::class));
     }

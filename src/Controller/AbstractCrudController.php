@@ -19,7 +19,7 @@ abstract class AbstractCrudController extends AbstractController
 {
     use CrudControllerTrait;
 
-    public static function getSubscribedServices()
+    public static function getSubscribedServices(): array
     {
         return array_merge(
             parent::getSubscribedServices(),

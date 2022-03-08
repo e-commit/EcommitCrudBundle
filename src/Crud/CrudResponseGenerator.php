@@ -41,7 +41,7 @@ class CrudResponseGenerator implements ServiceSubscriberInterface
 
     public function getAjaxResponse(Crud $crud, array $options = []): Response
     {
-        $masterRequest = $this->container->get('request_stack')->getMasterRequest();
+        $masterRequest = $this->container->get('request_stack')->getMainRequest();
         if (!$masterRequest->isXmlHttpRequest()) {
             throw new NotFoundHttpException('Ajax is required');
         }

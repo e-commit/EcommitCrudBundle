@@ -48,9 +48,9 @@ class CrudExtensionTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $this->crudExtension = self::$container->get(CrudExtension::class);
-        $this->formFactory = self::$container->get(FormFactoryInterface::class);
-        $this->environment = self::$container->get(Environment::class);
+        $this->crudExtension = self::getContainer()->get(CrudExtension::class);
+        $this->formFactory = self::getContainer()->get(FormFactoryInterface::class);
+        $this->environment = self::getContainer()->get(Environment::class);
     }
 
     public function testFormStartAjax(): void
@@ -758,6 +758,7 @@ class CrudExtensionTest extends KernelTestCase
         $builder = $this->formFactory->createBuilder(FormType::class, null, [
             'action' => '/url',
             'method' => 'POST',
+            'csrf_protection' => false,
         ]);
 
         return $builder->getForm()->createView();

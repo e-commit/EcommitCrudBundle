@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Tests\Functional\App\Controller;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Controller\AbstractCrudController;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Tests\Functional\App\Entity\TestUser;
@@ -22,7 +23,7 @@ class UserController extends AbstractCrudController
 {
     protected function getCrud(): Crud
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->container->get('doctrine')->getManager();
 
         $queryBuilder = $em->getRepository(TestUser::class)
             ->createQueryBuilder('u')
@@ -39,7 +40,7 @@ class UserController extends AbstractCrudController
             ->setRoute('user_ajax_crud')
             ->setPersistentSettings(true);
 
-        $request = $this->get('request_stack')->getCurrentRequest();
+        $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request->query->has('manual-reset')) {
             $crud->raz();
         }
@@ -63,5 +64,12 @@ class UserController extends AbstractCrudController
     public function ajaxCrudAction()
     {
         return $this->getAjaxCrudResponse();
+    }
+
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(parent::getSubscribedServices(), [
+            'doctrine' => ManagerRegistry::class,
+        ]);
     }
 }

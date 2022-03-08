@@ -28,7 +28,7 @@ abstract class AbstractEntityTransformerTest extends KernelTestCase
     protected function setUp(): void
     {
         static::bootKernel();
-        $this->em = static::$container->get(ManagerRegistry::class)->getManager();
+        $this->em = static::getContainer()->get(ManagerRegistry::class)->getManager();
     }
 
     protected function tearDown(): void

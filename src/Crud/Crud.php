@@ -350,7 +350,7 @@ class Crud
      */
     public function setPersistentSettings(bool $value): self
     {
-        if ($value && !($this->container->get('security.token_storage')->getToken()->getUser() instanceof UserInterface)) {
+        if ($value && (null === $this->container->get('security.token_storage')->getToken() || !($this->container->get('security.token_storage')->getToken()->getUser() instanceof UserInterface))) {
             $value = false;
         }
         $this->persistentSettings = $value;

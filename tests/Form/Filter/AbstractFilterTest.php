@@ -50,8 +50,8 @@ abstract class AbstractFilterTest extends KernelTestCase
     {
         static::bootKernel();
 
-        $this->em = static::$container->get(ManagerRegistry::class)->getManager();
-        $this->factory = static::$container->get(FormFactoryInterface::class);
+        $this->em = static::getContainer()->get(ManagerRegistry::class)->getManager();
+        $this->factory = static::getContainer()->get(FormFactoryInterface::class);
 
         $session = $this->createMock(SessionInterface::class);
         $session->expects($this->any())
@@ -75,7 +75,7 @@ abstract class AbstractFilterTest extends KernelTestCase
                     return $requestStack;
                 }
 
-                return static::$container->get('ecommit_crud.locator')->get($name);
+                return static::getContainer()->get('ecommit_crud.locator')->get($name);
             });
 
         $this->crudFactory = new CrudFactory($container);

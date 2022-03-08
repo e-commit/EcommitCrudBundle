@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Tests\Functional\App\Controller;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Crud\CrudFactory;
 use Ecommit\CrudBundle\Crud\CrudResponseGenerator;
@@ -25,13 +26,13 @@ class UserWithoutTraitController extends AbstractController
 {
     protected function getCrud(string $sessionName, array $routeParams = []): Crud
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->container->get('doctrine')->getManager();
 
         $queryBuilder = $em->getRepository(TestUser::class)
             ->createQueryBuilder('u')
             ->select('u');
 
-        $crud = $this->get(CrudFactory::class)->create($sessionName);
+        $crud = $this->container->get(CrudFactory::class)->create($sessionName);
         $crud->addColumn('username', 'u.username', 'username', ['default_displayed' => false])
             ->addColumn('firstName', 'u.firstName', 'first_name')
             ->addColumn('lastName', 'u.lastName', 'last_name')
@@ -42,7 +43,7 @@ class UserWithoutTraitController extends AbstractController
             ->setRoute('user_without_trait_ajax_crud', $routeParams)
             ->setPersistentSettings(true);
 
-        $request = $this->get('request_stack')->getCurrentRequest();
+        $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request->query->has('manual-reset')) {
             $crud->raz();
         }
@@ -107,10 +108,11 @@ class UserWithoutTraitController extends AbstractController
         ]);
     }
 
-    public static function getSubscribedServices()
+    public static function getSubscribedServices(): array
     {
         return array_merge(parent::getSubscribedServices(), [
             CrudFactory::class,
+            'doctrine' => ManagerRegistry::class,
         ]);
     }
 }

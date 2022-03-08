@@ -24,7 +24,7 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\Routing\RouteCollectionBuilder;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\WebpackEncoreBundle\WebpackEncoreBundle;
 
 class Kernel extends BaseKernel implements CompilerPassInterface
@@ -49,7 +49,7 @@ class Kernel extends BaseKernel implements CompilerPassInterface
         $container->removeDefinition('debug.argument_resolver');
     }
 
-    public function registerBundles()
+    public function registerBundles(): array
     {
         return [
             new TwigBundle(),
@@ -62,12 +62,12 @@ class Kernel extends BaseKernel implements CompilerPassInterface
         ];
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes): void
+    protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import($this->getProjectDir().'/config/routes.yaml');
     }
 
-    public function getProjectDir()
+    public function getProjectDir(): string
     {
         return __DIR__;
     }
