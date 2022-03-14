@@ -22,7 +22,7 @@ for (const rule of webpackConfig.module.rules) {
 // Karma options
 module.exports = function(config) {
     config.set({
-        frameworks: ['jasmine-ajax', 'jasmine'],
+        frameworks: ['jasmine-ajax', 'jasmine', 'webpack'],
         browserConsoleLogOptions: {
             level: 'log',
             terminal: false //Remove console.* logs
