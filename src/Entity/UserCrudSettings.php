@@ -45,7 +45,7 @@ class UserCrudSettings
     protected $displayedColumns = [];
 
     /**
-     * @ORM\Column(type="string", length=30)
+     * @ORM\Column(type="string", length=100)
      */
     protected $sort;
 

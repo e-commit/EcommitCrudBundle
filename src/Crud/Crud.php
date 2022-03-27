@@ -183,7 +183,7 @@ class Crud
      */
     public function addColumn(string $id, string $alias, string $label, array $options = []): self
     {
-        if (mb_strlen($id) > 30) {
+        if (mb_strlen($id) > 100) {
             throw new \Exception('Column id is too long');
         }
 
