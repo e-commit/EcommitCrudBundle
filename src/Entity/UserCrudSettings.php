@@ -16,42 +16,28 @@ namespace Ecommit\CrudBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Ecommit\CrudBundle\Crud\CrudSession;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="user_crud_settings")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'user_crud_settings')]
 class UserCrudSettings
 {
-    /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Ecommit\CrudBundle\Entity\UserCrudInterface")
-     */
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: 'Ecommit\CrudBundle\Entity\UserCrudInterface')]
     protected $user;
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="string", length=255, name="crud_name")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 255, name: 'crud_name')]
     protected $crudName;
 
-    /**
-     * @ORM\Column(type="integer", name="results_displayed")
-     */
+    #[ORM\Column(type: 'integer', name: 'results_displayed')]
     protected $resultsDisplayed;
 
-    /**
-     * @ORM\Column(type="array", name="displayed_columns")
-     */
+    #[ORM\Column(type: 'array', name: 'displayed_columns')]
     protected $displayedColumns = [];
 
-    /**
-     * @ORM\Column(type="string", length=100)
-     */
+    #[ORM\Column(type: 'string', length: 100)]
     protected $sort;
 
-    /**
-     * @ORM\Column(type="string", length=4)
-     */
+    #[ORM\Column(type: 'string', length: 4)]
     protected $sense;
 
     /**

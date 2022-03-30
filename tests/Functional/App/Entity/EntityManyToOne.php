@@ -15,30 +15,20 @@ namespace Ecommit\CrudBundle\Tests\Functional\App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- */
+#[ORM\Entity]
 class EntityManyToOne
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer')]
     protected $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     protected $name;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Tag")
-     */
+    #[ORM\ManyToOne(targetEntity: 'Tag')]
     protected $tag;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: 'datetime')]
     protected $createdAt;
 
     public function __construct(int $id, string $name, Tag $tag)

@@ -16,32 +16,22 @@ namespace Ecommit\CrudBundle\Tests\Functional\App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Ecommit\CrudBundle\Entity\UserCrudInterface;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="user")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'user')]
 class TestUser implements UserCrudInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected $userId;
 
-    /**
-     * @ORM\Column(type="string", length=180, unique=true)
-     */
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
     protected $username;
 
-    /**
-     * @ORM\Column(type="string", length=30)
-     */
+    #[ORM\Column(type: 'string', length: 30)]
     protected $firstName;
 
-    /**
-     * @ORM\Column(type="string", length=30)
-     */
+    #[ORM\Column(type: 'string', length: 30)]
     protected $lastName;
 
     /*
