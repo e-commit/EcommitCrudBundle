@@ -40,8 +40,10 @@ ecommit_crud:
     #Themes disponibles :
     #@EcommitCrud/Theme/base.html.twig
     #@EcommitCrud/Theme/bootstrap3.html.twig (boostrap3 requis)
+    #@EcommitCrud/Theme/bootstrap4.html.twig (boostrap4 requis)
+    #@EcommitCrud/Theme/bootstrap5.html.twig (boostrap5 requis)
     #Ou faire son propre terme (doit hériter de l'un des thèmes précédents)
-    theme: '@EcommitCrud/Theme/bootstrap3.html.twig'
+    theme: '@EcommitCrud/Theme/bootstrap5.html.twig'
 
     #Theme pour les icones
     #Themes disponibles :
@@ -87,8 +89,9 @@ Dans votre entrée principale [Webpack Encore](https://symfony.com/doc/current/f
 //Exemple dans assets/js/app.js
 import '@ecommit/crud-bundle/js/crud';
 import * as modalManager from '@ecommit/crud-bundle/js/modal/modal-manager';
-//Bootstrap3 requis (et chargé via Webpack Encore)
-var modalEngine = require('@ecommit/crud-bundle/js/modal/engine/bootstrap3');
+//Choix du moteur de modal (exemple avec Boostrap5)
+//Bootstrap5 requis (et chargé via Webpack Encore)
+var modalEngine = require('@ecommit/crud-bundle/js/modal/engine/bootstrap5');
 modalManager.defineEngine(modalEngine);
 ```
 

@@ -1,0 +1,116 @@
+{% use '@EcommitCrud/Theme/base.html.twig' %}
+
+{# paginator_links / crud_paginator_links #}
+
+{% block paginator_links %}
+    {% set ul_attr = ul_attr|merge({class: (ul_attr.class|default('') ~ ' pagination')|trim}) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block paginator_links_current_page %}
+    {% set li_attr_child = li_attr.current_page|merge({class: (li_attr.current_page.class|default('') ~ ' active')|trim}) %}
+    {% set li_attr = li_attr|merge({current_page: li_attr_child}) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block paginator_links_page %}
+    {% if page %}
+        {% set li_attr_child = li_attr_child|default([])|merge({class: (li_attr_child.class|default('') ~ ' page-item')|trim}) %}
+        {% set a_attr_child = a_attr_child|default([])|merge({class: (a_attr_child.class|default('') ~ ' page-link')|trim}) %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{# Display settings #}
+
+{% block display_settings_button %}
+    {% set button_attr = button_attr|default([])|merge({class: (button_attr.class|default('') ~ ' btn btn-secondary btn-sm')|trim}) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block display_settings_button_modal %}
+    {% set button_attr = {'data-modal': '1'} %}
+    {{ block('display_settings_button', template_name) }}
+{% endblock %}
+
+{% block display_settings_container_modal %}
+    {% set display_settings_container_attributes = display_settings_container_attributes|default({})|merge({class: (display_settings_container_attributes.class|default('') ~ ' modal fade')|trim, 'data-modal': '1', 'style': 'display: none;', 'role': 'dialog'}) %}
+    <div{% with { attr: display_settings_container_attributes } %}{{ block('attributes', template_name) }}{% endwith %}>
+        {{ block('display_settings_content_modal', template_name) }}
+    </div>
+{% endblock %}
+
+{% block display_settings_content_modal %}
+    {% form_theme form 'bootstrap_4_layout.html.twig' %}
+    {% set display_settings_text = display_settings_text|default('display_settings.title'|trans({}, 'EcommitCrudBundle')) %}
+    {% set display_settings_check_all_text = display_settings_check_all_text|default('display_settings.check_all'|trans({}, 'EcommitCrudBundle')) %}
+    {% set display_settings_uncheck_all_text = display_settings_uncheck_all_text|default('display_settings.uncheck_all'|trans({}, 'EcommitCrudBundle')) %}
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>{{ display_settings_text }}</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {{ form_start(form) }}
+            <div class="modal-body">
+                {{ form_row(form.resultsPerPage) }}
+                {{ form_row(form.displayedColumns) }}
+                <div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm ec-crud-display-settings-check-all-columns">{{ display_settings_check_all_text }}</button>
+                    &nbsp;
+                    <button type="button" class="btn btn-outline-secondary btn-sm ec-crud-display-settings-uncheck-all-columns">{{ display_settings_uncheck_all_text }}</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ form_widget(form.reset, {'attr': {'class': 'btn-outline-secondary'}}) }}
+                {{ form_widget(form.save, {'attr': {'class': 'btn-success'}}) }}
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block display_settings_content_without_modal %}
+    {% form_theme form 'bootstrap_4_layout.html.twig' %}
+    {% set display_settings_text = display_settings_text|default('display_settings.title'|trans({}, 'EcommitCrudBundle')) %}
+    {% set display_settings_check_all_text = display_settings_check_all_text|default('display_settings.check_all'|trans({}, 'EcommitCrudBundle')) %}
+    {% set display_settings_uncheck_all_text = display_settings_uncheck_all_text|default('display_settings.uncheck_all'|trans({}, 'EcommitCrudBundle')) %}
+    <div>
+        <h4>{{ display_settings_text }}</h4>
+
+        {{ form_start(form) }}
+        {{ form_row(form.resultsPerPage) }}
+        {{ form_row(form.displayedColumns) }}
+        <div>
+            <button type="button" class="btn btn-outline-secondary btn-sm ec-crud-display-settings-check-all-columns">{{ display_settings_check_all_text }}</button>
+            &nbsp;
+            <button type="button" class="btn btn-outline-secondary btn-sm ec-crud-display-settings-uncheck-all-columns">{{ display_settings_uncheck_all_text }}</button>
+        </div>
+
+        <div style="text-align: center;">
+            {{ form_row(form.reset, {'attr': {'class': 'btn-outline-secondary'}}) }}
+            {{ form_row(form.save, {'attr': {'class': 'btn-success'}}) }}
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+
+{# search_form_submit #}
+
+{% block search_form_submit %}
+    {% apply spaceless %}
+        {% set button_attr = button_attr|default([])|merge({class: (button_attr.class|default('') ~ ' btn btn-outline-secondary btn-sm')|trim}) %}
+        {{ parent() }}
+    {% endapply %}
+{% endblock %}
+
+{# search_form_reset #}
+
+{% block search_form_reset %}
+    {% apply spaceless %}
+        {% set button_attr = button_attr|default([])|merge({class: (button_attr.class|default('') ~ ' btn btn-outline-secondary btn-sm')|trim}) %}
+        {{ parent() }}
+    {% endapply %}
+{% endblock %}
