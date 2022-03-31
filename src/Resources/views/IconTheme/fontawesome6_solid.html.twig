@@ -1,0 +1,31 @@
+{% use '@EcommitCrud/IconTheme/base.html.twig' %}
+
+{% block asc %}
+    {% apply spaceless %}
+        <i class="fa-solid fa-arrow-down-a-z"></i>
+    {% endapply %}
+{% endblock %}
+
+{% block desc %}
+    {% apply spaceless %}
+        <i class="fa-solid fa-arrow-down-z-a"></i>
+    {% endapply %}
+{% endblock %}
+
+{% block display_settings %}
+    {% apply spaceless %}
+        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+    {% endapply %}
+{% endblock %}
+
+{% block search %}
+    {% apply spaceless %}
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    {% endapply %}
+{% endblock %}
+
+{% block reset %}
+    {% apply spaceless %}
+        <i class="fa-solid fa-fire" aria-hidden="true"></i>
+    {% endapply %}
+{% endblock %}

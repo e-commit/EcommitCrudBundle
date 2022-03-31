@@ -11,6 +11,8 @@ Prérequis :
     * Votre thème personnalisé (créer un thème Twig qui hérite `@EcommitCrud/Theme/base.html.twig`)
 * Un gestionnaire d'icones chargé par Webpack Encore parmi :
     * Fontawesome 4
+    * Fontawesome 5 Solid
+    * Fontawesome 6 Solid
     * Votre thème personnalisé (créer un thème Twig qui hérite `@EcommitCrud/IconTheme/base.html.twig`)
 
 Installez le bundle avec Composer : A la racine de votre projet Symfony, éxécutez la commande suivante :
@@ -45,8 +47,10 @@ ecommit_crud:
     #Themes disponibles :
     #@EcommitCrud/IconTheme/base.html.twig
     #@EcommitCrud/IconTheme/fontawesome4.html.twig (fontawesome4 requis)
+    #@EcommitCrud/IconTheme/fontawesome5_solid.html.twig (fontawesome5 Solid requis)
+    #@EcommitCrud/IconTheme/fontawesome6_solid.html.twig (fontawesome5 Solid requis)
     #Ou faire son propre terme (doit hériter de l'un des thèmes précédents)
-    icon_theme: '@EcommitCrud/IconTheme/fontawesome4.html.twig'
+    icon_theme: '@EcommitCrud/IconTheme/fontawesome6_solid.html.twig'
 ```
 
 Votre entité Doctrine "utilisateur" doit implémenter l'interface `Ecommit\CrudBundle\Entity\UserCrudInterface`. Exemple :
