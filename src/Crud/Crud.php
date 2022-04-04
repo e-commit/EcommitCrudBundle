@@ -724,6 +724,7 @@ class Crud
             $newValue = clone $this->searchForm->getDefaultData();
             $this->changeFilterValues($newValue);
             $this->searchForm->getForm()->setData(clone $newValue);
+            $this->sessionValues->searchFormIsSubmittedAndValid = false;
         }
         $this->changePage(1);
         $this->save();
