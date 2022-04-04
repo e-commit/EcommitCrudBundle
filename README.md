@@ -9,7 +9,7 @@
 
 ## Documentation ##
 
-[Read the Documentation (French documentation)](doc/index.md)
+[Read the Documentation (French documentation 🇫🇷)](doc/index.md)
 
 ## Security ##
 
