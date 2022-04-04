@@ -824,7 +824,6 @@ class Crud
      */
     public function clearTemplate(): void
     {
-        $this->queryBuilder = null;
         if ($this->searchForm) {
             $this->searchForm->createFormView();
             $this->searchForm = $this->searchForm->getForm();
