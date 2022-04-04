@@ -99,6 +99,7 @@ final class SearchFormBuilder
             'validation_groups' => $this->options['validation_groups'],
             'required' => false,
             'type_options' => [],
+            'update_query_builder' => null,
             'alias_search' => function (Options $options) {
                 $columns = $this->crud->getColumns();
                 if (\array_key_exists($options['column_id'], $columns)) {
@@ -126,6 +127,7 @@ final class SearchFormBuilder
                 return null;
             },
         ]);
+        $resolver->setAllowedTypes('update_query_builder', ['null', 'callable']);
         $filterService->configureOptions($resolver);
         $resolvedOptions = $resolver->resolve($options);
 
@@ -199,7 +201,11 @@ final class SearchFormBuilder
             if (!$filterService->supportsQueryBuilder($queryBuilder)) {
                 throw new \Exception('"%s" filter does not support "%s" query builder', $filter['name'], \get_class($queryBuilder));
             }
-            $filterService->updateQueryBuilder($queryBuilder, $property, $value, $filter['options']);
+            if ($filter['options']['update_query_builder']) {
+                $filter['options']['update_query_builder']($queryBuilder, $property, $value, $filter['options']);
+            } else {
+                $filterService->updateQueryBuilder($queryBuilder, $property, $value, $filter['options']);
+            }
         }
     }
 }

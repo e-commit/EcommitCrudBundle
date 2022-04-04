@@ -9,11 +9,12 @@
 
 | Option | Description | Requis  | Valeur par défaut |
 | ------ | ----------- | --------| ----------------- |
-| column_id | ID de la colonne du CRUD associée | Non | Nom du filtre 
+| column_id | ID de la colonne du CRUD associée | Non | Nom du filtre |
 | autovalidate | Si `true`, active la validation automatique (en fonction du filtre utilisé) | Non | [Valeur de autovalidate du formulaire](searcher.md) |
 | validation_groups | Groupe de validation | Non | [Valeur de validation_groups du formulaire](searcher.md) |
 | required | Si `true`, filtre obligatoire | Non | Non |
 | type_options | Options du champs du formulaire Symfony généré | Non | [ ] |
+| update_query_builder | Si non nul, surchage la méthode `updateQueryBuilder` du filtre | Non | Null |
 
 
 ## BooleanFilter
