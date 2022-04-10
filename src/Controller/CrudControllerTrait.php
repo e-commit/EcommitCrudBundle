@@ -42,15 +42,9 @@ trait CrudControllerTrait
     protected function getCrudOptions(): array
     {
         return [
-            'template_generator' => function (string $action) {
-                return $this->getTemplateName($action);
-            },
-            'before_build_query' => function (Crud $crud, $data) {
-                return $this->beforeBuildQuery($crud, $data);
-            },
-            'after_build_query' => function (Crud $crud, $data) {
-                return $this->afterBuildQuery($crud, $data);
-            },
+            'template_generator' => fn (string $action) => $this->getTemplateName($action),
+            'before_build_query' => fn (Crud $crud, $data) => $this->beforeBuildQuery($crud, $data),
+            'after_build_query' => fn (Crud $crud, $data) => $this->afterBuildQuery($crud, $data),
         ];
     }
 

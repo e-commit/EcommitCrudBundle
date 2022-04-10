@@ -610,7 +610,7 @@ class Crud
         if (!$this->searchForm) {
             return;
         }
-        if (null !== $value && \get_class($value) === \get_class($this->searchForm->getDefaultData())) {
+        if (null !== $value && $value::class === \get_class($this->searchForm->getDefaultData())) {
             $this->sessionValues->searchFormData = $value;
         } else {
             $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();

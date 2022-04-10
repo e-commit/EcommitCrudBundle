@@ -243,9 +243,7 @@ class EntityAjaxTypeTest extends KernelTestCase
 
     public function getTestViewWithChoiceLabelProvider(): array
     {
-        $closure = function (Tag $tag) {
-            return sprintf('name: %s', $tag->getName());
-        };
+        $closure = fn (Tag $tag) => sprintf('name: %s', $tag->getName());
 
         return [
             ['name', ['2' => 'tag2']],

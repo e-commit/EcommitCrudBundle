@@ -27,9 +27,7 @@ class EntityToIdTransformerTest extends EntityToChoiceTransformerTest
 
     public function getTestTransformProvider(): array
     {
-        $closure = function (Tag $tag) {
-            return sprintf('name: %s', $tag->getName());
-        };
+        $closure = fn (Tag $tag) => sprintf('name: %s', $tag->getName());
 
         return [
             [null, '3'], // Choice label: null

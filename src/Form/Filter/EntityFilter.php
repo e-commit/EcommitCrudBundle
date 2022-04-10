@@ -30,9 +30,7 @@ class EntityFilter extends AbstractFilter
     {
         $typeOptions = $this->getTypeOptions($options, array_merge($this->getCollectionTypeOptions($options), [
             'class' => $options['class'],
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('e');
-            },
+            'query_builder' => fn (EntityRepository $er) => $er->createQueryBuilder('e'),
         ]));
 
         if (isset($typeOptions['choices'])) {

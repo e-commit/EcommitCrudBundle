@@ -746,9 +746,7 @@ class CrudExtensionTest extends KernelTestCase
         $crud->expects($this->any())->method('getRouteName')->willReturn('user_crud');
         $crud->expects($this->any())->method('getRouteParams')->willReturn([]);
         $crud->expects($this->any())->method('getSessionValues')->willReturn($crudSession);
-        $crud->expects($this->any())->method('getColumn')->willReturnCallback(function ($columnId) use ($columns) {
-            return $columns[$columnId];
-        });
+        $crud->expects($this->any())->method('getColumn')->willReturnCallback(fn ($columnId) => $columns[$columnId]);
 
         return $crud;
     }

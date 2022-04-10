@@ -199,7 +199,7 @@ final class SearchFormBuilder
             /** @var FilterInterface $filterService */
             $filterService = $this->container->get('ecommit_crud.filters')->get($filter['name']);
             if (!$filterService->supportsQueryBuilder($queryBuilder)) {
-                throw new \Exception('"%s" filter does not support "%s" query builder', $filter['name'], \get_class($queryBuilder));
+                throw new \Exception('"%s" filter does not support "%s" query builder', $filter['name'], $queryBuilder::class);
             }
             if ($filter['options']['update_query_builder']) {
                 $filter['options']['update_query_builder']($queryBuilder, $property, $value, $filter['options']);
