@@ -384,7 +384,7 @@ class CrudExtensionTest extends KernelTestCase
             'render' => 'render.html.twig',
         ]);
 
-        $this->assertRegExp('/OK/', $result);
+        $this->assertMatchesRegularExpression('/OK/', $result);
     }
 
     public function testPaginatorWithThemeAndBlockOptions(): void
@@ -400,7 +400,7 @@ class CrudExtensionTest extends KernelTestCase
             'block' => 'hello_world',
         ]);
 
-        $this->assertRegExp('/Hello world/', $result);
+        $this->assertMatchesRegularExpression('/Hello world/', $result);
     }
 
     public function testPaginatorWithBadOptions(): void
@@ -529,7 +529,7 @@ class CrudExtensionTest extends KernelTestCase
             'render' => 'render.html.twig',
         ]);
 
-        $this->assertRegExp('/OK/', $html);
+        $this->assertMatchesRegularExpression('/OK/', $html);
     }
 
     public function testThWithThemeAndBlockOptions(): void
@@ -539,7 +539,7 @@ class CrudExtensionTest extends KernelTestCase
             'block' => 'hello_world',
         ]);
 
-        $this->assertRegExp('/Hello world/', $html);
+        $this->assertMatchesRegularExpression('/Hello world/', $html);
     }
 
     public function testThWithBadOptions(): void
@@ -700,7 +700,7 @@ class CrudExtensionTest extends KernelTestCase
             'render' => 'render.html.twig',
         ]);
 
-        $this->assertRegExp('/OK/', $html);
+        $this->assertMatchesRegularExpression('/OK/', $html);
     }
 
     public function testTdWithThemeAndBlockOptions(): void
@@ -710,7 +710,7 @@ class CrudExtensionTest extends KernelTestCase
             'block' => 'hello_world',
         ]);
 
-        $this->assertRegExp('/Hello world/', $html);
+        $this->assertMatchesRegularExpression('/Hello world/', $html);
     }
 
     public function testTdWithBadOptions(): void

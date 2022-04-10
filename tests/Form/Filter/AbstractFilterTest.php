@@ -128,10 +128,10 @@ abstract class AbstractFilterTest extends KernelTestCase
 
         $queryBuilder = $crud->getQueryBuilder();
         if (null === $whereExpected) {
-            $this->assertNotRegExp('/WHERE/', $queryBuilder->getDql());
+            $this->assertDoesNotMatchRegularExpression('/WHERE/', $queryBuilder->getDql());
         } else {
             $pattern = '/WHERE '.preg_quote($whereExpected, '/').' ORDER BY/i';
-            $this->assertRegExp($pattern, $queryBuilder->getDql());
+            $this->assertMatchesRegularExpression($pattern, $queryBuilder->getDql());
         }
 
         $parameters = [];
