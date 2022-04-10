@@ -15,15 +15,15 @@
             <tag name="container.service_locator"/>
         </service>
 
-        <service id="Ecommit\CrudBundle\Crud\CrudFactory" class="Ecommit\CrudBundle\Crud\CrudFactory" public="true">
+        <service id="ecommit_crud.factory" class="Ecommit\CrudBundle\Crud\CrudFactory" public="true">
             <argument type="service" id="ecommit_crud.locator"/>
         </service>
-        <service id="ecommit_crud.factory" alias="Ecommit\CrudBundle\Crud\CrudFactory" public="true" />
+        <service id="Ecommit\CrudBundle\Crud\CrudFactory" alias="ecommit_crud.factory" public="true" />
 
-        <service id="Ecommit\CrudBundle\Crud\CrudResponseGenerator" class="Ecommit\CrudBundle\Crud\CrudResponseGenerator" public="true">
+        <service id="ecommit_crud.response_generatror" class="Ecommit\CrudBundle\Crud\CrudResponseGenerator" public="true">
             <tag name="container.service_subscriber" />
         </service>
-        <service id="ecommit_crud.response_generatror" alias="Ecommit\CrudBundle\Crud\CrudResponseGenerator" public="true" />
+        <service id="Ecommit\CrudBundle\Crud\CrudResponseGenerator" alias="ecommit_crud.response_generatror" public="true" />
 
         <service id="Ecommit\CrudBundle\Twig\CrudExtension" class="Ecommit\CrudBundle\Twig\CrudExtension">
             <argument type="service" id="twig.form.renderer" />
