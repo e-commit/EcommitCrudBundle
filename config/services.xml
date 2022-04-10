@@ -25,7 +25,7 @@
         </service>
         <service id="Ecommit\CrudBundle\Crud\CrudResponseGenerator" alias="ecommit_crud.response_generatror" public="true" />
 
-        <service id="Ecommit\CrudBundle\Twig\CrudExtension" class="Ecommit\CrudBundle\Twig\CrudExtension">
+        <service id="ecommit_crud.twig.crud_extension" class="Ecommit\CrudBundle\Twig\CrudExtension">
             <argument type="service" id="twig.form.renderer" />
             <argument>%ecommit_crud.theme%</argument>
             <argument>%ecommit_crud.icon_theme%</argument>
@@ -33,11 +33,11 @@
             <tag name="twig.extension"/>
         </service>
 
-        <service id="Ecommit\CrudBundle\EventListener\MappingEntities" class="Ecommit\CrudBundle\EventListener\MappingEntities">
+        <service id="ecommit_crud.event_listener.mapping_entities" class="Ecommit\CrudBundle\EventListener\MappingEntities">
             <tag name="doctrine.event_listener" event="loadClassMetadata" />
         </service>
 
-        <service id="Ecommit\CrudBundle\Form\Type\EntityAjaxType" class="Ecommit\CrudBundle\Form\Type\EntityAjaxType">
+        <service id="ecommit_crud.type.entity_ajax" class="Ecommit\CrudBundle\Form\Type\EntityAjaxType">
             <argument type="service" id="Doctrine\Persistence\ManagerRegistry" />
             <argument type="service" id="Symfony\Component\Routing\RouterInterface" />
             <tag name="form.type" />

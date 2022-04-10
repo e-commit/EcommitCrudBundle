@@ -48,7 +48,7 @@ class CrudExtensionTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $this->crudExtension = self::getContainer()->get(CrudExtension::class);
+        $this->crudExtension = self::getContainer()->get('ecommit_crud.twig.crud_extension');
         $this->formFactory = self::getContainer()->get(FormFactoryInterface::class);
         $this->environment = self::getContainer()->get(Environment::class);
     }
