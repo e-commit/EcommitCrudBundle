@@ -17,5 +17,7 @@ use Ecommit\CrudBundle\Crud\QueryBuilderParameterInterface;
 
 abstract class AbstractQueryBuilderParameter implements QueryBuilderParameterInterface
 {
-    public $value;
+    public function __construct(public mixed $value)
+    {
+    }
 }

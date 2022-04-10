@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud\Http;
 
-class QueryBuilderQueryParameter extends AbstractQueryBuilderParameter
+class QueryBuilderQueryParameter extends AbstractQueryBuilderNamedParameter
 {
-    use QueryBuilderNamedParameterTrait;
 }

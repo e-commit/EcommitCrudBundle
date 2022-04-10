@@ -15,8 +15,4 @@ namespace Ecommit\CrudBundle\Crud\Http;
 
 class QueryBuilderBody extends AbstractQueryBuilderParameter
 {
-    public function __construct($value)
-    {
-        $this->value = $value;
-    }
 }

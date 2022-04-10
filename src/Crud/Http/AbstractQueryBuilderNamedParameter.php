@@ -13,13 +13,10 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud\Http;
 
-trait QueryBuilderNamedParameterTrait
+abstract class AbstractQueryBuilderNamedParameter extends AbstractQueryBuilderParameter
 {
-    public $name;
-
-    public function __construct(string $name, $value)
+    public function __construct(public string $name, mixed $value)
     {
-        $this->name = $name;
-        $this->value = $value;
+        parent::__construct($value);
     }
 }
