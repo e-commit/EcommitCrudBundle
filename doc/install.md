@@ -19,7 +19,7 @@ Installez le bundle avec Composer : A la racine de votre projet Symfony, éxécu
 
 ```bash
 $ composer require ecommit/crud-bundle:3.*@dev
-$ yarn add --dev @ecommit/crud-bundle@link:vendor/ecommit/crud-bundle/src/Resources/assets
+$ yarn add --dev @ecommit/crud-bundle@link:vendor/ecommit/crud-bundle/assets
 ```
 
 Activez le bundle dans le fichier de configuration `config/bundles.php` de votre projet :

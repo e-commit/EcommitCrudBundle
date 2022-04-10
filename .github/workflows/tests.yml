@@ -110,4 +110,4 @@ jobs:
 
             -   name: Run ESLint
                 if: matrix.coding-standards
-                run: ./node_modules/.bin/eslint src/Resources/assets/js/* tests/Resources/assets/js/*
+                run: ./node_modules/.bin/eslint assets/js/* tests/assets/js/*

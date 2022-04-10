@@ -27,4 +27,9 @@ class EcommitCrudBundle extends Bundle
         $container->addCompilerPass(new TwigFormPass());
         $container->addCompilerPass(new FiltersPass());
     }
+
+    public function getPath(): string
+    {
+        return \dirname(__DIR__);
+    }
 }
