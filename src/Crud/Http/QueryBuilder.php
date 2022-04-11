@@ -21,63 +21,17 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class QueryBuilder implements QueryBuilderInterface
 {
-    /**
-     * @var string
-     */
-    protected $url;
+    protected array $queryParameters = [];
+    protected array $bodyParameters = [];
+    protected mixed $body = null;
+    protected bool $bodyIsJson = false;
+    protected array $headerParameters = [];
+    protected ?\Closure $orderBuilder = null;
+    protected ?\Closure $paginationBuilder = null;
+    protected array $orders = [];
 
-    /**
-     * @var string
-     */
-    protected $httpMethod;
-
-    /**
-     * @var array
-     */
-    protected $queryParameters = [];
-
-    /**
-     * @var array
-     */
-    protected $bodyParameters = [];
-
-    /**
-     * @var QueryBuilderBody
-     */
-    protected $body;
-
-    protected $bodyIsJson = false;
-
-    /**
-     * @var array
-     */
-    protected $headerParameters = [];
-
-    /**
-     * @var \Closure
-     */
-    protected $orderBuilder;
-
-    /**
-     * @var \Closure
-     */
-    protected $paginationBuilder;
-
-    /**
-     * @var array
-     */
-    protected $orders = [];
-
-    /**
-     * @var HttpClientInterface
-     */
-    protected $client;
-
-    public function __construct(string $url, string $httpMethod, ?HttpClientInterface $client = null)
+    public function __construct(protected string $url, protected string $httpMethod, protected ?HttpClientInterface $client = null)
     {
-        $this->url = $url;
-        $this->httpMethod = $httpMethod;
-        $this->client = $client;
         if (null === $this->client) {
             $this->client = HttpClient::create();
         }
@@ -140,7 +94,7 @@ class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    public function orderBy($sort, $sense): self
+    public function orderBy(string $sort, string $sense): self
     {
         $this->orders = [];
         $this->addOrderBy($sort, $sense);

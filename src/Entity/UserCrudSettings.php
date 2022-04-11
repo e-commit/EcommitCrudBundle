@@ -40,154 +40,82 @@ class UserCrudSettings
     #[ORM\Column(type: 'string', length: 4)]
     protected $sense;
 
-    /**
-     * Set crudName.
-     *
-     * @param string $crudName
-     *
-     * @return UserCrudSettings
-     */
-    public function setCrudName($crudName)
+    public function setCrudName(string $crudName): self
     {
         $this->crudName = $crudName;
 
         return $this;
     }
 
-    /**
-     * Get crudName.
-     *
-     * @return string
-     */
-    public function getCrudName()
+    public function getCrudName(): string
     {
         return $this->crudName;
     }
 
-    /**
-     * Set resultsDisplayed.
-     *
-     * @param int $resultsDisplayed
-     *
-     * @return UserCrudSettings
-     */
-    public function setResultsDisplayed($resultsDisplayed)
+    public function setResultsDisplayed(int $resultsDisplayed): self
     {
         $this->resultsDisplayed = $resultsDisplayed;
 
         return $this;
     }
 
-    /**
-     * Get resultsDisplayed.
-     *
-     * @return int
-     */
-    public function getResultsDisplayed()
+    public function getResultsDisplayed(): int
     {
         return $this->resultsDisplayed;
     }
 
-    /**
-     * Set displayedColumns.
-     *
-     * @param array $displayedColumns
-     *
-     * @return UserCrudSettings
-     */
-    public function setDisplayedColumns($displayedColumns)
+    public function setDisplayedColumns(array $displayedColumns): self
     {
         $this->displayedColumns = $displayedColumns;
 
         return $this;
     }
 
-    /**
-     * Get displayedColumns.
-     *
-     * @return array
-     */
-    public function getDisplayedColumns()
+    public function getDisplayedColumns(): array
     {
         return $this->displayedColumns;
     }
 
-    /**
-     * Set sort.
-     *
-     * @param string $sort
-     *
-     * @return UserCrudSettings
-     */
-    public function setSort($sort)
+    public function setSort(string $sort): self
     {
         $this->sort = $sort;
 
         return $this;
     }
 
-    /**
-     * Get sort.
-     *
-     * @return string
-     */
-    public function getSort()
+    public function getSort(): string
     {
         return $this->sort;
     }
 
-    /**
-     * Set sense.
-     *
-     * @param string $sense
-     *
-     * @return UserCrudSettings
-     */
-    public function setSense($sense)
+    public function setSense(string $sense): self
     {
         $this->sense = $sense;
 
         return $this;
     }
 
-    /**
-     * Get sense.
-     *
-     * @return string
-     */
-    public function getSense()
+    public function getSense(): string
     {
         return $this->sense;
     }
 
-    /**
-     * Set user.
-     *
-     * @return UserCrudSettings
-     */
-    public function setUser(\Ecommit\CrudBundle\Entity\UserCrudInterface $user)
+    public function setUser(\Ecommit\CrudBundle\Entity\UserCrudInterface $user): self
     {
         $this->user = $user;
 
         return $this;
     }
 
-    /**
-     * Get user.
-     *
-     * @return \Ecommit\CrudBundle\Entity\UserCrudInterface
-     */
-    public function getUser()
+    public function getUser(): \Ecommit\CrudBundle\Entity\UserCrudInterface
     {
         return $this->user;
     }
 
     /**
      * Create CrudSession from this object.
-     *
-     * @return \Ecommit\CrudBundle\Crud\CrudSession
      */
-    public function transformToCrudSession(CrudSession $crudSessionManager)
+    public function transformToCrudSession(CrudSession $crudSessionManager): self
     {
         $crudSessionManager->displayedColumns = $this->displayedColumns;
         $crudSessionManager->resultsPerPage = $this->resultsDisplayed;

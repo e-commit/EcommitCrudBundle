@@ -18,7 +18,7 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 class EntitiesToIdsTransformer extends EntitiesToChoicesTransformer
 {
-    public function transform($collection)
+    public function transform(mixed $collection)
     {
         if (null === $collection) {
             return [];

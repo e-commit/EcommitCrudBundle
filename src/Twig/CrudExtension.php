@@ -24,23 +24,10 @@ use Twig\TwigFunction;
 
 class CrudExtension extends AbstractExtension
 {
-    /**
-     * @var FormRendererInterface
-     */
-    protected $formRenderer;
-
-    protected $theme;
-    protected $iconTheme;
-    protected $configuration;
-
     protected $lastTdValues = [];
 
-    public function __construct(FormRendererInterface $formRenderer, string $theme, string $iconTheme, array $configuration)
+    public function __construct(protected FormRendererInterface $formRenderer, protected string $theme, protected string $iconTheme, protected array $configuration)
     {
-        $this->formRenderer = $formRenderer;
-        $this->theme = $theme;
-        $this->iconTheme = $iconTheme;
-        $this->configuration = $configuration;
     }
 
     public function getName()
@@ -358,7 +345,7 @@ class CrudExtension extends AbstractExtension
      *                         * theme: Theme used. If null, default theme is used
      *                         * block: Twig block used. Default: td
      */
-    public function td(Environment $environment, string $columnId, Crud $crud, $value, $options = []): string
+    public function td(Environment $environment, string $columnId, Crud $crud, mixed $value, array $options = []): string
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
@@ -459,7 +446,7 @@ class CrudExtension extends AbstractExtension
      *                       * theme: Theme used. If null, default theme is used
      *                       * block: Twig block used. Default: search_form_start
      */
-    public function searchFormStart(Environment $environment, Crud $crud, array $options = [])
+    public function searchFormStart(Environment $environment, Crud $crud, array $options = []): string
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
@@ -515,7 +502,7 @@ class CrudExtension extends AbstractExtension
      *                       * theme: Theme used. If null, default theme is used
      *                       * block: Twig block used. Default: search_form_submit
      */
-    public function searchFormSubmit(Environment $environment, Crud $crud, $options = [])
+    public function searchFormSubmit(Environment $environment, Crud $crud, array $options = []): string
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
@@ -550,7 +537,7 @@ class CrudExtension extends AbstractExtension
      *                       * theme: Theme used. If null, default theme is used
      *                       * block: Twig block used. Default: search_form_reset
      */
-    public function searchFormReset(Environment $environment, Crud $crud, $options = [])
+    public function searchFormReset(Environment $environment, Crud $crud, array $options = []): string
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([

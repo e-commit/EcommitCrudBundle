@@ -19,7 +19,7 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 class EntityToChoiceTransformer extends AbstractEntityTransformer
 {
-    public function transform($entity)
+    public function transform(mixed $entity)
     {
         if (null === $entity || '' === $entity) {
             return null;
@@ -37,7 +37,7 @@ class EntityToChoiceTransformer extends AbstractEntityTransformer
         return $results;
     }
 
-    public function reverseTransform($identifier)
+    public function reverseTransform(mixed $identifier)
     {
         if ('' === $identifier || null === $identifier) {
             return null;

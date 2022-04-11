@@ -18,19 +18,16 @@ use Psr\Container\ContainerInterface;
 
 final class CrudFilters
 {
-    protected $container;
-
-    public function __construct(ContainerInterface $container)
+    public function __construct(protected ContainerInterface $container)
     {
-        $this->container = $container;
     }
 
-    public function has($filter): bool
+    public function has(string $filter): bool
     {
         return $this->container->has($filter);
     }
 
-    public function get($filter): FilterInterface
+    public function get(string $filter): FilterInterface
     {
         return $this->container->get($filter);
     }

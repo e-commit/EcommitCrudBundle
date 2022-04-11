@@ -17,14 +17,8 @@ use Psr\Container\ContainerInterface;
 
 class CrudFactory
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    public function __construct(ContainerInterface $container)
+    public function __construct(protected ContainerInterface $container)
     {
-        $this->container = $container;
     }
 
     public function create(string $sessionName): Crud

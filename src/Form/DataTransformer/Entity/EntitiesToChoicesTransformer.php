@@ -15,6 +15,7 @@ namespace Ecommit\CrudBundle\Form\DataTransformer\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\QueryBuilder;
 use Ecommit\ScalarValues\ScalarValues;
 use Symfony\Bridge\Doctrine\Form\ChoiceList\ORMQueryBuilderLoader;
 use Symfony\Component\Form\Exception\TransformationFailedException;
@@ -22,16 +23,12 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 class EntitiesToChoicesTransformer extends AbstractEntityTransformer
 {
-    protected $maxResults;
-
-    public function __construct($queryBuilder, $identifier, $choiceLabel, bool $throwExceptionIfValueNotFoundInReverse, int $maxResults)
+    public function __construct(QueryBuilder $queryBuilder, string $identifier, mixed $choiceLabel, bool $throwExceptionIfValueNotFoundInReverse, protected int $maxResults)
     {
         parent::__construct($queryBuilder, $identifier, $choiceLabel, $throwExceptionIfValueNotFoundInReverse);
-
-        $this->maxResults = $maxResults;
     }
 
-    public function transform($collection)
+    public function transform(mixed $collection)
     {
         if (null === $collection) {
             return [];
@@ -52,7 +49,7 @@ class EntitiesToChoicesTransformer extends AbstractEntityTransformer
         return $results;
     }
 
-    public function reverseTransform($identifiers)
+    public function reverseTransform(mixed $identifiers)
     {
         $collection = new ArrayCollection();
 

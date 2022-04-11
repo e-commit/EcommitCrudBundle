@@ -17,6 +17,7 @@ use Ecommit\CrudBundle\Entity\UserCrudSettings;
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 use Ecommit\CrudBundle\Form\Type\DisplaySettingsType;
 use Ecommit\DoctrineUtils\Paginator\DoctrinePaginatorBuilder;
+use Ecommit\Paginator\PaginatorInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Form;
@@ -30,64 +31,36 @@ class Crud
     public const DESC = 'DESC';
     public const ASC = 'ASC';
 
-    protected $sessionName;
+    protected CrudSession $sessionValues;
+    protected SearchFormBuilder|FormView|null $searchForm;
+    protected Form|FormView|null $displaySettingsForm;
+    protected bool $isInitialized = false;
+    protected bool $initializationInProgress = false;
+    protected array $availableColumns = [];
+    protected array $availableVirtualColumns = [];
+    protected array $availableResultsPerPage = [];
+    protected ?string $defaultSort;
+    protected array $defaultPersonalizedSort = [];
+    protected ?string $defaultSense;
+    protected ?int $defaultResultsPerPage;
+    protected \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null $queryBuilder;
+    protected bool $persistentSettings = false;
+    protected bool $updateDatabase = false;
+    protected ?PaginatorInterface $paginator;
+    protected bool|\Closure|array $buildPaginator = true;
+    protected bool $displayResultsOnlyIfSearch = false;
+    protected bool $displayResults = true;
+    protected array $twigFunctionsConfiguration = [];
+    protected ?string $routeName;
+    protected array $routeParams = [];
+    protected string $divIdSearch = 'crud_search';
+    protected string $divIdList = 'crud_list';
 
-    /**
-     * @var CrudSession
-     */
-    protected $sessionValues;
-
-    /**
-     * @var SearchFormBuilder|FormView
-     */
-    protected $searchForm;
-
-    /**
-     * @var Form
-     */
-    protected $displaySettingsForm = null;
-
-    protected $isInitialized = false;
-    protected $initializationInProgress = false;
-    protected $availableColumns = [];
-    protected $availableVirtualColumns = [];
-    protected $availableResultsPerPage = [];
-    protected $defaultSort = null;
-    protected $defaultPersonalizedSort = [];
-    protected $defaultSense = null;
-    protected $defaultResultsPerPage = null;
-
-    protected $queryBuilder = null;
-    protected $persistentSettings = false;
-    protected $updateDatabase = false;
-    protected $paginator = null;
-    protected $buildPaginator = true;
-    protected $displayResultsOnlyIfSearch = false;
-    protected $displayResults = true;
-
-    protected $twigFunctionsConfiguration = [];
-
-    /*
-     * Router
-     */
-    protected $routeName = null;
-    protected $routeParams = [];
-
-    protected $divIdSearch = 'crud_search';
-    protected $divIdList = 'crud_list';
-
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    public function __construct($sessionName, ContainerInterface $container)
+    public function __construct(protected string $sessionName, protected ContainerInterface $container)
     {
         if (!preg_match('/^[a-zA-Z0-9_]{1,50}$/', $sessionName)) {
             throw new \Exception('Variable sessionName is not given or is invalid');
         }
-        $this->sessionName = $sessionName;
-        $this->container = $container;
         $this->sessionValues = new CrudSession();
 
         return $this;
@@ -228,18 +201,13 @@ class Crud
         return $this;
     }
 
-    public function getQueryBuilder()
+    public function getQueryBuilder(): \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null
     {
         return $this->queryBuilder;
     }
 
-    public function setQueryBuilder($queryBuilder): self
+    public function setQueryBuilder(\Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface $queryBuilder): self
     {
-        if (!($queryBuilder instanceof \Doctrine\ORM\QueryBuilder) &&
-            !($queryBuilder instanceof \Doctrine\DBAL\Query\QueryBuilder) &&
-            !($queryBuilder instanceof QueryBuilderInterface)) {
-            throw new \Exception('Bad query builder');
-        }
         $this->queryBuilder = $queryBuilder;
 
         return $this;
@@ -309,10 +277,8 @@ class Crud
 
     /**
      * Returns the list url.
-     *
-     * @param array $parameters Additional parameters
      */
-    public function getUrl($parameters = []): string
+    public function getUrl(array $parameters = []): string
     {
         $parameters = array_merge($this->routeParams, $parameters);
 
@@ -321,10 +287,8 @@ class Crud
 
     /**
      * Returns the search url.
-     *
-     * @param array $parameters Additional parameters
      */
-    public function getSearchUrl($parameters = []): string
+    public function getSearchUrl(array $parameters = []): string
     {
         $parameters = array_merge($this->routeParams, ['search' => 1], $parameters);
 
@@ -333,10 +297,8 @@ class Crud
 
     /**
      * Enables (or not) the auto build paginator.
-     *
-     * @param bool|closure|array $value
      */
-    public function setBuildPaginator($value): self
+    public function setBuildPaginator(bool|\Closure|array $value): self
     {
         $this->buildPaginator = $value;
 
@@ -344,9 +306,7 @@ class Crud
     }
 
     /*
-     * Use (or not) persistent settings
-     *
-     * @param bool $value
+     * Use (or not) persistent settings.
      */
     public function setPersistentSettings(bool $value): self
     {
@@ -394,7 +354,7 @@ class Crud
         }
     }
 
-    protected function testIfDatabaseMustMeUpdated($oldValue, $new_value): void
+    protected function testIfDatabaseMustMeUpdated(mixed $oldValue, mixed $new_value): void
     {
         if ($oldValue != $new_value) {
             $this->updateDatabase = true;
@@ -525,10 +485,8 @@ class Crud
 
     /**
      * User Action: Changes number of displayed results.
-     *
-     * @param int $value
      */
-    protected function changeNumberResultsDisplayed($value): void
+    protected function changeNumberResultsDisplayed(int $value): void
     {
         $oldValue = $this->sessionValues->resultsPerPage;
         if (\in_array($value, $this->availableResultsPerPage)) {
@@ -541,15 +499,10 @@ class Crud
 
     /**
      * User Action: Changes displayed columns.
-     *
-     * @param array $value (columns id)
      */
-    protected function changeColumnsDisplayed($value): void
+    protected function changeColumnsDisplayed(array $value): void
     {
         $oldValue = $this->sessionValues->displayedColumns;
-        if (!\is_array($value)) {
-            $value = $this->getDefaultDisplayedColumns();
-        }
         $newDisplayedColumns = [];
         $availableColumns = $this->availableColumns;
         foreach ($value as $column_name) {
@@ -569,7 +522,7 @@ class Crud
      *
      * @param string $value Column id
      */
-    protected function changeSort($value): void
+    protected function changeSort(mixed $value): void
     {
         $oldValue = $this->sessionValues->sort;
         $availableColumns = $this->availableColumns;
@@ -585,10 +538,8 @@ class Crud
 
     /**
      * User action: Changes sense.
-     *
-     * @param const $value Sens (ASC / DESC)
      */
-    protected function changeSense($value): void
+    protected function changeSense(mixed $value): void
     {
         $oldValue = $this->sessionValues->sense;
         if (\is_scalar($value) && (self::ASC === $value || self::DESC === $value)) {
@@ -602,10 +553,8 @@ class Crud
 
     /**
      * User action: Changes search form values.
-     *
-     * @param object $value
      */
-    protected function changeFilterValues($value): void
+    protected function changeFilterValues(SearcherInterface $value): void
     {
         if (!$this->searchForm) {
             return;
@@ -619,10 +568,8 @@ class Crud
 
     /**
      * User action: Changes page number.
-     *
-     * @param string $value Page number
      */
-    protected function changePage($value): void
+    protected function changePage(mixed $value): void
     {
         if (!\is_scalar($value)) {
             $value = 1;
@@ -869,12 +816,12 @@ class Crud
         return $this->sessionValues;
     }
 
-    public function getPaginator()
+    public function getPaginator(): ?PaginatorInterface
     {
         return $this->paginator;
     }
 
-    public function setPaginator($value)
+    public function setPaginator(PaginatorInterface $value)
     {
         $this->paginator = $value;
 
@@ -886,7 +833,7 @@ class Crud
      *
      * @return SearchFormBuilder (before clearTemplate) or FormView (after clearTemplate)
      */
-    public function getSearchForm()
+    public function getSearchForm(): SearchFormBuilder|FormView|null
     {
         return $this->searchForm;
     }
@@ -896,7 +843,7 @@ class Crud
      *
      * @return Form (before clearTemplate) or FormView (after clearTemplate)
      */
-    public function getDisplaySettingsForm()
+    public function getDisplaySettingsForm(): Form|FormView|null
     {
         return $this->displaySettingsForm;
     }

@@ -742,6 +742,10 @@ class CrudExtensionTest extends KernelTestCase
             ->disableOriginalConstructor()
             ->onlyMethods(['getDivIdList', 'getRouteName', 'getRouteParams', 'getSessionValues', 'getColumn'])
             ->getMock();
+        $reflection = new \ReflectionClass($crud);
+        $reflectionProperty = $reflection->getProperty('sessionName');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue($crud, 'session_name');
         $crud->expects($this->any())->method('getDivIdList')->willReturn('myId');
         $crud->expects($this->any())->method('getRouteName')->willReturn('user_crud');
         $crud->expects($this->any())->method('getRouteParams')->willReturn([]);

@@ -15,13 +15,8 @@ namespace Ecommit\CrudBundle\Crud;
 
 class CrudColumn
 {
-    public $id;
-    public $alias;
-    public $aliasSearch;
-    public $aliasSort;
-    public $label;
-    public $sortable;
-    public $defaultDisplayed;
+    public string $aliasSearch;
+    public string $aliasSort;
 
     /**
      * Constructor.
@@ -34,13 +29,8 @@ class CrudColumn
      * @param string $aliasSearch      Column SQL alias, used during searchs
      * @param string $aliasSort        Column(s) SQL alias (string or array of strings), used during sorting
      */
-    public function __construct(string $id, string $alias, ?string $label, bool $sortable, bool $defaultDisplayed, ?string $aliasSearch, ?string $aliasSort)
+    public function __construct(public string $id, public string $alias, public ?string $label, public bool $sortable, public bool $defaultDisplayed, ?string $aliasSearch, ?string $aliasSort)
     {
-        $this->id = $id;
-        $this->alias = $alias;
-        $this->label = $label;
-        $this->sortable = $sortable;
-        $this->defaultDisplayed = $defaultDisplayed;
         $this->aliasSearch = $aliasSearch ?: $alias;
         $this->aliasSort = $aliasSort ?: $alias;
     }

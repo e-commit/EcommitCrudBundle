@@ -20,45 +20,13 @@ class CrudSession
     /**
      * Search's object (used by "setData" inside the form). Used to
      * save the data of the search form.
-     *
-     * @var SearcherInterface
      */
-    public $searchFormData = null;
+    public ?SearcherInterface $searchFormData;
 
-    public $searchFormIsSubmittedAndValid = false;
-
-    /**
-     * Number of results, in one page.
-     *
-     * @var int
-     */
-    public $resultsPerPage = null;
-
-    /**
-     * Displayed colums.
-     *
-     * @var type
-     */
-    public $displayedColumns = [];
-
-    /**
-     * Sortable: Sort (Column id).
-     *
-     * @var type
-     */
-    public $sort = null;
-
-    /**
-     * Sortable: Sens (ASC / DESC).
-     *
-     * @var type
-     */
-    public $sense = null;
-
-    /**
-     * Page number.
-     *
-     * @var int
-     */
-    public $page = 1;
+    public int $resultsPerPage;
+    public array $displayedColumns = [];
+    public string $sort;
+    public string $sense;
+    public int $page = 1;
+    public bool $searchFormIsSubmittedAndValid = false;
 }

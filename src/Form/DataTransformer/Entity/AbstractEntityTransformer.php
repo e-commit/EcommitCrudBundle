@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Form\DataTransformer\Entity;
 
+use Doctrine\ORM\QueryBuilder;
 use Ecommit\ScalarValues\ScalarValues;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -20,28 +21,15 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 abstract class AbstractEntityTransformer implements DataTransformerInterface
 {
-    protected $queryBuilder;
-    protected $identifier;
-    protected $choiceLabel;
-    protected $throwExceptionIfValueNotFoundInReverse;
+    protected PropertyAccessor $accessor;
+    protected array $cachedResults = [];
 
-    /**
-     * @var PropertyAccessor
-     */
-    protected $accessor;
-
-    protected $cachedResults = [];
-
-    public function __construct($queryBuilder, $identifier, $choiceLabel, bool $throwExceptionIfValueNotFoundInReverse)
+    public function __construct(protected QueryBuilder $queryBuilder, protected string $identifier, protected mixed $choiceLabel, protected bool $throwExceptionIfValueNotFoundInReverse)
     {
-        $this->queryBuilder = $queryBuilder;
-        $this->identifier = $identifier;
-        $this->choiceLabel = $choiceLabel;
-        $this->throwExceptionIfValueNotFoundInReverse = $throwExceptionIfValueNotFoundInReverse;
         $this->accessor = PropertyAccess::createPropertyAccessor();
     }
 
-    protected function getCacheHash($id): string
+    protected function getCacheHash(mixed $id): string
     {
         if (\is_array($id)) {
             $id = ScalarValues::filterScalarValues($id);
@@ -60,7 +48,7 @@ abstract class AbstractEntityTransformer implements DataTransformerInterface
         ]));
     }
 
-    protected function extractLabel($entity): string
+    protected function extractLabel(object $entity): string
     {
         if ($this->choiceLabel) {
             if ($this->choiceLabel instanceof \Closure) {

@@ -24,7 +24,7 @@ trait CrudControllerTrait
 
     abstract protected function getTemplateName(string $action): string;
 
-    final protected function createCrud($sessionName): Crud
+    final protected function createCrud(string $sessionName): Crud
     {
         return $this->container->get(CrudFactory::class)->create($sessionName);
     }
@@ -58,7 +58,7 @@ trait CrudControllerTrait
         return $data;
     }
 
-    protected static function getCrudRequiredServices()
+    protected static function getCrudRequiredServices(): array
     {
         return [
             CrudFactory::class,
