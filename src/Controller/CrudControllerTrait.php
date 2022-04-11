@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Controller;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Crud\CrudFactory;
 use Ecommit\CrudBundle\Crud\CrudResponseGenerator;
@@ -63,6 +64,7 @@ trait CrudControllerTrait
         return [
             CrudFactory::class,
             CrudResponseGenerator::class,
+            'doctrine' => '?'.ManagerRegistry::class,
         ];
     }
 }

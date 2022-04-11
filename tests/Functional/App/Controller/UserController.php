@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Tests\Functional\App\Controller;
 
-use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Controller\AbstractCrudController;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Tests\Functional\App\Entity\TestUser;
@@ -64,12 +63,5 @@ class UserController extends AbstractCrudController
     public function ajaxCrudAction()
     {
         return $this->getAjaxCrudResponse();
-    }
-
-    public static function getSubscribedServices(): array
-    {
-        return array_merge(parent::getSubscribedServices(), [
-            'doctrine' => ManagerRegistry::class,
-        ]);
     }
 }
