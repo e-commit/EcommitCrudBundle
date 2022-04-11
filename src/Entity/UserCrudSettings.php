@@ -115,7 +115,7 @@ class UserCrudSettings
     /**
      * Create CrudSession from this object.
      */
-    public function transformToCrudSession(CrudSession $crudSessionManager): self
+    public function transformToCrudSession(CrudSession $crudSessionManager): CrudSession
     {
         $crudSessionManager->displayedColumns = $this->displayedColumns;
         $crudSessionManager->resultsPerPage = $this->resultsDisplayed;

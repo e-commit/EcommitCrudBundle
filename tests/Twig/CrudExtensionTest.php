@@ -729,14 +729,16 @@ class CrudExtensionTest extends KernelTestCase
             'column3' => new CrudColumn('column3', 'alias3', 'label3', false, true, 'alias3', 'alias3'),
             'column4' => new CrudColumn('column4', 'alias4', 'label4', true, true, 'alias4', 'alias4'),
         ];
-        $crudSession = new CrudSession();
-        $crudSession->displayedColumns = [
-            'column1',
-            'column2',
-            'column3',
-        ];
-        $crudSession->sort = $sort;
-        $crudSession->sense = $sense;
+        $crudSession = new CrudSession(
+            10,
+            [
+                'column1',
+                'column2',
+                'column3',
+            ],
+            $sort,
+            $sense,
+        );
 
         $crud = $this->getMockBuilder(Crud::class)
             ->disableOriginalConstructor()

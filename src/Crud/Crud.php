@@ -61,7 +61,6 @@ class Crud
         if (!preg_match('/^[a-zA-Z0-9_]{1,50}$/', $sessionName)) {
             throw new \Exception('Variable sessionName is not given or is invalid');
         }
-        $this->sessionValues = new CrudSession();
 
         return $this;
     }
@@ -439,8 +438,16 @@ class Crud
             return;
         }
 
-        // If session is null => Retrieve from database
-        // Only if persistent settings is enabled
+        // If session is null => Assign default value
+        $this->sessionValues = new CrudSession(
+            $this->defaultResultsPerPage,
+            $this->getDefaultDisplayedColumns(),
+            $this->defaultSort,
+            $this->defaultSense,
+            ($this->searchForm) ? $this->searchForm->getDefaultData() : null,
+        );
+
+        // If persistent settings is enabled -> Retrieve from database
         if ($this->persistentSettings) {
             $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
                 [
@@ -449,23 +456,11 @@ class Crud
                 ]
             );
             if ($objectDatabase) {
-                $this->sessionValues = $objectDatabase->transformToCrudSession(new CrudSession());
-                if ($this->searchForm) {
-                    $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();
-                }
+                $this->sessionValues = $objectDatabase->transformToCrudSession($this->sessionValues);
                 $this->checkCrudSession();
 
                 return;
             }
-        }
-
-        // Session and database values are null: Default values;
-        $this->sessionValues->displayedColumns = $this->getDefaultDisplayedColumns();
-        $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
-        $this->sessionValues->sense = $this->defaultSense;
-        $this->sessionValues->sort = $this->defaultSort;
-        if ($this->searchForm) {
-            $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();
         }
     }
 

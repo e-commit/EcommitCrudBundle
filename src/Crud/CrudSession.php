@@ -15,18 +15,15 @@ namespace Ecommit\CrudBundle\Crud;
 
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 
+/**
+ * $searchFormData: Search's object (used by "setData" inside the form). Used to save the data of the search form.
+ */
 class CrudSession
 {
-    /**
-     * Search's object (used by "setData" inside the form). Used to
-     * save the data of the search form.
-     */
-    public ?SearcherInterface $searchFormData;
-
-    public int $resultsPerPage;
-    public array $displayedColumns = [];
-    public string $sort;
-    public string $sense;
     public int $page = 1;
     public bool $searchFormIsSubmittedAndValid = false;
+
+    public function __construct(public int $resultsPerPage, public array $displayedColumns, public string $sort, public string $sense, public ?SearcherInterface $searchFormData = null)
+    {
+    }
 }
