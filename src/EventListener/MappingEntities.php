@@ -16,7 +16,7 @@ namespace Ecommit\CrudBundle\EventListener;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
-class MappingEntities
+final class MappingEntities
 {
     protected $isLoad = false;
 

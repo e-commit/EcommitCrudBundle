@@ -18,7 +18,7 @@ use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 /**
  * $searchFormData: Search's object (used by "setData" inside the form). Used to save the data of the search form.
  */
-class CrudSession
+final class CrudSession
 {
     public int $page = 1;
     public bool $searchFormIsSubmittedAndValid = false;

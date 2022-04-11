@@ -22,7 +22,7 @@ use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-class CrudExtension extends AbstractExtension
+final class CrudExtension extends AbstractExtension
 {
     protected $lastTdValues = [];
 

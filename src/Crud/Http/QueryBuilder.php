@@ -19,7 +19,7 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
-class QueryBuilder implements QueryBuilderInterface
+final class QueryBuilder implements QueryBuilderInterface
 {
     protected array $queryParameters = [];
     protected array $bodyParameters = [];

@@ -15,6 +15,9 @@ namespace Ecommit\CrudBundle\Crud\Http;
 
 use Ecommit\CrudBundle\Crud\QueryBuilderParameterInterface;
 
+/**
+ * @internal
+ */
 abstract class AbstractQueryBuilderParameter implements QueryBuilderParameterInterface
 {
     public function __construct(public mixed $value)

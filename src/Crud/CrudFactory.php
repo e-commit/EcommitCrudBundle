@@ -15,7 +15,7 @@ namespace Ecommit\CrudBundle\Crud;
 
 use Psr\Container\ContainerInterface;
 
-class CrudFactory
+final class CrudFactory
 {
     public function __construct(protected ContainerInterface $container)
     {

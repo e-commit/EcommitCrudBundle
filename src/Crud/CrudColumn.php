@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud;
 
-class CrudColumn
+final class CrudColumn
 {
     public string $aliasSearch;
     public string $aliasSort;

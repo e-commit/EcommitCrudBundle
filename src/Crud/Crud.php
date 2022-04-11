@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class Crud
+final class Crud
 {
     public const DESC = 'DESC';
     public const ASC = 'ASC';

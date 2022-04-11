@@ -22,7 +22,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Twig\Environment;
 
-class CrudResponseGenerator implements ServiceSubscriberInterface
+final class CrudResponseGenerator implements ServiceSubscriberInterface
 {
     public function __construct(protected ContainerInterface $container)
     {

@@ -11,10 +11,14 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
+use DG\BypassFinals;
+
 require __DIR__.'/Functional/App/config/bootstrap.php';
 
 function bootstrap(): void
 {
+    BypassFinals::enable();
+
     $kernel = new \Ecommit\CrudBundle\Tests\Functional\App\Kernel('test', true);
     $kernel->boot();
 
