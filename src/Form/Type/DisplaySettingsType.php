@@ -51,7 +51,7 @@ class DisplaySettingsType extends AbstractType
             'label' => 'display_settings.reset_display_settings',
             'translation_domain' => 'EcommitCrudBundle',
             'attr' => [
-                'class' => 'ec-crud-display-settings-raz',
+                'class' => 'ec-crud-display-settings-reset',
                 'data-reset-url' => $options['reset_settings_url'],
             ],
         ]);

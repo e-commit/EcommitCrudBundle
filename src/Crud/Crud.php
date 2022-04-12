@@ -109,7 +109,7 @@ final class Crud
         $this->processRequest();
 
         // Searcher form: Allocates object
-        if ($this->searchForm && !$this->container->get('request_stack')->getCurrentRequest()->query->has('raz')) {
+        if ($this->searchForm && !$this->container->get('request_stack')->getCurrentRequest()->query->has('reset')) {
             // IMPORTANT
             // We have not to allocate directelly the "$this->sessionValues->searchFormData" object
             // because otherwise it will be linked to form, and will be updated when the "bind" function will
@@ -490,7 +490,7 @@ final class Crud
         }
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
-        if ($request->query->has('raz')) {
+        if ($request->query->has('reset')) {
             return;
         }
         if ('POST' == $request->getMethod()) {
@@ -584,7 +584,7 @@ final class Crud
     /**
      * Reset search form values.
      */
-    public function raz(): void
+    public function reset(): void
     {
         $this->initIfNecessary();
         if ($this->searchForm) {
@@ -601,10 +601,7 @@ final class Crud
         }
     }
 
-    /**
-     * Reset sort.
-     */
-    public function razSort(): void
+    public function resetSort(): void
     {
         $this->initIfNecessary();
         $this->sessionValues->sense = $this->defaultSense;
@@ -612,10 +609,7 @@ final class Crud
         $this->save();
     }
 
-    /**
-     * Reset display settings.
-     */
-    protected function razDisplaySettings(): void
+    protected function resetDisplaySettings(): void
     {
         $this->sessionValues->displayedColumns = $this->getDefaultDisplayedColumns();
         $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
@@ -791,14 +785,14 @@ final class Crud
     protected function processRequest(): void
     {
         $request = $this->container->get('request_stack')->getCurrentRequest();
-        if ($request->query->has('razsettings')) {
+        if ($request->query->has('resetsettings')) {
             // Reset display settings
-            $this->razDisplaySettings();
+            $this->resetDisplaySettings();
 
             return;
         }
-        if ($request->query->has('raz')) {
-            $this->raz();
+        if ($request->query->has('reset')) {
+            $this->reset();
 
             return;
         }
@@ -850,7 +844,7 @@ final class Crud
             'results_per_page_choices' => $resultsPerPageChoices,
             'columns_choices' => $columnsChoices,
             'action' => $this->getUrl(['display-settings' => 1]),
-            'reset_settings_url' => $this->getUrl(['razsettings' => 1]),
+            'reset_settings_url' => $this->getUrl(['resetsettings' => 1]),
         ]);
     }
 

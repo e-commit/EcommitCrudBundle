@@ -562,7 +562,7 @@ final class CrudExtension extends AbstractExtension
             [
                 'data-crud-search-id' => $crud->getDivIdSearch(),
                 'data-crud-list-id' => $crud->getDivIdList(),
-                'data-ec-crud-ajax-url' => $crud->getSearchUrl(['raz' => 1]),
+                'data-ec-crud-ajax-url' => $crud->getSearchUrl(['reset' => 1]),
             ],
             $options['button_attr'],
             $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options']))

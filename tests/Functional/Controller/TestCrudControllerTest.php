@@ -302,7 +302,7 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testPersistentValuesAfterResetSettings
      */
-    public function testManualRaz(Client $client): Client
+    public function testManualReset(Client $client): Client
     {
         $client->request('GET', static::URL);
 
@@ -321,7 +321,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->waitForAjax($client);
         $this->assertSame([2, 3], $this->countRowsAndColumns($client->getCrawler()));
 
-        // Manuel RAZ (before CRUD initialization)
+        // Manuel RESET (before CRUD initialization)
         if (parse_url(static::URL, \PHP_URL_QUERY)) {
             $resetUrl = static::URL.'&manual-reset=1';
         } else {
@@ -335,9 +335,9 @@ class TestCrudControllerTest extends PantherTestCase
     }
 
     /**
-     * @depends testManualRaz
+     * @depends testManualReset
      */
-    public function testManualRazSort(Client $client): Client
+    public function testManualResetSort(Client $client): Client
     {
         $client->request('GET', static::URL);
 
@@ -355,7 +355,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([2, 3], $this->countRowsAndColumns($client->getCrawler()));
         $this->assertSame(['last_name', Crud::ASC], $this->getSort($client->getCrawler()));
 
-        // Manuel RAZ (before CRUD initialization)
+        // Manuel RESET (before CRUD initialization)
         if (parse_url(static::URL, \PHP_URL_QUERY)) {
             $resetUrl = static::URL.'&manual-reset-sort=1';
         } else {

@@ -70,7 +70,7 @@ $(document).on('click', 'button.ec-crud-display-settings-uncheck-all-columns', f
   })
 })
 
-$(document).on('click', 'button.ec-crud-display-settings-raz', function (event) {
+$(document).on('click', 'button.ec-crud-display-settings-reset', function (event) {
   const displaySettingsContainer = $(this).parents('div.ec-crud-display-settings')
   const displaySettingsContainerId = $(displaySettingsContainer).attr('id')
   const listId = $(displaySettingsContainer).attr('data-crud-list-id')

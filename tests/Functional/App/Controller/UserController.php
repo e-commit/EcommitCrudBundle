@@ -41,10 +41,10 @@ class UserController extends AbstractCrudController
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request->query->has('manual-reset')) {
-            $crud->raz();
+            $crud->reset();
         }
         if ($request->query->has('manual-reset-sort')) {
-            $crud->razSort();
+            $crud->resetSort();
         }
 
         return $crud;
