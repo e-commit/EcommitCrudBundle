@@ -626,7 +626,7 @@ final class Crud
         }
     }
 
-    public function createDisplaySettingsForm(): void
+    protected function createDisplaySettingsForm(): void
     {
         $resultsPerPageChoices = [];
         foreach ($this->getAvailableResultsPerPage() as $number) {
