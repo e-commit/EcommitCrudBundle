@@ -89,7 +89,7 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
 
         $crud->initIfNecessary();
         if ($request->query->has('search')) {
-            $crud->processForm();
+            $crud->processSearchForm();
         }
 
         if (null !== $options['before_build']) {

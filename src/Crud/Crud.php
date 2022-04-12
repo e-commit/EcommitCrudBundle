@@ -480,10 +480,7 @@ final class Crud
         return $this;
     }
 
-    /**
-     * Process search form.
-     */
-    public function processForm(): void
+    public function processSearchForm(): void
     {
         if (!$this->searchForm) {
             throw new NotFoundHttpException('Crud: Search form does not exist');
