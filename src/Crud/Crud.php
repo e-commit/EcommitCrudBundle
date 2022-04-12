@@ -77,17 +77,17 @@ final class Crud
 
         // Cheks not empty values
         $checkValues = [
-            'availableColumns',
-            'availableResultsPerPage',
-            'defaultSort',
-            'defaultSense',
-            'defaultResultsPerPage',
-            'queryBuilder',
-            'routeName',
+            'availableColumns' => 'addColumn',
+            'availableResultsPerPage' => 'setAvailableResultsPerPage',
+            'defaultResultsPerPage' => 'setAvailableResultsPerPage',
+            'defaultSort' => 'setDefaultSort',
+            'defaultSense' => 'setDefaultSort',
+            'queryBuilder' => 'setQueryBuilder',
+            'routeName' => 'setRoute',
         ];
-        foreach ($checkValues as $value) {
+        foreach ($checkValues as $value => $method) {
             if (empty($this->$value)) {
-                throw new \Exception('Config Crud: Option '.$value.' is required');
+                throw new \Exception(sprintf('The CRUD configuration is not complete. You must call the "%s" method.', $method));
             }
         }
 
