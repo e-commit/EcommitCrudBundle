@@ -187,6 +187,40 @@ final class Crud
     }
 
     /**
+     * Returns availabled columns.
+     */
+    public function getColumns(): array
+    {
+        return $this->availableColumns;
+    }
+
+    public function getColumn(string $columnId): CrudColumn
+    {
+        if (isset($this->availableColumns[$columnId])) {
+            return $this->availableColumns[$columnId];
+        }
+        throw new \Exception('Crud: Column '.$columnId.' does not exist');
+    }
+
+    /**
+     * Return default displayed columns.
+     */
+    public function getDefaultDisplayedColumns(): array
+    {
+        $columns = [];
+        foreach ($this->availableColumns as $column) {
+            if ($column->defaultDisplayed) {
+                $columns[] = $column->id;
+            }
+        }
+        if (0 == \count($columns)) {
+            throw new \Exception('Config Crud: One column displayed is required');
+        }
+
+        return $columns;
+    }
+
+    /**
      * Add a virtual column inside the crud.
      *
      * @param string $id          Column id (used everywhere inside the crud)
@@ -198,6 +232,22 @@ final class Crud
         $this->availableVirtualColumns[$id] = $column;
 
         return $this;
+    }
+
+    /**
+     * Returns availabled virtual columns.
+     */
+    public function getVirtualColumns(): array
+    {
+        return $this->availableVirtualColumns;
+    }
+
+    public function getVirtualColumn(string $columnId): CrudColumn
+    {
+        if (isset($this->availableVirtualColumns[$columnId])) {
+            return $this->availableVirtualColumns[$columnId];
+        }
+        throw new \Exception('Crud: Column '.$columnId.' does not exist');
     }
 
     public function getQueryBuilder(): \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null
@@ -215,6 +265,14 @@ final class Crud
     public function getAvailableResultsPerPage(): array
     {
         return $this->availableResultsPerPage;
+    }
+
+    /**
+     * Return default results per page.
+     */
+    public function getDefaultResultsPerPage(): ?int
+    {
+        return $this->defaultResultsPerPage;
     }
 
     public function setAvailableResultsPerPage(array $availableResultsPerPage, int $defaultValue): self
@@ -309,12 +367,56 @@ final class Crud
         return $this->container->get('router')->generate($this->routeName, $parameters);
     }
 
+    public function getSessionName(): string
+    {
+        return $this->sessionName;
+    }
+
+    public function getDisplayResultsOnlyIfSearch(): bool
+    {
+        return $this->displayResultsOnlyIfSearch;
+    }
+
+    public function setDisplayResultsOnlyIfSearch(bool $displayResultsOnlyIfSearch): self
+    {
+        $this->displayResultsOnlyIfSearch = $displayResultsOnlyIfSearch;
+
+        return $this;
+    }
+
+    public function getDisplayResults(): bool
+    {
+        return $this->displayResults;
+    }
+
+    public function setDisplayResults(bool $displayResults): self
+    {
+        $this->displayResults = $displayResults;
+        if (false === $displayResults && $this->paginator) {
+            $this->paginator = null;
+        }
+
+        return $this;
+    }
+
     /**
      * Enables (or not) the auto build paginator.
      */
     public function setBuildPaginator(bool|\Closure|array $value): self
     {
         $this->buildPaginator = $value;
+
+        return $this;
+    }
+
+    public function getPaginator(): ?PaginatorInterface
+    {
+        return $this->paginator;
+    }
+
+    public function setPaginator(?PaginatorInterface $value): self
+    {
+        $this->paginator = $value;
 
         return $this;
     }
@@ -332,9 +434,48 @@ final class Crud
         return $this;
     }
 
+    public function getSessionValues(): CrudSession
+    {
+        return $this->sessionValues;
+    }
+
+    /**
+     * Returns the search form.
+     *
+     * @return SearchFormBuilder (before clearTemplate) or FormView (after clearTemplate)
+     */
+    public function getSearchForm(): SearchFormBuilder|FormView|null
+    {
+        return $this->searchForm;
+    }
+
     public function createSearchForm(SearcherInterface $defaultData, ?string $type = null, array $options = []): self
     {
         $this->searchForm = new SearchFormBuilder($this->container, $this, $defaultData, $type, $options);
+
+        return $this;
+    }
+
+    public function getDivIdSearch(): string
+    {
+        return $this->divIdSearch;
+    }
+
+    public function setDivIdSearch(string $divIdSearch): self
+    {
+        $this->divIdSearch = $divIdSearch;
+
+        return $this;
+    }
+
+    public function getDivIdList(): string
+    {
+        return $this->divIdList;
+    }
+
+    public function setDivIdList(string $divIdList): self
+    {
+        $this->divIdList = $divIdList;
 
         return $this;
     }
@@ -368,114 +509,162 @@ final class Crud
         }
     }
 
+    /**
+     * Builds the query.
+     */
+    public function buildQuery(): void
+    {
+        // Builds query
+        $columnSortId = $this->sessionValues->sort;
+        if ('defaultPersonalizedSort' == $columnSortId) {
+            // Default personalised sort is used
+            foreach ($this->defaultPersonalizedSort as $key => $value) {
+                if (\is_int($key)) {
+                    $sort = $value;
+                    $sense = $this->defaultSense;
+                } else {
+                    $sort = $key;
+                    $sense = $value;
+                }
+                $this->queryBuilder->addOrderBy($sort, $sense);
+            }
+        } else {
+            $columnSortAlias = $this->availableColumns[$columnSortId]->aliasSort;
+            if (empty($columnSortAlias)) {
+                // Sort alias is not defined. Alias is used
+                $columnSortAlias = $this->availableColumns[$columnSortId]->alias;
+                $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
+            } elseif (\is_array($columnSortAlias)) {
+                // Sort alias is defined in many columns
+                foreach ($columnSortAlias as $oneColumnSortAlias) {
+                    $this->queryBuilder->addOrderBy($oneColumnSortAlias, $this->sessionValues->sense);
+                }
+            } else {
+                // Sort alias is defined in one column
+                $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
+            }
+        }
+
+        // Adds form searcher filters
+        if ($this->searchForm) {
+            $this->searchForm->updateQueryBuilder($this->queryBuilder, $this->sessionValues->searchFormData);
+        }
+
+        // Builds paginator
+        if ($this->displayResults) {
+            if (\is_object($this->buildPaginator) && $this->buildPaginator instanceof \Closure) {
+                // Case: Manual paginator (by closure) is enabled
+                $this->paginator = $this->buildPaginator->__invoke(
+                    $this->queryBuilder,
+                    $this->sessionValues->page,
+                    $this->sessionValues->resultsPerPage
+                );
+            } elseif (true === $this->buildPaginator || \is_array($this->buildPaginator)) {
+                // Case: Auto paginator is enabled
+                $paginatorOptions = [];
+                if (\is_array($this->buildPaginator)) {
+                    $paginatorOptions = $this->buildPaginator;
+                }
+
+                $this->paginator = DoctrinePaginatorBuilder::createDoctrinePaginator(
+                    $this->queryBuilder,
+                    $this->sessionValues->page,
+                    $this->sessionValues->resultsPerPage,
+                    $paginatorOptions
+                );
+            }
+        }
+    }
+
+    /**
+     * Reset search form values.
+     */
+    public function raz(): void
+    {
+        $this->initIfNecessary();
+        if ($this->searchForm) {
+            $newValue = clone $this->searchForm->getDefaultData();
+            $this->changeFilterValues($newValue);
+            $this->searchForm->getForm()->setData(clone $newValue);
+            $this->sessionValues->searchFormIsSubmittedAndValid = false;
+        }
+        $this->changePage(1);
+        $this->save();
+
+        if ($this->displayResultsOnlyIfSearch) {
+            $this->displayResults = false;
+        }
+    }
+
+    /**
+     * Reset sort.
+     */
+    public function razSort(): void
+    {
+        $this->initIfNecessary();
+        $this->sessionValues->sense = $this->defaultSense;
+        $this->sessionValues->sort = $this->defaultSort;
+        $this->save();
+    }
+
+    /**
+     * Reset display settings.
+     */
+    protected function razDisplaySettings(): void
+    {
+        $this->sessionValues->displayedColumns = $this->getDefaultDisplayedColumns();
+        $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
+        $this->sessionValues->sense = $this->defaultSense;
+        $this->sessionValues->sort = $this->defaultSort;
+
+        if ($this->persistentSettings) {
+            // Remove settings in database
+            $qb = $this->container->get('doctrine')->getManager()->createQueryBuilder();
+            $qb->delete('EcommitCrudBundle:UserCrudSettings', 's')
+                ->andWhere('s.user = :user AND s.crudName = :crud_name')
+                ->setParameters(['user' => $this->container->get('security.token_storage')->getToken()->getUser(), 'crud_name' => $this->sessionName])
+                ->getQuery()
+                ->execute();
+        }
+    }
+
+    /**
+     * Clears this object, before sending it to template.
+     */
+    public function clearTemplate(): void
+    {
+        if ($this->searchForm) {
+            $this->searchForm->createFormView();
+            $this->searchForm = $this->searchForm->getForm();
+        }
+        $this->displaySettingsForm = $this->displaySettingsForm->createView();
+    }
+
+    public function getTwigFunctionsConfiguration(): array
+    {
+        return $this->twigFunctionsConfiguration;
+    }
+
+    public function getTwigFunctionConfiguration(string $function): array
+    {
+        if (isset($this->twigFunctionsConfiguration[$function])) {
+            return $this->twigFunctionsConfiguration[$function];
+        }
+
+        return [];
+    }
+
+    public function setTwigFunctionsConfiguration(array $twigFunctionsConfiguration): self
+    {
+        $this->twigFunctionsConfiguration = $twigFunctionsConfiguration;
+
+        return $this;
+    }
+
     protected function testIfDatabaseMustMeUpdated(mixed $oldValue, mixed $new_value): void
     {
         if ($oldValue != $new_value) {
             $this->updateDatabase = true;
-        }
-    }
-
-    /**
-     * Saves user value.
-     */
-    protected function save(): void
-    {
-        // Save in session
-        $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
-        $sessionValues = clone $this->sessionValues;
-        if (\is_object($this->sessionValues->searchFormData)) {
-            $sessionValues->searchFormData = clone $this->sessionValues->searchFormData;
-        }
-        $session->set($this->sessionName, $sessionValues);
-
-        // Save in database
-        if ($this->persistentSettings && $this->updateDatabase) {
-            $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
-                [
-                    'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
-                    'crudName' => $this->sessionName,
-                ]
-            );
-            $em = $this->container->get('doctrine')->getManager();
-
-            if ($objectDatabase) {
-                // Update object in database
-                $objectDatabase->updateFromSessionManager($this->sessionValues);
-                $em->flush();
-            } else {
-                // Create object in database only if not default values
-                if ($this->sessionValues->displayedColumns != $this->getDefaultDisplayedColumns() ||
-                    $this->sessionValues->resultsPerPage != $this->defaultResultsPerPage ||
-                    $this->sessionValues->sense != $this->defaultSense ||
-                    $this->sessionValues->sort != $this->defaultSort
-                ) {
-                    $objectDatabase = new UserCrudSettings();
-                    $objectDatabase->setUser($this->container->get('security.token_storage')->getToken()->getUser());
-                    $objectDatabase->setCrudName($this->sessionName);
-                    $objectDatabase->updateFromSessionManager($this->sessionValues);
-                    $em->persist($objectDatabase);
-                    $em->flush();
-                }
-            }
-        }
-    }
-
-    /**
-     * Return default displayed columns.
-     */
-    public function getDefaultDisplayedColumns(): array
-    {
-        $columns = [];
-        foreach ($this->availableColumns as $column) {
-            if ($column->defaultDisplayed) {
-                $columns[] = $column->id;
-            }
-        }
-        if (0 == \count($columns)) {
-            throw new \Exception('Config Crud: One column displayed is required');
-        }
-
-        return $columns;
-    }
-
-    /**
-     * Load user values.
-     */
-    protected function load(): void
-    {
-        $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
-        $object = $session->get($this->sessionName); // Load from session
-
-        if (!empty($object)) {
-            $this->sessionValues = $object;
-            $this->checkCrudSession();
-
-            return;
-        }
-
-        // If session is null => Assign default value
-        $this->sessionValues = new CrudSession(
-            $this->defaultResultsPerPage,
-            $this->getDefaultDisplayedColumns(),
-            $this->defaultSort,
-            $this->defaultSense,
-            ($this->searchForm) ? $this->searchForm->getDefaultData() : null,
-        );
-
-        // If persistent settings is enabled -> Retrieve from database
-        if ($this->persistentSettings) {
-            $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
-                [
-                    'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
-                    'crudName' => $this->sessionName,
-                ]
-            );
-            if ($objectDatabase) {
-                $this->sessionValues = $objectDatabase->transformToCrudSession($this->sessionValues);
-                $this->checkCrudSession();
-
-                return;
-            }
         }
     }
 
@@ -626,6 +815,16 @@ final class Crud
         }
     }
 
+    /**
+     * Returns the search form.
+     *
+     * @return Form (before clearTemplate) or FormView (after clearTemplate)
+     */
+    public function getDisplaySettingsForm(): Form|FormView|null
+    {
+        return $this->displaySettingsForm;
+    }
+
     protected function createDisplaySettingsForm(): void
     {
         $resultsPerPageChoices = [];
@@ -651,287 +850,88 @@ final class Crud
     }
 
     /**
-     * Reset display settings.
+     * Load user values.
      */
-    protected function razDisplaySettings(): void
+    protected function load(): void
     {
-        $this->sessionValues->displayedColumns = $this->getDefaultDisplayedColumns();
-        $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
-        $this->sessionValues->sense = $this->defaultSense;
-        $this->sessionValues->sort = $this->defaultSort;
+        $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
+        $object = $session->get($this->sessionName); // Load from session
 
+        if (!empty($object)) {
+            $this->sessionValues = $object;
+            $this->checkCrudSession();
+
+            return;
+        }
+
+        // If session is null => Assign default value
+        $this->sessionValues = new CrudSession(
+            $this->defaultResultsPerPage,
+            $this->getDefaultDisplayedColumns(),
+            $this->defaultSort,
+            $this->defaultSense,
+            ($this->searchForm) ? $this->searchForm->getDefaultData() : null,
+        );
+
+        // If persistent settings is enabled -> Retrieve from database
         if ($this->persistentSettings) {
-            // Remove settings in database
-            $qb = $this->container->get('doctrine')->getManager()->createQueryBuilder();
-            $qb->delete('EcommitCrudBundle:UserCrudSettings', 's')
-                ->andWhere('s.user = :user AND s.crudName = :crud_name')
-                ->setParameters(['user' => $this->container->get('security.token_storage')->getToken()->getUser(), 'crud_name' => $this->sessionName])
-                ->getQuery()
-                ->execute();
-        }
-    }
+            $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
+                [
+                    'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
+                    'crudName' => $this->sessionName,
+                ]
+            );
+            if ($objectDatabase) {
+                $this->sessionValues = $objectDatabase->transformToCrudSession($this->sessionValues);
+                $this->checkCrudSession();
 
-    /**
-     * Reset search form values.
-     */
-    public function raz(): void
-    {
-        $this->initIfNecessary();
-        if ($this->searchForm) {
-            $newValue = clone $this->searchForm->getDefaultData();
-            $this->changeFilterValues($newValue);
-            $this->searchForm->getForm()->setData(clone $newValue);
-            $this->sessionValues->searchFormIsSubmittedAndValid = false;
-        }
-        $this->changePage(1);
-        $this->save();
-
-        if ($this->displayResultsOnlyIfSearch) {
-            $this->displayResults = false;
-        }
-    }
-
-    /**
-     * Reset sort.
-     */
-    public function razSort(): void
-    {
-        $this->initIfNecessary();
-        $this->sessionValues->sense = $this->defaultSense;
-        $this->sessionValues->sort = $this->defaultSort;
-        $this->save();
-    }
-
-    /**
-     * Builds the query.
-     */
-    public function buildQuery(): void
-    {
-        // Builds query
-        $columnSortId = $this->sessionValues->sort;
-        if ('defaultPersonalizedSort' == $columnSortId) {
-            // Default personalised sort is used
-            foreach ($this->defaultPersonalizedSort as $key => $value) {
-                if (\is_int($key)) {
-                    $sort = $value;
-                    $sense = $this->defaultSense;
-                } else {
-                    $sort = $key;
-                    $sense = $value;
-                }
-                $this->queryBuilder->addOrderBy($sort, $sense);
+                return;
             }
-        } else {
-            $columnSortAlias = $this->availableColumns[$columnSortId]->aliasSort;
-            if (empty($columnSortAlias)) {
-                // Sort alias is not defined. Alias is used
-                $columnSortAlias = $this->availableColumns[$columnSortId]->alias;
-                $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
-            } elseif (\is_array($columnSortAlias)) {
-                // Sort alias is defined in many columns
-                foreach ($columnSortAlias as $oneColumnSortAlias) {
-                    $this->queryBuilder->addOrderBy($oneColumnSortAlias, $this->sessionValues->sense);
-                }
+        }
+    }
+
+    /**
+     * Saves user value.
+     */
+    protected function save(): void
+    {
+        // Save in session
+        $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
+        $sessionValues = clone $this->sessionValues;
+        if (\is_object($this->sessionValues->searchFormData)) {
+            $sessionValues->searchFormData = clone $this->sessionValues->searchFormData;
+        }
+        $session->set($this->sessionName, $sessionValues);
+
+        // Save in database
+        if ($this->persistentSettings && $this->updateDatabase) {
+            $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
+                [
+                    'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
+                    'crudName' => $this->sessionName,
+                ]
+            );
+            $em = $this->container->get('doctrine')->getManager();
+
+            if ($objectDatabase) {
+                // Update object in database
+                $objectDatabase->updateFromSessionManager($this->sessionValues);
+                $em->flush();
             } else {
-                // Sort alias is defined in one column
-                $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
-            }
-        }
-
-        // Adds form searcher filters
-        if ($this->searchForm) {
-            $this->searchForm->updateQueryBuilder($this->queryBuilder, $this->sessionValues->searchFormData);
-        }
-
-        // Builds paginator
-        if ($this->displayResults) {
-            if (\is_object($this->buildPaginator) && $this->buildPaginator instanceof \Closure) {
-                // Case: Manual paginator (by closure) is enabled
-                $this->paginator = $this->buildPaginator->__invoke(
-                    $this->queryBuilder,
-                    $this->sessionValues->page,
-                    $this->sessionValues->resultsPerPage
-                );
-            } elseif (true === $this->buildPaginator || \is_array($this->buildPaginator)) {
-                // Case: Auto paginator is enabled
-                $paginatorOptions = [];
-                if (\is_array($this->buildPaginator)) {
-                    $paginatorOptions = $this->buildPaginator;
+                // Create object in database only if not default values
+                if ($this->sessionValues->displayedColumns != $this->getDefaultDisplayedColumns() ||
+                    $this->sessionValues->resultsPerPage != $this->defaultResultsPerPage ||
+                    $this->sessionValues->sense != $this->defaultSense ||
+                    $this->sessionValues->sort != $this->defaultSort
+                ) {
+                    $objectDatabase = new UserCrudSettings();
+                    $objectDatabase->setUser($this->container->get('security.token_storage')->getToken()->getUser());
+                    $objectDatabase->setCrudName($this->sessionName);
+                    $objectDatabase->updateFromSessionManager($this->sessionValues);
+                    $em->persist($objectDatabase);
+                    $em->flush();
                 }
-
-                $this->paginator = DoctrinePaginatorBuilder::createDoctrinePaginator(
-                    $this->queryBuilder,
-                    $this->sessionValues->page,
-                    $this->sessionValues->resultsPerPage,
-                    $paginatorOptions
-                );
             }
         }
-    }
-
-    /**
-     * Return default results per page.
-     */
-    public function getDefaultResultsPerPage(): ?int
-    {
-        return $this->defaultResultsPerPage;
-    }
-
-    /**
-     * Clears this object, before sending it to template.
-     */
-    public function clearTemplate(): void
-    {
-        if ($this->searchForm) {
-            $this->searchForm->createFormView();
-            $this->searchForm = $this->searchForm->getForm();
-        }
-        $this->displaySettingsForm = $this->displaySettingsForm->createView();
-    }
-
-    /**
-     * Returns availabled columns.
-     */
-    public function getColumns(): array
-    {
-        return $this->availableColumns;
-    }
-
-    public function getColumn(string $columnId): CrudColumn
-    {
-        if (isset($this->availableColumns[$columnId])) {
-            return $this->availableColumns[$columnId];
-        }
-        throw new \Exception('Crud: Column '.$columnId.' does not exist');
-    }
-
-    /**
-     * Returns availabled virtual columns.
-     */
-    public function getVirtualColumns(): array
-    {
-        return $this->availableVirtualColumns;
-    }
-
-    public function getVirtualColumn(string $columnId): CrudColumn
-    {
-        if (isset($this->availableVirtualColumns[$columnId])) {
-            return $this->availableVirtualColumns[$columnId];
-        }
-        throw new \Exception('Crud: Column '.$columnId.' does not exist');
-    }
-
-    public function getSessionValues(): CrudSession
-    {
-        return $this->sessionValues;
-    }
-
-    public function getPaginator(): ?PaginatorInterface
-    {
-        return $this->paginator;
-    }
-
-    public function setPaginator(?PaginatorInterface $value): self
-    {
-        $this->paginator = $value;
-
-        return $this;
-    }
-
-    /**
-     * Returns the search form.
-     *
-     * @return SearchFormBuilder (before clearTemplate) or FormView (after clearTemplate)
-     */
-    public function getSearchForm(): SearchFormBuilder|FormView|null
-    {
-        return $this->searchForm;
-    }
-
-    /**
-     * Returns the search form.
-     *
-     * @return Form (before clearTemplate) or FormView (after clearTemplate)
-     */
-    public function getDisplaySettingsForm(): Form|FormView|null
-    {
-        return $this->displaySettingsForm;
-    }
-
-    public function getDivIdSearch(): string
-    {
-        return $this->divIdSearch;
-    }
-
-    public function setDivIdSearch(string $divIdSearch): self
-    {
-        $this->divIdSearch = $divIdSearch;
-
-        return $this;
-    }
-
-    public function getDivIdList(): string
-    {
-        return $this->divIdList;
-    }
-
-    public function setDivIdList(string $divIdList): self
-    {
-        $this->divIdList = $divIdList;
-
-        return $this;
-    }
-
-    public function getSessionName(): string
-    {
-        return $this->sessionName;
-    }
-
-    public function getDisplayResultsOnlyIfSearch(): bool
-    {
-        return $this->displayResultsOnlyIfSearch;
-    }
-
-    public function setDisplayResultsOnlyIfSearch(bool $displayResultsOnlyIfSearch): self
-    {
-        $this->displayResultsOnlyIfSearch = $displayResultsOnlyIfSearch;
-
-        return $this;
-    }
-
-    public function getDisplayResults(): bool
-    {
-        return $this->displayResults;
-    }
-
-    public function setDisplayResults(bool $displayResults): self
-    {
-        $this->displayResults = $displayResults;
-        if (false === $displayResults && $this->paginator) {
-            $this->paginator = null;
-        }
-
-        return $this;
-    }
-
-    public function getTwigFunctionsConfiguration(): array
-    {
-        return $this->twigFunctionsConfiguration;
-    }
-
-    public function getTwigFunctionConfiguration(string $function): array
-    {
-        if (isset($this->twigFunctionsConfiguration[$function])) {
-            return $this->twigFunctionsConfiguration[$function];
-        }
-
-        return [];
-    }
-
-    public function setTwigFunctionsConfiguration(array $twigFunctionsConfiguration): self
-    {
-        $this->twigFunctionsConfiguration = $twigFunctionsConfiguration;
-
-        return $this;
     }
 }
