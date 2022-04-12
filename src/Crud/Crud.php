@@ -907,6 +907,9 @@ final class Crud
     public function setDisplayResults(bool $displayResults): self
     {
         $this->displayResults = $displayResults;
+        if (false === $displayResults && $this->paginator) {
+            $this->paginator = null;
+        }
 
         return $this;
     }
