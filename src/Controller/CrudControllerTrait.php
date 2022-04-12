@@ -44,8 +44,8 @@ trait CrudControllerTrait
     {
         return [
             'template_generator' => fn (string $action) => $this->getTemplateName($action),
-            'before_build_query' => fn (Crud $crud, $data) => $this->beforeBuildQuery($crud, $data),
-            'after_build_query' => fn (Crud $crud, $data) => $this->afterBuildQuery($crud, $data),
+            'before_build_query' => fn (Crud $crud, array $data) => $this->beforeBuildQuery($crud, $data),
+            'after_build_query' => fn (Crud $crud, array $data) => $this->afterBuildQuery($crud, $data),
         ];
     }
 

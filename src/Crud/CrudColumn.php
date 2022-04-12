@@ -29,7 +29,7 @@ final class CrudColumn
      * @param string $aliasSearch      Column SQL alias, used during searchs
      * @param string $aliasSort        Column(s) SQL alias (string or array of strings), used during sorting
      */
-    public function __construct(public string $id, public string $alias, public ?string $label, public bool $sortable, public bool $defaultDisplayed, ?string $aliasSearch, ?string $aliasSort)
+    public function __construct(public string $id, public string $alias, public ?string $label, public bool $sortable, public bool $defaultDisplayed, ?string $aliasSearch = null, ?string $aliasSort = null)
     {
         $this->aliasSearch = $aliasSearch ?: $alias;
         $this->aliasSort = $aliasSort ?: $alias;

@@ -32,26 +32,26 @@ final class Crud
     public const ASC = 'ASC';
 
     protected CrudSession $sessionValues;
-    protected SearchFormBuilder|FormView|null $searchForm;
-    protected Form|FormView|null $displaySettingsForm;
+    protected SearchFormBuilder|FormView|null $searchForm = null;
+    protected Form|FormView|null $displaySettingsForm = null;
     protected bool $isInitialized = false;
     protected bool $initializationInProgress = false;
     protected array $availableColumns = [];
     protected array $availableVirtualColumns = [];
     protected array $availableResultsPerPage = [];
-    protected ?string $defaultSort;
+    protected ?string $defaultSort = null;
     protected array $defaultPersonalizedSort = [];
-    protected ?string $defaultSense;
-    protected ?int $defaultResultsPerPage;
-    protected \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null $queryBuilder;
+    protected ?string $defaultSense = null;
+    protected ?int $defaultResultsPerPage = null;
+    protected \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null $queryBuilder = null;
     protected bool $persistentSettings = false;
     protected bool $updateDatabase = false;
-    protected ?PaginatorInterface $paginator;
+    protected ?PaginatorInterface $paginator = null;
     protected bool|\Closure|array $buildPaginator = true;
     protected bool $displayResultsOnlyIfSearch = false;
     protected bool $displayResults = true;
     protected array $twigFunctionsConfiguration = [];
-    protected ?string $routeName;
+    protected ?string $routeName = null;
     protected array $routeParams = [];
     protected string $divIdSearch = 'crud_search';
     protected string $divIdList = 'crud_list';
@@ -816,7 +816,7 @@ final class Crud
         return $this->paginator;
     }
 
-    public function setPaginator(PaginatorInterface $value)
+    public function setPaginator(?PaginatorInterface $value): self
     {
         $this->paginator = $value;
 
@@ -867,7 +867,7 @@ final class Crud
         return $this;
     }
 
-    public function getSessionName(): ?string
+    public function getSessionName(): string
     {
         return $this->sessionName;
     }
