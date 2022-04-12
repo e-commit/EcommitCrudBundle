@@ -225,6 +225,16 @@ final class Crud
         return $this;
     }
 
+    public function getDefaultSort(): ?string
+    {
+        return $this->defaultSort;
+    }
+
+    public function getDefaultSense(): ?string
+    {
+        return $this->defaultSense;
+    }
+
     /**
      * Set the default sort.
      *
@@ -237,6 +247,11 @@ final class Crud
         $this->defaultSense = $sense;
 
         return $this;
+    }
+
+    public function getDefaultPersonalizedSort(): array
+    {
+        return $this->defaultPersonalizedSort;
     }
 
     /**
