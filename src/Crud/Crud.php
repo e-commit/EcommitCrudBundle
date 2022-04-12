@@ -654,9 +654,9 @@ final class Crud
         return $this;
     }
 
-    protected function testIfDatabaseMustMeUpdated(mixed $oldValue, mixed $new_value): void
+    protected function testIfDatabaseMustMeUpdated(mixed $oldValue, mixed $newValue): void
     {
-        if ($oldValue != $new_value) {
+        if ($oldValue != $newValue) {
             $this->updateDatabase = true;
         }
     }
@@ -697,9 +697,9 @@ final class Crud
         $oldValue = $this->sessionValues->displayedColumns;
         $newDisplayedColumns = [];
         $availableColumns = $this->availableColumns;
-        foreach ($value as $column_name) {
-            if (\array_key_exists($column_name, $availableColumns)) {
-                $newDisplayedColumns[] = $column_name;
+        foreach ($value as $columnName) {
+            if (\array_key_exists($columnName, $availableColumns)) {
+                $newDisplayedColumns[] = $columnName;
             }
         }
         if (0 == \count($newDisplayedColumns)) {
