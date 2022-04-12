@@ -509,10 +509,13 @@ final class Crud
         }
     }
 
-    /**
-     * Builds the query.
-     */
-    public function buildQuery(): void
+    public function build(): void
+    {
+        $this->updateQueryBuilder();
+        $this->buildPaginator();
+    }
+
+    protected function updateQueryBuilder(): void
     {
         // Builds query
         $columnSortId = $this->sessionValues->sort;
@@ -530,17 +533,13 @@ final class Crud
             }
         } else {
             $columnSortAlias = $this->availableColumns[$columnSortId]->aliasSort;
-            if (empty($columnSortAlias)) {
-                // Sort alias is not defined. Alias is used
-                $columnSortAlias = $this->availableColumns[$columnSortId]->alias;
-                $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
-            } elseif (\is_array($columnSortAlias)) {
-                // Sort alias is defined in many columns
+            if (\is_array($columnSortAlias)) {
+                // Sort alias in many columns
                 foreach ($columnSortAlias as $oneColumnSortAlias) {
                     $this->queryBuilder->addOrderBy($oneColumnSortAlias, $this->sessionValues->sense);
                 }
             } else {
-                // Sort alias is defined in one column
+                // Sort alias in one column
                 $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
             }
         }
@@ -549,31 +548,37 @@ final class Crud
         if ($this->searchForm) {
             $this->searchForm->updateQueryBuilder($this->queryBuilder, $this->sessionValues->searchFormData);
         }
+    }
 
-        // Builds paginator
-        if ($this->displayResults) {
-            if (\is_object($this->buildPaginator) && $this->buildPaginator instanceof \Closure) {
-                // Case: Manual paginator (by closure) is enabled
-                $this->paginator = $this->buildPaginator->__invoke(
-                    $this->queryBuilder,
-                    $this->sessionValues->page,
-                    $this->sessionValues->resultsPerPage
-                );
-            } elseif (true === $this->buildPaginator || \is_array($this->buildPaginator)) {
-                // Case: Auto paginator is enabled
-                $paginatorOptions = [];
-                if (\is_array($this->buildPaginator)) {
-                    $paginatorOptions = $this->buildPaginator;
-                }
-
-                $this->paginator = DoctrinePaginatorBuilder::createDoctrinePaginator(
-                    $this->queryBuilder,
-                    $this->sessionValues->page,
-                    $this->sessionValues->resultsPerPage,
-                    $paginatorOptions
-                );
-            }
+    protected function buildPaginator(): void
+    {
+        if (!$this->displayResults || false === $this->buildPaginator) {
+            return;
         }
+
+        if (\is_object($this->buildPaginator) && $this->buildPaginator instanceof \Closure) {
+            // Case: Manual paginator (by closure) is enabled
+            $this->paginator = $this->buildPaginator->__invoke(
+                $this->queryBuilder,
+                $this->sessionValues->page,
+                $this->sessionValues->resultsPerPage
+            );
+
+            return;
+        }
+
+        // Case: Auto paginator is enabled
+        $paginatorOptions = [];
+        if (\is_array($this->buildPaginator)) {
+            $paginatorOptions = $this->buildPaginator;
+        }
+
+        $this->paginator = DoctrinePaginatorBuilder::createDoctrinePaginator(
+            $this->queryBuilder,
+            $this->sessionValues->page,
+            $this->sessionValues->resultsPerPage,
+            $paginatorOptions
+        );
     }
 
     /**

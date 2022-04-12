@@ -40,7 +40,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
         $this->assertSame(['first_name', Crud::ASC], $this->getSort($client->getCrawler()));
         $this->assertSame('AudeJavel', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -58,7 +58,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
         $this->assertSame(['first_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('YvonEmbavé', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -76,7 +76,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('ClémentTine', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -97,7 +97,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('ClémentTine', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -119,7 +119,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 2], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('ClémentTine', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -135,7 +135,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 2], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('ClémentTine', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -153,7 +153,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([2, 2], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('JudieCieux', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -169,7 +169,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([2, 2], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('JudieCieux', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -188,7 +188,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 1], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('HenriPoste', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -204,7 +204,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 1], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('HenriPoste', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -223,7 +223,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 1], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('HenriPlait', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -241,7 +241,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 2], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('ClémentTine', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -257,7 +257,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 2], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
         $this->assertSame('ClémentTine', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -278,7 +278,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
         $this->assertSame(['first_name', Crud::ASC], $this->getSort($client->getCrawler()));
         $this->assertSame('AudeJavel', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -294,7 +294,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
         $this->assertSame(['first_name', Crud::ASC], $this->getSort($client->getCrawler()));
         $this->assertSame('AudeJavel', $this->getFirstUsername($client->getCrawler()));
-        $this->checkBeforeAndAfterBuildQuery($client->getCrawler());
+        $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
@@ -369,15 +369,15 @@ class TestCrudControllerTest extends PantherTestCase
         return $client;
     }
 
-    protected function checkBeforeAndAfterBuildQuery(Crawler $crawler): void
+    protected function checkBeforeAndAfterBuild(Crawler $crawler): void
     {
         if (null === static::SEARCH_IN_LIST) {
-            $this->assertCount(0, $crawler->filterXPath('//div[contains(text(), "TEST BEFORE AFTER BUILD QUERY")]'));
+            $this->assertCount(0, $crawler->filterXPath('//div[contains(text(), "TEST BEFORE AFTER BUILD")]'));
 
             return;
         }
 
-        $this->assertCount(1, $crawler->filterXPath('//div[contains(text(), "TEST BEFORE AFTER BUILD QUERY '.static::SEARCH_IN_LIST.'")]'));
+        $this->assertCount(1, $crawler->filterXPath('//div[contains(text(), "TEST BEFORE AFTER BUILD '.static::SEARCH_IN_LIST.'")]'));
     }
 
     protected function countRowsAndColumns(Crawler $crawler): array

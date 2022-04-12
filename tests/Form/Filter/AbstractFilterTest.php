@@ -124,7 +124,7 @@ abstract class AbstractFilterTest extends KernelTestCase
 
     protected function checkQueryBuilder(Crud $crud, ?string $whereExpected, array $parametersExpected = []): void
     {
-        $crud->buildQuery();
+        $crud->build();
 
         $queryBuilder = $crud->getQueryBuilder();
         if (null === $whereExpected) {

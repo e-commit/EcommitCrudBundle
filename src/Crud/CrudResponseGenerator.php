@@ -92,14 +92,14 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
             $crud->processForm();
         }
 
-        if (null !== $options['before_build_query']) {
-            $data = $options['before_build_query']($crud, $data);
+        if (null !== $options['before_build']) {
+            $data = $options['before_build']($crud, $data);
         }
 
-        $crud->buildQuery();
+        $crud->build();
 
-        if (null !== $options['after_build_query']) {
-            $data = $options['after_build_query']($crud, $data);
+        if (null !== $options['after_build']) {
+            $data = $options['after_build']($crud, $data);
         }
 
         $crud->clearTemplate();
@@ -111,15 +111,15 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
-            'before_build_query' => null,
-            'after_build_query' => null,
+            'before_build' => null,
+            'after_build' => null,
         ]);
         $resolver->setRequired([
             'template_generator',
         ]);
         $resolver->setAllowedTypes('template_generator', 'callable');
-        $resolver->setAllowedTypes('before_build_query', ['null', 'callable']);
-        $resolver->setAllowedTypes('after_build_query', ['null', 'callable']);
+        $resolver->setAllowedTypes('before_build', ['null', 'callable']);
+        $resolver->setAllowedTypes('after_build', ['null', 'callable']);
 
         return $resolver->resolve($options);
     }

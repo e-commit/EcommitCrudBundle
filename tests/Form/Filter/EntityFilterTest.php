@@ -42,7 +42,7 @@ class EntityFilterTest extends AbstractFilterTest
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
-        $crud->buildQuery();
+        $crud->build();
         $idsFound = [];
         foreach ($crud->getQueryBuilder()->getQuery()->getResult() as $entity) {
             $idsFound[] = $entity->getId();
@@ -188,7 +188,7 @@ class EntityFilterTest extends AbstractFilterTest
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
-        $crud->buildQuery();
+        $crud->build();
         $idsFound = [];
         foreach ($crud->getQueryBuilder()->getQuery()->getResult() as $entity) {
             $idsFound[] = $entity->getId();

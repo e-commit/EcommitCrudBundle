@@ -59,13 +59,13 @@ class UserWithoutTraitController extends AbstractController
         if ($request->query->has('test-before-and-after-build-query')) {
             return $crudResponseGenerator->getResponse($this->getCrud('user_without_trait_with_data', ['test-before-and-after-build-query' => 1]), [
                 'template_generator' => fn (string $action) => sprintf('user/%s.html.twig', $action),
-                'before_build_query' => function (Crud $crud, array $data) {
-                    $data['test_before_after_build_query'] = 'BEFORE';
+                'before_build' => function (Crud $crud, array $data) {
+                    $data['test_before_after_build'] = 'BEFORE';
 
                     return $data;
                 },
-                'after_build_query' => function (Crud $crud, array $data) {
-                    $data['test_before_after_build_query'] = $data['test_before_after_build_query'].' AFTER';
+                'after_build' => function (Crud $crud, array $data) {
+                    $data['test_before_after_build'] = $data['test_before_after_build'].' AFTER';
 
                     return $data;
                 },
@@ -82,13 +82,13 @@ class UserWithoutTraitController extends AbstractController
         if ($request->query->has('test-before-and-after-build-query')) {
             return $crudResponseGenerator->getAjaxResponse($this->getCrud('user_without_trait_with_data', ['test-before-and-after-build-query' => 1]), [
                 'template_generator' => fn (string $action) => sprintf('user/%s.html.twig', $action),
-                'before_build_query' => function (Crud $crud, array $data) {
-                    $data['test_before_after_build_query'] = 'BEFORE';
+                'before_build' => function (Crud $crud, array $data) {
+                    $data['test_before_after_build'] = 'BEFORE';
 
                     return $data;
                 },
-                'after_build_query' => function (Crud $crud, array $data) {
-                    $data['test_before_after_build_query'] = $data['test_before_after_build_query'].' AFTER';
+                'after_build' => function (Crud $crud, array $data) {
+                    $data['test_before_after_build'] = $data['test_before_after_build'].' AFTER';
 
                     return $data;
                 },

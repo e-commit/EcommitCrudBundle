@@ -20,7 +20,7 @@
         </table>
     </div>
 
-    {% if test_before_after_build_query is defined %}<div>TEST BEFORE AFTER BUILD QUERY {{ test_before_after_build_query }}</div>{% endif %}
+    {% if test_before_after_build is defined %}<div>TEST BEFORE AFTER BUILD {{ test_before_after_build }}</div>{% endif %}
 
     <div class="info-pagination">
         {% trans with {'%first%': crud.paginator.firstIndice, '%last%' : crud.paginator.lastIndice} %}Results %first%-%last%{% endtrans %}  -

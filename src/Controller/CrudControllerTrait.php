@@ -44,17 +44,17 @@ trait CrudControllerTrait
     {
         return [
             'template_generator' => fn (string $action) => $this->getTemplateName($action),
-            'before_build_query' => fn (Crud $crud, array $data) => $this->beforeBuildQuery($crud, $data),
-            'after_build_query' => fn (Crud $crud, array $data) => $this->afterBuildQuery($crud, $data),
+            'before_build' => fn (Crud $crud, array $data) => $this->beforeBuild($crud, $data),
+            'after_build' => fn (Crud $crud, array $data) => $this->afterBuild($crud, $data),
         ];
     }
 
-    protected function beforeBuildQuery(Crud $crud, array $data): array
+    protected function beforeBuild(Crud $crud, array $data): array
     {
         return $data;
     }
 
-    protected function afterBuildQuery(Crud $crud, array $data): array
+    protected function afterBuild(Crud $crud, array $data): array
     {
         return $data;
     }
