@@ -102,7 +102,7 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
             $data = $options['after_build']($crud, $data);
         }
 
-        $crud->clearTemplate();
+        $crud->createView();
 
         return $data;
     }

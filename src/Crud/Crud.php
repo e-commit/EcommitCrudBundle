@@ -442,7 +442,7 @@ final class Crud
     /**
      * Returns the search form.
      *
-     * @return SearchFormBuilder (before clearTemplate) or FormView (after clearTemplate)
+     * @return SearchFormBuilder (before createView) or FormView (after createView)
      */
     public function getSearchForm(): SearchFormBuilder|FormView|null
     {
@@ -624,10 +624,7 @@ final class Crud
         }
     }
 
-    /**
-     * Clears this object, before sending it to template.
-     */
-    public function clearTemplate(): void
+    public function createView(): void
     {
         if ($this->searchForm) {
             $this->searchForm->createFormView();
@@ -814,7 +811,7 @@ final class Crud
     /**
      * Returns the search form.
      *
-     * @return Form (before clearTemplate) or FormView (after clearTemplate)
+     * @return Form (before createView) or FormView (after createView)
      */
     public function getDisplaySettingsForm(): Form|FormView|null
     {
