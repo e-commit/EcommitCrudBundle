@@ -34,7 +34,7 @@ class FiltersPass implements CompilerPassInterface
             $lazyServicesRefs[$name] = new Reference($id);
         }
 
-        $container->register(CrudFilters::class, CrudFilters::class)
+        $container->register('ecommit_crud.filters', CrudFilters::class)
             ->setPublic(false)
             ->setArguments([ServiceLocatorTagPass::register($container, $lazyServicesRefs)]);
     }

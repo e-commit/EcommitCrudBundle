@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Tests\DependencyInjection;
 
-use Ecommit\CrudBundle\Crud\CrudFilters;
 use Ecommit\CrudBundle\Tests\Functional\App\Form\Filter\MyFilter;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -26,7 +25,7 @@ class EcommitCrudExtensionTest extends KernelTestCase
 
     public function testAutoconfigureTag(): void
     {
-        $crudFilters = self::getContainer()->get(CrudFilters::class);
+        $crudFilters = self::getContainer()->get('ecommit_crud.filters');
 
         $this->assertTrue($crudFilters->has(MyFilter::class));
     }

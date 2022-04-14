@@ -584,13 +584,13 @@ class CrudTest extends KernelTestCase
             ->willReturn($request);
 
         $crudFilters = $this->createMock(CrudFilters::class);
-        $crudFilters->method('has')->willReturnCallback(fn (string $name) => \array_key_exists($name, $filters) || static::getContainer()->get(CrudFilters::class)->has($name));
+        $crudFilters->method('has')->willReturnCallback(fn (string $name) => \array_key_exists($name, $filters) || static::getContainer()->get('ecommit_crud.filters')->has($name));
         $crudFilters->method('get')->willReturnCallback(function (string $name) use ($filters): FilterInterface {
             if (\array_key_exists($name, $filters)) {
                 return $filters[$name];
             }
 
-            return static::getContainer()->get(CrudFilters::class)->get($name);
+            return static::getContainer()->get('ecommit_crud.filters')->get($name);
         });
 
         $container = $this->createMock(ContainerInterface::class);

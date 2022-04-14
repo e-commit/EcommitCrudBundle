@@ -10,7 +10,7 @@
                 <argument key="request_stack" type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
                 <argument key="doctrine" type="service" id="Doctrine\Persistence\ManagerRegistry"/>
                 <argument key="security.token_storage" type="service" id="Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface"/>
-                <argument key="ecommit_crud.filters" type="service" id="Ecommit\CrudBundle\Crud\CrudFilters"/>
+                <argument key="ecommit_crud.filters" type="service" id="ecommit_crud.filters"/>
             </argument>
             <tag name="container.service_locator"/>
         </service>
