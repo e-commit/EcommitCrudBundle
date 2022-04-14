@@ -21,6 +21,7 @@ use Ecommit\Paginator\PaginatorInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -33,7 +34,7 @@ final class Crud
 
     protected CrudSession $sessionValues;
     protected SearchFormBuilder|FormView|null $searchForm = null;
-    protected Form|FormView|null $displaySettingsForm = null;
+    protected FormInterface|FormView|null $displaySettingsForm = null;
     protected bool $isInitialized = false;
     protected bool $initializationInProgress = false;
     protected array $availableColumns = [];
@@ -813,7 +814,7 @@ final class Crud
      *
      * @return Form (before createView) or FormView (after createView)
      */
-    public function getDisplaySettingsForm(): Form|FormView|null
+    public function getDisplaySettingsForm(): FormInterface|FormView|null
     {
         return $this->displaySettingsForm;
     }

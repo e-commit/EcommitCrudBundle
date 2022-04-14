@@ -17,8 +17,8 @@ use Ecommit\CrudBundle\Form\Filter\FilterInterface;
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 use Ecommit\CrudBundle\Form\Type\FormSearchType;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -27,7 +27,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 final class SearchFormBuilder
 {
     protected array $options;
-    protected FormBuilderInterface|Form|FormView $form;
+    protected FormBuilderInterface|FormInterface|FormView $form;
     protected array $filters = [];
 
     public function __construct(protected ContainerInterface $container, protected Crud $crud, protected SearcherInterface $defaultData, ?string $type, array $options)
@@ -120,7 +120,7 @@ final class SearchFormBuilder
         return $this;
     }
 
-    public function getField(string $property): FormBuilderInterface|Form|FormView
+    public function getField(string $property): FormBuilderInterface|FormInterface|FormView
     {
         if ($this->form instanceof FormView) {
             return $this->form[$property];
@@ -129,7 +129,7 @@ final class SearchFormBuilder
         return $this->form->get($property);
     }
 
-    public function createForm(): void
+    public function createForm(): self
     {
         // Add filters
         foreach ($this->filters as $property => $filter) {
@@ -146,14 +146,18 @@ final class SearchFormBuilder
 
         $this->form->setAction($this->crud->getSearchUrl());
         $this->form = $this->form->getForm();
+
+        return $this;
     }
 
-    public function createFormView(): void
+    public function createFormView(): self
     {
         $this->form = $this->form->createView();
+
+        return $this;
     }
 
-    public function getForm(): FormBuilderInterface|Form|FormView
+    public function getForm(): FormBuilderInterface|FormInterface|FormView
     {
         return $this->form;
     }
@@ -163,7 +167,7 @@ final class SearchFormBuilder
         return $this->defaultData;
     }
 
-    public function updateQueryBuilder(\Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface $queryBuilder, SearcherInterface $searcher): void
+    public function updateQueryBuilder(\Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface $queryBuilder, SearcherInterface $searcher): self
     {
         $searcher->updateQueryBuilder($queryBuilder, $this->options);
 
@@ -182,5 +186,7 @@ final class SearchFormBuilder
                 $filterService->updateQueryBuilder($queryBuilder, $property, $value, $filter['options']);
             }
         }
+
+        return $this;
     }
 }
