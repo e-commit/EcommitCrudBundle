@@ -122,6 +122,10 @@ final class SearchFormBuilder
 
     public function getField(string $property): FormBuilderInterface|Form|FormView
     {
+        if ($this->form instanceof FormView) {
+            return $this->form[$property];
+        }
+
         return $this->form->get($property);
     }
 
