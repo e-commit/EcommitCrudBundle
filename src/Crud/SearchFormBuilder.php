@@ -167,14 +167,14 @@ final class SearchFormBuilder
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             $value = $propertyAccessor->getValue($searcher, $property);
 
-            /** @var FilterInterface $filterService */
-            $filterService = $this->container->get('ecommit_crud.filters')->get($filter['name']);
-            if (!$filterService->supportsQueryBuilder($queryBuilder)) {
-                throw new \Exception('"%s" filter does not support "%s" query builder', $filter['name'], $queryBuilder::class);
-            }
             if ($filter['options']['update_query_builder']) {
                 $filter['options']['update_query_builder']($queryBuilder, $property, $value, $filter['options']);
             } else {
+                /** @var FilterInterface $filterService */
+                $filterService = $this->container->get('ecommit_crud.filters')->get($filter['name']);
+                if (!$filterService->supportsQueryBuilder($queryBuilder)) {
+                    throw new \Exception('"%s" filter does not support "%s" query builder', $filter['name'], $queryBuilder::class);
+                }
                 $filterService->updateQueryBuilder($queryBuilder, $property, $value, $filter['options']);
             }
         }
