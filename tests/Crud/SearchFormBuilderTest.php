@@ -16,6 +16,7 @@ namespace Ecommit\CrudBundle\Tests\Crud;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Ecommit\CrudBundle\Crud\Crud;
+use Ecommit\CrudBundle\Crud\CrudColumnReference;
 use Ecommit\CrudBundle\Crud\SearchFormBuilder;
 use Ecommit\CrudBundle\Form\Filter\FilterInterface;
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
@@ -40,10 +41,7 @@ class SearchFormBuilderTest extends KernelTestCase
      */
     public function testCreateFormBuilder(?string $type, string $expectedName, string $expectedType): void
     {
-        $defaultData = $this->createMock(SearcherInterface::class);
-        $defaultData->expects($this->once())->method('buildForm');
-
-        $searchFormBuilder = new SearchFormBuilder($this->createCrudContainer(), $this->createCrud(), $defaultData, $type, []);
+        $searchFormBuilder = $this->createSearchFormBuilder(type: $type);
         $this->assertSame($expectedName, $searchFormBuilder->getForm()->getFormConfig()->getName());
         $this->assertInstanceOf($expectedType, $searchFormBuilder->getForm()->getFormConfig()->getType()->getInnerType());
     }
@@ -145,6 +143,14 @@ class SearchFormBuilderTest extends KernelTestCase
             ->addFilter('column2', 'my_filter')
             ->addFilter('virtual1', 'my_filter');
         $filters = $this->getPrivateValue($searchFormBuilder, 'filters');
+        $this->assertEquals(new CrudColumnReference('column1'), $filters['column1']['options']['alias_search']);
+        $this->assertEquals(new CrudColumnReference('column2'), $filters['column2']['options']['alias_search']);
+        $this->assertEquals(new CrudColumnReference('virtual1'), $filters['virtual1']['options']['alias_search']);
+
+        // Resolve filters
+        $searchFormBuilder->createForm();
+
+        $filters = $this->getPrivateValue($searchFormBuilder, 'filters');
         $this->assertSame('alias1', $filters['column1']['options']['alias_search']);
         $this->assertSame('custom_alias2', $filters['column2']['options']['alias_search']);
         $this->assertSame('virtualalias1', $filters['virtual1']['options']['alias_search']);
@@ -157,8 +163,14 @@ class SearchFormBuilderTest extends KernelTestCase
             ->addVirtualColumn('virtual1', 'virtualalias1');
         $searchFormBuilder = $this->createSearchFormBuilder(crud: $crud)
             ->addFilter('column1', 'my_filter')
-            ->addFilter('column2', 'my_filter')
             ->addFilter('virtual1', 'my_filter');
+        $filters = $this->getPrivateValue($searchFormBuilder, 'filters');
+        $this->assertEquals(new CrudColumnReference('column1'), $filters['column1']['options']['label']);
+        $this->assertEquals(new CrudColumnReference('virtual1'), $filters['virtual1']['options']['label']);
+
+        // Resolve filters
+        $searchFormBuilder->createForm();
+
         $filters = $this->getPrivateValue($searchFormBuilder, 'filters');
         $this->assertSame('label1', $filters['column1']['options']['label']);
         $this->assertNull($filters['virtual1']['options']['label']);
@@ -204,7 +216,10 @@ class SearchFormBuilderTest extends KernelTestCase
 
     public function testCreateForm(): void
     {
-        $searchFormBuilder = $this->createSearchFormBuilder();
+        $defaultData = $this->createMock(SearcherInterface::class);
+        $defaultData->expects($this->once())->method('buildForm');
+
+        $searchFormBuilder = $this->createSearchFormBuilder(defaultData: $defaultData);
         $this->assertSame($searchFormBuilder, $searchFormBuilder->createForm());
     }
 

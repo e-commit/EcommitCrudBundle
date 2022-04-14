@@ -17,8 +17,11 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Crud\CrudColumn;
+use Ecommit\CrudBundle\Crud\CrudFilters;
 use Ecommit\CrudBundle\Crud\CrudSession;
 use Ecommit\CrudBundle\Crud\SearchFormBuilder;
+use Ecommit\CrudBundle\Form\Filter\FilterInterface;
+use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 use Ecommit\CrudBundle\Tests\Functional\App\Entity\TestUser;
 use Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher\UserSearcher;
 use Ecommit\DoctrineUtils\Paginator\DoctrineORMPaginator;
@@ -516,7 +519,56 @@ class CrudTest extends KernelTestCase
         $crud->init();
     }
 
-    protected function createCrud(string $sessionName = 'session_name'): Crud
+    public function testCallCreateSearchFormBeforeRequiredOptions(): void
+    {
+        $filter = $this->createMock(FilterInterface::class);
+        $filter->expects($this->exactly(4))->method('buildForm')->willReturnCallback(function (SearchFormBuilder $builder, string $property, array $options): void {
+            if (\in_array($property, ['userId', 'lastName'])) { // Virtual columns
+                $this->assertNull($options['label']);
+            } else {
+                $expectedLabel = 'label_'.$property;
+                $this->assertSame($expectedLabel, $options['label']);
+            }
+        });
+        $filter->expects($this->exactly(4))->method('supportsQueryBuilder')->willReturn(true);
+        $filter->expects($this->exactly(4))->method('updateQueryBuilder')->willReturnCallback(function ($queryBuilder, string $property, $value, array $options): void {
+            $this->assertSame('u.'.$property, $options['alias_search']);
+        });
+
+        $searcherData = $this->getMockBuilder(SearcherInterface::class)
+            ->addMethods(['getUsername', 'getFirstName', 'getLastName', 'getUserId'])
+            ->onlyMethods(['buildForm', 'updateQueryBuilder', 'configureOptions'])
+            ->getMock();
+        $searcherData->expects($this->once())->method('buildForm')->willReturnCallback(function (SearchFormBuilder $builder, array $options): void {
+            $builder->addFilter('username', 'my_filter');
+            $builder->addFilter('userId', 'my_filter');
+        });
+        $searcherData->method('getUsername')->willReturn('val');
+        $searcherData->method('getFirstName')->willReturn('val');
+        $searcherData->method('getLastName')->willReturn('val');
+        $searcherData->method('getUserId')->willReturn('val');
+
+        $queryBuilder = self::getContainer()->get(ManagerRegistry::class)->getRepository(TestUser::class)
+            ->createQueryBuilder('u')
+            ->select('u');
+
+        $crud = $this->createCrud(filters: ['my_filter' => $filter])
+            ->createSearchForm($searcherData); // Call createSearchForm before setting options : alias_search and label are not known yet
+        $crud->getSearchForm()->addFilter('firstName', 'my_filter'); // Call addFilter before setting options : alias_search and label are not known yet
+        $crud->getSearchForm()->addFilter('lastName', 'my_filter'); // Call addFilter before setting options : alias_search and label are not known yet
+        $crud->addColumn('username', 'u.username', 'label_username')
+            ->addColumn('firstName', 'u.firstName', 'label_firstName')
+            ->addVirtualColumn('lastName', 'u.lastName')
+            ->addVirtualColumn('userId', 'u.userId')
+            ->setQueryBuilder($queryBuilder)
+            ->setAvailableResultsPerPage([10, 50, 100], 50)
+            ->setDefaultSort('username', Crud::ASC)
+            ->setRoute('user_ajax_crud')
+            ->init();
+        $crud->build();
+    }
+
+    protected function createCrud(string $sessionName = 'session_name', array $filters = []): Crud
     {
         $session = $this->createMock(SessionInterface::class);
         $session->expects($this->any())
@@ -531,11 +583,23 @@ class CrudTest extends KernelTestCase
         $requestStack->method('getCurrentRequest')
             ->willReturn($request);
 
+        $crudFilters = $this->createMock(CrudFilters::class);
+        $crudFilters->method('has')->willReturnCallback(fn (string $name) => \array_key_exists($name, $filters) || static::getContainer()->get(CrudFilters::class)->has($name));
+        $crudFilters->method('get')->willReturnCallback(function (string $name) use ($filters): FilterInterface {
+            if (\array_key_exists($name, $filters)) {
+                return $filters[$name];
+            }
+
+            return static::getContainer()->get(CrudFilters::class)->get($name);
+        });
+
         $container = $this->createMock(ContainerInterface::class);
         $container->method('get')
-            ->willReturnCallback(function ($name) use ($requestStack) {
+            ->willReturnCallback(function ($name) use ($requestStack, $crudFilters) {
                 if ('request_stack' === $name) {
                     return $requestStack;
+                } elseif ('ecommit_crud.filters' === $name) {
+                    return $crudFilters;
                 }
 
                 return static::getContainer()->get('ecommit_crud.locator')->get($name);
