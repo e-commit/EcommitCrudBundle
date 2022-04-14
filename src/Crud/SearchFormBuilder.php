@@ -98,11 +98,6 @@ final class SearchFormBuilder
                     return $columns[$options['column_id']]->label;
                 }
 
-                $virtualColumns = $this->crud->getVirtualColumns();
-                if (\array_key_exists($options['column_id'], $virtualColumns)) {
-                    return $virtualColumns[$options['column_id']]->label;
-                }
-
                 return null;
             },
         ]);
