@@ -159,6 +159,9 @@ final class Crud
         if (mb_strlen($id) > 100) {
             throw new \Exception('Column id is too long');
         }
+        if (\array_key_exists($id, $this->availableColumns) || \array_key_exists($id, $this->availableVirtualColumns)) {
+            throw new \Exception(sprintf('The column "%s" already exists', $id));
+        }
 
         $resolver = new OptionsResolver();
         $resolver->setDefaults(
@@ -229,6 +232,9 @@ final class Crud
      */
     public function addVirtualColumn(string $id, string $aliasSearch): self
     {
+        if (\array_key_exists($id, $this->availableColumns) || \array_key_exists($id, $this->availableVirtualColumns)) {
+            throw new \Exception(sprintf('The column "%s" already exists', $id));
+        }
         $column = new CrudColumn($id, $aliasSearch, null, false, false, null, null);
         $this->availableVirtualColumns[$id] = $column;
 

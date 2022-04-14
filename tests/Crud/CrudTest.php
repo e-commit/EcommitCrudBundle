@@ -110,6 +110,39 @@ class CrudTest extends KernelTestCase
         $crud->addColumn(str_pad('', 101, 'a'), 'alias', 'label');
     }
 
+    /**
+     * @dataProvider getTestAddColumnAlreadyExistsProvider
+     */
+    public function testAddColumnAlreadyExists(callable $callback): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The column "column1" already exists');
+
+        $callback($this->createCrud());
+    }
+
+    public function getTestAddColumnAlreadyExistsProvider(): array
+    {
+        return [
+            [function (Crud $crud): void {
+                $crud->addColumn('column1', 'alias1', 'label1')
+                    ->addColumn('column1', 'alias1', 'label1');
+            }],
+            [function (Crud $crud): void {
+                $crud->addVirtualColumn('column1', 'alias1', 'label1')
+                    ->addVirtualColumn('column1', 'alias1', 'label1');
+            }],
+            [function (Crud $crud): void {
+                $crud->addColumn('column1', 'alias1', 'label1')
+                    ->addVirtualColumn('column1', 'alias1', 'label1');
+            }],
+            [function (Crud $crud): void {
+                $crud->addVirtualColumn('column1', 'alias1', 'label1')
+                    ->addColumn('column1', 'alias1', 'label1');
+            }],
+        ];
+    }
+
     public function testAddColumnWithInvalidOption(): void
     {
         $this->expectException(UndefinedOptionsException::class);
