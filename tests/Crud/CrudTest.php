@@ -601,6 +601,62 @@ class CrudTest extends KernelTestCase
         $crud->build();
     }
 
+    /**
+     * @dataProvider getTestCallMethodNotAllowedBeforeInitializationProvider
+     */
+    public function testCallMethodNotAllowedBeforeInitialization(string $method, array $arguments = []): void
+    {
+        $crud = $this->createValidCrud(true);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage(sprintf('The method "%s" cannot be called before CRUD initialization', $method));
+
+        $crud->$method(...$arguments);
+    }
+
+    public function getTestCallMethodNotAllowedBeforeInitializationProvider(): array
+    {
+        return [
+            ['getSessionValues'],
+            ['processSearchForm'],
+            ['build'],
+            ['createView'],
+        ];
+    }
+
+    /**
+     * @dataProvider getTestCallMethodNotAllowedAfterInitializationProvider
+     */
+    public function testCallMethodNotAllowedAfterInitialization(string $method, array $arguments = []): void
+    {
+        $crud = $this->createValidCrud(true);
+        $crud->init();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage(sprintf('The method "%s" cannot be called after CRUD initialization', $method));
+
+        $crud->$method(...$arguments);
+    }
+
+    public function getTestCallMethodNotAllowedAfterInitializationProvider(): array
+    {
+        return [
+            ['addColumn', ['column', 'alias', 'label']],
+            ['addVirtualColumn', ['column', 'alias']],
+            ['setQueryBuilder', [$this->createMock(QueryBuilder::class)]],
+            ['setAvailableResultsPerPage', [[5, 10], 10]],
+            ['setDefaultSort', ['column', Crud::ASC]],
+            ['setDefaultPersonalizedSort', [[]]],
+            ['setRoute', ['route']],
+            ['setDisplayResultsOnlyIfSearch', [true]],
+            ['setBuildPaginator', [true]],
+            ['setPersistentSettings', [true]],
+            ['createSearchForm', [$this->createMock(SearcherInterface::class)]],
+            ['setDivIdSearch', ['div']],
+            ['setDivIdList', ['div']],
+        ];
+    }
+
     protected function createCrud(string $sessionName = 'session_name', array $filters = []): Crud
     {
         $session = $this->createMock(SessionInterface::class);

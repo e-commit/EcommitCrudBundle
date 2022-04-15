@@ -142,6 +142,26 @@ final class Crud
         }
     }
 
+    protected function crudMustNotBeInitialized(): void
+    {
+        if (!$this->isInitialized) {
+            return;
+        }
+
+        $caller = debug_backtrace()[1]['function'];
+        throw new \Exception(sprintf('The method "%s" cannot be called after CRUD initialization', $caller));
+    }
+
+    protected function crudMustBeInitialized(): void
+    {
+        if ($this->isInitialized || $this->initializationInProgress) {
+            return;
+        }
+
+        $caller = debug_backtrace()[1]['function'];
+        throw new \Exception(sprintf('The method "%s" cannot be called before CRUD initialization', $caller));
+    }
+
     /**
      * Add a column inside the crud.
      *
@@ -156,6 +176,7 @@ final class Crud
      */
     public function addColumn(string $id, string $alias, string $label, array $options = []): self
     {
+        $this->crudMustNotBeInitialized();
         if (mb_strlen($id) > 100) {
             throw new \Exception('Column id is too long');
         }
@@ -232,6 +253,7 @@ final class Crud
      */
     public function addVirtualColumn(string $id, string $aliasSearch): self
     {
+        $this->crudMustNotBeInitialized();
         if (\array_key_exists($id, $this->availableColumns) || \array_key_exists($id, $this->availableVirtualColumns)) {
             throw new \Exception(sprintf('The column "%s" already exists', $id));
         }
@@ -264,6 +286,7 @@ final class Crud
 
     public function setQueryBuilder(\Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface $queryBuilder): self
     {
+        $this->crudMustNotBeInitialized();
         $this->queryBuilder = $queryBuilder;
 
         return $this;
@@ -284,6 +307,7 @@ final class Crud
 
     public function setAvailableResultsPerPage(array $availableResultsPerPage, int $defaultValue): self
     {
+        $this->crudMustNotBeInitialized();
         $this->availableResultsPerPage = $availableResultsPerPage;
         $this->defaultResultsPerPage = $defaultValue;
 
@@ -308,6 +332,7 @@ final class Crud
      */
     public function setDefaultSort(string $sort, string $sense): self
     {
+        $this->crudMustNotBeInitialized();
         $this->defaultSort = $sort;
         $this->defaultSense = $sense;
 
@@ -328,6 +353,7 @@ final class Crud
      */
     public function setDefaultPersonalizedSort(array $criterias): self
     {
+        $this->crudMustNotBeInitialized();
         $this->defaultPersonalizedSort = $criterias;
 
         $this->defaultSort = 'defaultPersonalizedSort';
@@ -338,6 +364,7 @@ final class Crud
 
     public function setRoute(string $routeName, array $parameters = []): self
     {
+        $this->crudMustNotBeInitialized();
         $this->routeName = $routeName;
         $this->routeParams = $parameters;
 
@@ -386,6 +413,7 @@ final class Crud
 
     public function setDisplayResultsOnlyIfSearch(bool $displayResultsOnlyIfSearch): self
     {
+        $this->crudMustNotBeInitialized();
         $this->displayResultsOnlyIfSearch = $displayResultsOnlyIfSearch;
 
         return $this;
@@ -411,6 +439,7 @@ final class Crud
      */
     public function setBuildPaginator(bool|\Closure|array $value): self
     {
+        $this->crudMustNotBeInitialized();
         $this->buildPaginator = $value;
 
         return $this;
@@ -433,6 +462,7 @@ final class Crud
      */
     public function setPersistentSettings(bool $value): self
     {
+        $this->crudMustNotBeInitialized();
         if ($value && (null === $this->container->get('security.token_storage')->getToken() || !($this->container->get('security.token_storage')->getToken()->getUser() instanceof UserInterface))) {
             $value = false;
         }
@@ -443,6 +473,8 @@ final class Crud
 
     public function getSessionValues(): CrudSession
     {
+        $this->crudMustBeInitialized();
+
         return $this->sessionValues;
     }
 
@@ -458,6 +490,7 @@ final class Crud
 
     public function createSearchForm(SearcherInterface $defaultData, ?string $type = null, array $options = []): self
     {
+        $this->crudMustNotBeInitialized();
         $this->searchForm = new SearchFormBuilder($this->container, $this, $defaultData, $type, $options);
 
         return $this;
@@ -470,6 +503,7 @@ final class Crud
 
     public function setDivIdSearch(string $divIdSearch): self
     {
+        $this->crudMustNotBeInitialized();
         $this->divIdSearch = $divIdSearch;
 
         return $this;
@@ -482,6 +516,7 @@ final class Crud
 
     public function setDivIdList(string $divIdList): self
     {
+        $this->crudMustNotBeInitialized();
         $this->divIdList = $divIdList;
 
         return $this;
@@ -489,6 +524,7 @@ final class Crud
 
     public function processSearchForm(): void
     {
+        $this->crudMustBeInitialized();
         if (!$this->searchForm) {
             throw new NotFoundHttpException('Crud: Search form does not exist');
         }
@@ -515,6 +551,7 @@ final class Crud
 
     public function build(): void
     {
+        $this->crudMustBeInitialized();
         $this->updateQueryBuilder();
         $this->buildPaginator();
     }
@@ -633,6 +670,7 @@ final class Crud
 
     public function createView(): void
     {
+        $this->crudMustBeInitialized();
         if ($this->searchForm) {
             $this->searchForm->createFormView();
             $this->searchForm = $this->searchForm->getForm();
