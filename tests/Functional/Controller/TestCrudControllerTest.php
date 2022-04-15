@@ -127,7 +127,7 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testChangePerPage
      */
-    public function testPersistentValuesAfterChangeSortAndSettings(Client $client): Client
+    public function testSessionValuesAfterChangeSortAndSettings(Client $client): Client
     {
         $client->request('GET', static::URL);
 
@@ -141,7 +141,7 @@ class TestCrudControllerTest extends PantherTestCase
     }
 
     /**
-     * @depends testPersistentValuesAfterChangeSortAndSettings
+     * @depends testSessionValuesAfterChangeSortAndSettings
      */
     public function testChangePage(Client $client): Client
     {
@@ -161,7 +161,7 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testChangePage
      */
-    public function testPersistentValuesAfterChangePage(Client $client): Client
+    public function testSessionValuesAfterChangePage(Client $client): Client
     {
         $client->request('GET', static::URL);
 
@@ -175,7 +175,7 @@ class TestCrudControllerTest extends PantherTestCase
     }
 
     /**
-     * @depends testPersistentValuesAfterChangePage
+     * @depends testSessionValuesAfterChangePage
      */
     public function testSearch(Client $client): Client
     {
@@ -196,7 +196,7 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testSearch
      */
-    public function testPersistentValuesAfterSearch(Client $client): Client
+    public function testSessionValuesAfterSearch(Client $client): Client
     {
         $client->request('GET', static::URL);
 
@@ -210,7 +210,7 @@ class TestCrudControllerTest extends PantherTestCase
     }
 
     /**
-     * @depends testPersistentValuesAfterSearch
+     * @depends testSessionValuesAfterSearch
      */
     public function testSearchWithoutFilter(Client $client): Client
     {
@@ -249,7 +249,7 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testResetSearch
      */
-    public function testPersistentValuesAfterResetSearch(Client $client): Client
+    public function testSessionValuesAfterResetSearch(Client $client): Client
     {
         $client->request('GET', static::URL);
 
@@ -263,7 +263,7 @@ class TestCrudControllerTest extends PantherTestCase
     }
 
     /**
-     * @depends testPersistentValuesAfterResetSearch
+     * @depends testSessionValuesAfterResetSearch
      */
     public function testResetSettings(Client $client): Client
     {
@@ -286,7 +286,7 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testResetSettings
      */
-    public function testPersistentValuesAfterResetSettings(Client $client): Client
+    public function testSessionValuesAfterResetSettings(Client $client): Client
     {
         $client->request('GET', static::URL);
 
@@ -300,7 +300,7 @@ class TestCrudControllerTest extends PantherTestCase
     }
 
     /**
-     * @depends testPersistentValuesAfterResetSettings
+     * @depends testSessionValuesAfterResetSettings
      */
     public function testManualReset(Client $client): Client
     {
