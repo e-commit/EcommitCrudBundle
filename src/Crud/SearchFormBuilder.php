@@ -63,6 +63,9 @@ final class SearchFormBuilder
 
     public function addFilter(string $property, string $filter, array $options = []): self
     {
+        if (!$this->form instanceof FormBuilderInterface) {
+            throw new \Exception('The "addFilter" method cannot be called after the form creation');
+        }
         if (!$this->container->get('ecommit_crud.filters')->has($filter)) {
             throw new \Exception(sprintf('Filter "%s" not found', $filter));
         }

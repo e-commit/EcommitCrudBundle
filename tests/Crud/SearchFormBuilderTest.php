@@ -92,6 +92,16 @@ class SearchFormBuilderTest extends KernelTestCase
         $this->assertSame(['my_group2'], $searchFormBuilder->getForm()->getFormConfig()->getOption('validation_groups'));
     }
 
+    public function testAddFilterFormAlreadyCreated(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The "addFilter" method cannot be called after the form creation');
+
+        $this->createSearchFormBuilder()
+            ->createForm()
+            ->addFilter('property', 'my_filter');
+    }
+
     public function testAddFilterNotExists(): void
     {
         $this->expectException(\Exception::class);
