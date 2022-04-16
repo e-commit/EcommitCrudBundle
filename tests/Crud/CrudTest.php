@@ -101,6 +101,17 @@ class CrudTest extends KernelTestCase
         $this->assertEquals($columns, $crud->getColumns());
     }
 
+    public function testAddColumnWithAliasSort(): void
+    {
+        $crud = $this->createValidCrud()
+            ->addColumn('my_column', 'u.alias', 'My Column', ['alias_sort' => 'u.lastName'])
+            ->setDefaultSort('my_column', Crud::ASC);
+        $crud->init();
+        $crud->build();
+
+        $this->assertSame(['u.lastName ASC'], $crud->getQueryBuilder()->getDQLPart('orderBy')[0]->getParts());
+    }
+
     public function testAddColumnTooLong(): void
     {
         $this->expectException(\Exception::class);
