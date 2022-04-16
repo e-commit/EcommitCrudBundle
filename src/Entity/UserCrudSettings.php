@@ -31,7 +31,7 @@ class UserCrudSettings
     #[ORM\Column(type: 'integer', name: 'results_displayed')]
     protected $resultsDisplayed;
 
-    #[ORM\Column(type: 'array', name: 'displayed_columns')]
+    #[ORM\Column(type: 'json', name: 'displayed_columns')]
     protected $displayedColumns = [];
 
     #[ORM\Column(type: 'string', length: 100)]
