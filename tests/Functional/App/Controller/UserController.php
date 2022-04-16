@@ -28,16 +28,16 @@ class UserController extends AbstractCrudController
             ->createQueryBuilder('u')
             ->select('u');
 
-        $crud = $this->createCrud('user');
+        $crud = $this->createCrud(static::getCrudName());
         $crud->addColumn('username', 'u.username', 'username', ['default_displayed' => false])
             ->addColumn('firstName', 'u.firstName', 'first_name')
             ->addColumn('lastName', 'u.lastName', 'last_name')
             ->setQueryBuilder($queryBuilder)
-            ->setAvailableResultsPerPage([5, 5, 10, 50], 5)
+            ->setAvailableResultsPerPage([5, 10, 50], 5)
             ->setDefaultSort('firstName', Crud::ASC)
             ->createSearchForm(new UserSearcher())
-            ->setRoute('user_ajax_crud')
-            ->setPersistentSettings(true);
+            ->setRoute(static::getCrudRouteName(), static::getCrudRouteParams())
+            ->setPersistentSettings(static::getPersistentSettings());
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request->query->has('manual-reset')) {
@@ -48,6 +48,26 @@ class UserController extends AbstractCrudController
         }
 
         return $crud;
+    }
+
+    public function getCrudName(): string
+    {
+        return 'user';
+    }
+
+    public function getCrudRouteName(): string
+    {
+        return 'user_ajax_crud';
+    }
+
+    public function getCrudRouteParams(): array
+    {
+        return [];
+    }
+
+    public function getPersistentSettings(): bool
+    {
+        return false;
     }
 
     protected function getTemplateName(string $action): string

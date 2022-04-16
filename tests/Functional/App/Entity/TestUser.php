@@ -15,10 +15,12 @@ namespace Ecommit\CrudBundle\Tests\Functional\App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Ecommit\CrudBundle\Entity\UserCrudInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'user')]
-class TestUser implements UserCrudInterface
+class TestUser implements UserCrudInterface, UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
@@ -33,6 +35,37 @@ class TestUser implements UserCrudInterface
 
     #[ORM\Column(type: 'string', length: 30)]
     protected $lastName;
+
+    /*
+     * Methods
+     */
+
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function eraseCredentials(): void
+    {
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->username;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->username;
+    }
+
+    /**
+     * SF < 6.
+     */
+    public function getSalt(): string
+    {
+        return '';
+    }
 
     /*
      * Getters / Setters (auto-generated)

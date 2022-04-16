@@ -15,6 +15,8 @@ namespace Ecommit\CrudBundle\Tests\Functional\App\DataFixtures;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Ecommit\CrudBundle\Crud\Crud;
+use Ecommit\CrudBundle\Entity\UserCrudSettings;
 use Ecommit\CrudBundle\Tests\Functional\App\Entity\TestUser;
 
 class TestUserFixtures extends Fixture
@@ -41,7 +43,17 @@ class TestUserFixtures extends Fixture
                 ->setFirstName($data[0])
                 ->setLastName($data[1]);
             $manager->persist($user);
+            $this->addReference('user_'.$data[0].$data[1], $user);
         }
+
+        $userCrudSettings = new UserCrudSettings();
+        $userCrudSettings->setUser($this->getReference('user_EveReste'))
+            ->setCrudName('crud_persistent_settings')
+            ->setDisplayedColumns(['username', 'firstName'])
+            ->setResultsDisplayed(50)
+            ->setSort('firstName')
+            ->setSense(Crud::DESC);
+        $manager->persist($userCrudSettings);
 
         $manager->flush();
     }

@@ -14,8 +14,29 @@ user_without_trait_ajax_crud:
     path: /user-without-trait/ajax-crud
     controller: Ecommit\CrudBundle\Tests\Functional\App\Controller\UserWithoutTraitController::ajaxCrudAction
 
+user_with_persistent_settings_crud:
+    path: /user-with-persistent-settings/{scope}/{persistent}
+    requirements:
+        scope: private|public
+        persistent: yes|no
+    controller: Ecommit\CrudBundle\Tests\Functional\App\Controller\UserWithPersistentSettingsController::crudAction
+
+user_with_persistent_settings_ajax_crud:
+    path: /user-with-persistent-settings/{scope}/{persistent}/ajax-crud
+    requirements:
+        scope: private|public
+        persistent: yes|no
+    controller: Ecommit\CrudBundle\Tests\Functional\App\Controller\UserWithPersistentSettingsController::ajaxCrudAction
+
 fake_route:
     path: /fake
     controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
     defaults:
         path: /
+
+login:
+    path: /login
+    controller: Ecommit\CrudBundle\Tests\Functional\App\Controller\UserWithPersistentSettingsController::loginAction
+
+logout:
+    path: /logout
