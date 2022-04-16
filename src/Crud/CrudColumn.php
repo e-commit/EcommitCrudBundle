@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud;
 
+/**
+ * @internal
+ */
 final class CrudColumn
 {
     public string $aliasSearch;

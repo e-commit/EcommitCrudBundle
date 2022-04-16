@@ -13,9 +13,6 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud\Http;
 
-/**
- * @internal
- */
 abstract class AbstractQueryBuilderNamedParameter extends AbstractQueryBuilderParameter
 {
     public function __construct(public string $name, mixed $value)

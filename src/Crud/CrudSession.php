@@ -16,6 +16,8 @@ namespace Ecommit\CrudBundle\Crud;
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 
 /**
+ * @internal
+ *
  * $searchFormData: Search's object (used by "setData" inside the form). Used to save the data of the search form.
  */
 final class CrudSession

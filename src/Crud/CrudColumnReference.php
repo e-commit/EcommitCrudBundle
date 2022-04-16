@@ -13,7 +13,10 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Crud;
 
-class CrudColumnReference
+/**
+ * @internal
+ */
+final class CrudColumnReference
 {
     public function __construct(public string $id)
     {
