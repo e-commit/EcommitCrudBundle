@@ -80,7 +80,7 @@ class QueryBuilderTest extends TestCase
     public function testAddBodyParameterNotAllowed(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported.');
+        $this->expectExceptionMessage('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported');
 
         $queryBuilder = $this->createQueryBuider();
         $queryBuilder->addParameter(new QueryBuilderBody('val1'));
@@ -101,7 +101,7 @@ class QueryBuilderTest extends TestCase
     public function testAddBodyNotAllowed(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported.');
+        $this->expectExceptionMessage('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported');
 
         $queryBuilder = $this->createQueryBuider();
         $queryBuilder->addParameter(new QueryBuilderBodyParameter('param1', 'val1'));

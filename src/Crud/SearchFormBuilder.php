@@ -67,7 +67,7 @@ final class SearchFormBuilder
             throw new \Exception('The "addFilter" method cannot be called after the form creation');
         }
         if (!$this->container->get('ecommit_crud.filters')->has($filter)) {
-            throw new \Exception(sprintf('Filter "%s" not found', $filter));
+            throw new \Exception(sprintf('The filter "%s" does not exist', $filter));
         }
         /** @var FilterInterface $filterService */
         $filterService = $this->container->get('ecommit_crud.filters')->get($filter);
@@ -121,7 +121,7 @@ final class SearchFormBuilder
             // Check if column exists
             $columnId = $filter['options']['column_id'];
             if (!\array_key_exists($columnId, $this->crud->getColumns()) && !\array_key_exists($columnId, $this->crud->getVirtualColumns())) {
-                throw new \Exception(sprintf('Column "%s" not found', $columnId));
+                throw new \Exception(sprintf('The column "%s" does not exist', $columnId));
             }
 
             /** @var FilterInterface $filterService */
@@ -190,7 +190,7 @@ final class SearchFormBuilder
                 /** @var FilterInterface $filterService */
                 $filterService = $this->container->get('ecommit_crud.filters')->get($filter['name']);
                 if (!$filterService->supportsQueryBuilder($queryBuilder)) {
-                    throw new \Exception(sprintf('"%s" filter does not support "%s" query builder', $filter['name'], $queryBuilder::class));
+                    throw new \Exception(sprintf('The filter "%s" does not support "%s" query builder', $filter['name'], $queryBuilder::class));
                 }
                 $filterService->updateQueryBuilder($queryBuilder, $property, $value, $filter['options']);
             }

@@ -105,7 +105,7 @@ class SearchFormBuilderTest extends KernelTestCase
     public function testAddFilterNotExists(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Filter "bad_filter" not found');
+        $this->expectExceptionMessage('The filter "bad_filter" does not exist');
 
         $this->createSearchFormBuilder()->addFilter('property', 'bad_filter');
     }
@@ -219,7 +219,7 @@ class SearchFormBuilderTest extends KernelTestCase
             ->addFilter('column1', 'my_filter');
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Column "column1" not found');
+        $this->expectExceptionMessage('The column "column1" does not exist');
 
         $searchFormBuilder->createForm();
     }
@@ -385,7 +385,7 @@ class SearchFormBuilderTest extends KernelTestCase
         $searcherData->expects($this->once())->method('getProperty')->willReturn('value');
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('"my_filter" filter does not support "Doctrine\ORM\QueryBuilder" query builder');
+        $this->expectExceptionMessage('The filter "my_filter" does not support "Doctrine\ORM\QueryBuilder" query builder');
 
         $searchFormBuilder->updateQueryBuilder($queryBuilder, $searcherData);
     }

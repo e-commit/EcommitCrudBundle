@@ -60,7 +60,7 @@ final class Crud
     public function __construct(protected string $sessionName, protected ContainerInterface $container)
     {
         if (!preg_match('/^[a-zA-Z0-9_]{1,50}$/', $sessionName)) {
-            throw new \Exception('Variable sessionName is not given or is invalid');
+            throw new \Exception('The session name format is invalid');
         }
 
         return $this;
@@ -88,7 +88,7 @@ final class Crud
         ];
         foreach ($checkValues as $value => $method) {
             if (empty($this->$value)) {
-                throw new \Exception(sprintf('The CRUD configuration is not complete. You must call the "%s" method.', $method));
+                throw new \Exception(sprintf('The CRUD configuration is not complete. You must call the "%s" method', $method));
             }
         }
 
@@ -178,7 +178,7 @@ final class Crud
     {
         $this->crudMustNotBeInitialized();
         if (mb_strlen($id) > 100) {
-            throw new \Exception('Column id is too long');
+            throw new \Exception(sprintf('The column id "%s" is too long', $id));
         }
         if (\array_key_exists($id, $this->availableColumns) || \array_key_exists($id, $this->availableVirtualColumns)) {
             throw new \Exception(sprintf('The column "%s" already exists', $id));
@@ -224,7 +224,7 @@ final class Crud
         if (isset($this->availableColumns[$columnId])) {
             return $this->availableColumns[$columnId];
         }
-        throw new \Exception('Crud: Column '.$columnId.' does not exist');
+        throw new \Exception(sprintf('The column "%s" does not exist', $columnId));
     }
 
     /**
@@ -239,7 +239,7 @@ final class Crud
             }
         }
         if (0 == \count($columns)) {
-            throw new \Exception('Config Crud: One column displayed is required');
+            throw new \Exception('At least one column is required');
         }
 
         return $columns;
@@ -276,7 +276,7 @@ final class Crud
         if (isset($this->availableVirtualColumns[$columnId])) {
             return $this->availableVirtualColumns[$columnId];
         }
-        throw new \Exception('Crud: Column '.$columnId.' does not exist');
+        throw new \Exception(sprintf('The column "%s" does not exist', $columnId));
     }
 
     public function getQueryBuilder(): \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null

@@ -49,7 +49,7 @@ class CrudTest extends KernelTestCase
     public function testCrudWithInvalidSessionName(string $sessionName): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Variable sessionName is not given or is invalid');
+        $this->expectExceptionMessage('The session name format is invalid');
 
         $this->createCrud($sessionName);
     }
@@ -114,11 +114,12 @@ class CrudTest extends KernelTestCase
 
     public function testAddColumnTooLong(): void
     {
+        $columnId = str_pad('', 101, 'a');
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Column id is too long');
+        $this->expectExceptionMessage('The column id "'.$columnId.'" is too long');
 
         $crud = $this->createCrud('session_name');
-        $crud->addColumn(str_pad('', 101, 'a'), 'alias', 'label');
+        $crud->addColumn($columnId, 'alias', 'label');
     }
 
     /**
@@ -187,7 +188,7 @@ class CrudTest extends KernelTestCase
     public function testGetColumnNotExists(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Crud: Column invalid does not exist');
+        $this->expectExceptionMessage('The column "invalid" does not exist');
 
         $crud = $this->createCrud('session_name');
         $crud->getColumn('invalid');
@@ -203,7 +204,7 @@ class CrudTest extends KernelTestCase
     public function testGetDefaultDisplayedColumnsEmpty(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Config Crud: One column displayed is required');
+        $this->expectExceptionMessage('At least one column is required');
 
         $crud = $this->createCrud();
         $crud->getDefaultDisplayedColumns();
@@ -233,7 +234,7 @@ class CrudTest extends KernelTestCase
     public function testGetVirtualColumnNotExists(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Crud: Column invalid does not exist');
+        $this->expectExceptionMessage('The column "invalid" does not exist');
 
         $crud = $this->createCrud('session_name');
         $crud->getVirtualColumn('invalid');

@@ -63,12 +63,12 @@ final class QueryBuilder implements QueryBuilderInterface
             $this->queryParameters[] = $parameter;
         } elseif ($parameter instanceof QueryBuilderBodyParameter) {
             if (null !== $this->body) {
-                throw new \Exception('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported.');
+                throw new \Exception('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported');
             }
             $this->bodyParameters[] = $parameter;
         } elseif ($parameter instanceof QueryBuilderBody) {
             if (\count($this->bodyParameters) > 0) {
-                throw new \Exception('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported.');
+                throw new \Exception('Use QueryBuilderBodyParameter and QueryBuilderBody classes is not supported');
             }
             $this->body = $parameter;
         } elseif ($parameter instanceof QueryBuilderHeaderParameter) {
