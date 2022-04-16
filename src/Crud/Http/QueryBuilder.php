@@ -87,17 +87,17 @@ final class QueryBuilder implements QueryBuilderInterface
         return $this;
     }
 
-    public function addOrderBy(string $sort, string $sense): self
+    public function addOrderBy(string $sort, string $sortDirection): self
     {
-        $this->orders[$sort] = $sense;
+        $this->orders[$sort] = $sortDirection;
 
         return $this;
     }
 
-    public function orderBy(string $sort, string $sense): self
+    public function orderBy(string $sort, string $sortDirection): self
     {
         $this->orders = [];
-        $this->addOrderBy($sort, $sense);
+        $this->addOrderBy($sort, $sortDirection);
 
         return $this;
     }

@@ -52,7 +52,7 @@ class TestUserFixtures extends Fixture
             ->setDisplayedColumns(['username', 'firstName'])
             ->setResultsDisplayed(50)
             ->setSort('firstName')
-            ->setSense(Crud::DESC);
+            ->setSortDirection(Crud::DESC);
         $manager->persist($userCrudSettings);
 
         $manager->flush();

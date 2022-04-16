@@ -15,9 +15,9 @@ namespace Ecommit\CrudBundle\Crud;
 
 interface QueryBuilderInterface
 {
-    public function addOrderBy(string $sort, string $sense): self;
+    public function addOrderBy(string $sort, string $sortDirection): self;
 
-    public function orderBy(string $sort, string $sense): self;
+    public function orderBy(string $sort, string $sortDirection): self;
 
     public function addParameter(QueryBuilderParameterInterface $parameter): self;
 }

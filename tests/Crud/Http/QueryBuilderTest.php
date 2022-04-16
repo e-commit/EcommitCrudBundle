@@ -136,16 +136,16 @@ class QueryBuilderTest extends TestCase
     {
         $queryBuilder = $this->createQueryBuider();
         $queryBuilder->setOrderBuilder(function (QueryBuilder $queryBuilder, $orders): void {
-            foreach ($orders as $sort => $sense) {
+            foreach ($orders as $sort => $sortDirection) {
                 $queryBuilder->addParameter(new QueryBuilderBodyParameter('sort', $sort));
-                $queryBuilder->addParameter(new QueryBuilderBodyParameter('sense', $sense));
+                $queryBuilder->addParameter(new QueryBuilderBodyParameter('sort-direction', $sortDirection));
             }
         });
         $queryBuilder->orderBy('col1', Crud::ASC);
         $response = $queryBuilder->getResponse(1, 1);
 
         $this->checkRequest($response, [
-            'body' => 'sort=col1&sense=ASC',
+            'body' => 'sort=col1&sort-direction=ASC',
         ]);
     }
 
@@ -154,20 +154,20 @@ class QueryBuilderTest extends TestCase
         $queryBuilder = $this->createQueryBuider();
         $queryBuilder->setOrderBuilder(function (QueryBuilder $queryBuilder, $orders): void {
             $paramSort = [];
-            $paramSense = [];
-            foreach ($orders as $sort => $sense) {
+            $paramSortDirection = [];
+            foreach ($orders as $sort => $sortDirection) {
                 $paramSort[] = $sort;
-                $paramSense[] = $sense;
+                $paramSortDirection[] = $sortDirection;
             }
             $queryBuilder->addParameter(new QueryBuilderBodyParameter('sort', implode(',', $paramSort)));
-            $queryBuilder->addParameter(new QueryBuilderBodyParameter('sense', implode(',', $paramSense)));
+            $queryBuilder->addParameter(new QueryBuilderBodyParameter('sort-direction', implode(',', $paramSortDirection)));
         });
         $queryBuilder->addOrderBy('col1', Crud::ASC);
         $queryBuilder->addOrderBy('col2', Crud::DESC);
         $response = $queryBuilder->getResponse(1, 1);
 
         $this->checkRequest($response, [
-            'body' => 'sort=col1%2Ccol2&sense=ASC%2CDESC',
+            'body' => 'sort=col1%2Ccol2&sort-direction=ASC%2CDESC',
         ]);
     }
 
@@ -192,9 +192,9 @@ class QueryBuilderTest extends TestCase
         $queryBuilder->addParameter(new QueryBuilderBodyParameter('bodyparam1', 'bodyparamval1'));
         $queryBuilder->addParameter(new QueryBuilderHeaderParameter('headerparam1', 'headerparamval1'));
         $queryBuilder->setOrderBuilder(function (QueryBuilder $queryBuilder, $orders): void {
-            foreach ($orders as $sort => $sense) {
+            foreach ($orders as $sort => $sortDirection) {
                 $queryBuilder->addParameter(new QueryBuilderQueryParameter('sort', $sort));
-                $queryBuilder->addParameter(new QueryBuilderQueryParameter('sense', $sense));
+                $queryBuilder->addParameter(new QueryBuilderQueryParameter('sort-direction', $sortDirection));
             }
         });
         $queryBuilder->setPaginationBuilder(function (QueryBuilder $queryBuilder, $page, $resultsPerPage): void {
@@ -207,7 +207,7 @@ class QueryBuilderTest extends TestCase
 
         $this->checkRequest($response, [
             'method' => 'POST',
-            'url' => 'http://test/url?queryparam1=queryparamval1&page=10&per_page=100&sort=col1&sense=ASC',
+            'url' => 'http://test/url?queryparam1=queryparamval1&page=10&per_page=100&sort=col1&sort-direction=ASC',
             'body' => 'bodyparam1=bodyparamval1',
             'headers' => ['headerparam1: headerparamval1'],
         ]);

@@ -44,7 +44,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 50,
             displayedColumns: ['username', 'firstName'],
             sort: 'firstName',
-            sense: Crud::DESC
+            sortDirection: Crud::DESC
         );
 
         return $client;
@@ -70,7 +70,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 50,
             displayedColumns: ['username', 'firstName'],
             sort: 'firstName',
-            sense: Crud::DESC
+            sortDirection: Crud::DESC
         );
 
         return $client;
@@ -88,7 +88,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 50,
             displayedColumns: ['username', 'firstName'],
             sort: 'firstName',
-            sense: Crud::DESC
+            sortDirection: Crud::DESC
         );
 
         $this->logout($client);
@@ -113,7 +113,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 50,
             displayedColumns: ['username', 'firstName'],
             sort: 'firstName',
-            sense: Crud::DESC
+            sortDirection: Crud::DESC
         );
 
         return $client;
@@ -139,7 +139,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 10,
             displayedColumns: ['username', 'firstName', 'lastName'],
             sort: 'username',
-            sense: Crud::ASC
+            sortDirection: Crud::ASC
         );
 
         return $client;
@@ -181,7 +181,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 10,
             displayedColumns: ['firstName', 'lastName', 'username'],
             sort: 'lastName',
-            sense: Crud::DESC
+            sortDirection: Crud::DESC
         );
 
         $this->logout($client);
@@ -205,7 +205,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 10,
             displayedColumns: ['firstName', 'lastName', 'username'],
             sort: 'lastName',
-            sense: Crud::DESC
+            sortDirection: Crud::DESC
         );
 
         return $client;
@@ -231,7 +231,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 10,
             displayedColumns: ['firstName', 'lastName', 'username'],
             sort: 'lastName',
-            sense: Crud::DESC
+            sortDirection: Crud::DESC
         );
 
         return $client;
@@ -249,7 +249,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
             resultsDisplayed: 10,
             displayedColumns: ['firstName', 'lastName', 'username'],
             sort: 'lastName',
-            sense: Crud::DESC
+            sortDirection: Crud::DESC
         );
 
         return $client;
@@ -306,13 +306,13 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
         $this->waitForAjax($client);
     }
 
-    protected function checkUserCrudSettingsDatabase(string $username, int $resultsDisplayed, array $displayedColumns, string $sort, string $sense): void
+    protected function checkUserCrudSettingsDatabase(string $username, int $resultsDisplayed, array $displayedColumns, string $sort, string $sortDirection): void
     {
         $userCrudSettings = $this->getUserCrudSettings($username);
         $this->assertSame($resultsDisplayed, $userCrudSettings->getResultsDisplayed());
         $this->assertSame($displayedColumns, $userCrudSettings->getDisplayedColumns());
         $this->assertSame($sort, $userCrudSettings->getSort());
-        $this->assertSame($sense, $userCrudSettings->getSense());
+        $this->assertSame($sortDirection, $userCrudSettings->getSortDirection());
     }
 
     protected function getUserCrudSettings(string $username): ?UserCrudSettings

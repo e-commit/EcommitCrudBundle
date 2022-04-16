@@ -50,7 +50,7 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testList
      */
-    public function testChangeSortSense(Client $client): Client
+    public function testChangeSortDirection(Client $client): Client
     {
         $link = $client->getCrawler()->filterXPath('//table[@class="result"]/thead/tr/th/a[contains(text(), "first_name")]');
         $link->click();
@@ -66,7 +66,7 @@ class TestCrudControllerTest extends PantherTestCase
     }
 
     /**
-     * @depends testChangeSortSense
+     * @depends testChangeSortDirection
      */
     public function testChangeSortColumn(Client $client): Client
     {

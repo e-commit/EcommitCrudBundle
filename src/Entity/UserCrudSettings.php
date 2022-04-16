@@ -38,7 +38,7 @@ class UserCrudSettings
     protected $sort;
 
     #[ORM\Column(type: 'string', length: 4)]
-    protected $sense;
+    protected $sortDirection;
 
     public function setCrudName(string $crudName): self
     {
@@ -88,16 +88,16 @@ class UserCrudSettings
         return $this->sort;
     }
 
-    public function setSense(string $sense): self
+    public function setSortDirection(string $sortDirection): self
     {
-        $this->sense = $sense;
+        $this->sortDirection = $sortDirection;
 
         return $this;
     }
 
-    public function getSense(): string
+    public function getSortDirection(): string
     {
-        return $this->sense;
+        return $this->sortDirection;
     }
 
     public function setUser(\Ecommit\CrudBundle\Entity\UserCrudInterface $user): self
@@ -119,7 +119,7 @@ class UserCrudSettings
     {
         $crudSessionManager->displayedColumns = $this->displayedColumns;
         $crudSessionManager->resultsPerPage = $this->resultsDisplayed;
-        $crudSessionManager->sense = $this->sense;
+        $crudSessionManager->sortDirection = $this->sortDirection;
         $crudSessionManager->sort = $this->sort;
 
         return $crudSessionManager;
@@ -132,7 +132,7 @@ class UserCrudSettings
     {
         $this->displayedColumns = $crudSessionManager->displayedColumns;
         $this->resultsDisplayed = $crudSessionManager->resultsPerPage;
-        $this->sense = $crudSessionManager->sense;
+        $this->sortDirection = $crudSessionManager->sortDirection;
         $this->sort = $crudSessionManager->sort;
     }
 }

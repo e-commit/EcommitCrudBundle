@@ -268,10 +268,10 @@ class CrudTest extends KernelTestCase
         $crud = $this->createCrud();
 
         $this->assertNull($crud->getDefaultSort());
-        $this->assertNull($crud->getDefaultSense());
+        $this->assertNull($crud->getDefaultSortDirection());
         $this->assertInstanceOf(Crud::class, $crud->setDefaultSort('username', Crud::DESC));
         $this->assertSame('username', $crud->getDefaultSort());
-        $this->assertSame(Crud::DESC, $crud->getDefaultSense());
+        $this->assertSame(Crud::DESC, $crud->getDefaultSortDirection());
     }
 
     public function testDefaultPersonalizedSort(): void
@@ -284,7 +284,7 @@ class CrudTest extends KernelTestCase
 
         $this->assertSame(['u.userId'], $crud->getDefaultPersonalizedSort());
         $this->assertSame('defaultPersonalizedSort', $crud->getDefaultSort());
-        $this->assertSame(Crud::ASC, $crud->getDefaultSense());
+        $this->assertSame(Crud::ASC, $crud->getDefaultSortDirection());
     }
 
     public function testRouting(): void
@@ -520,7 +520,7 @@ class CrudTest extends KernelTestCase
             ['availableResultsPerPage', 'setAvailableResultsPerPage', []],
             ['defaultResultsPerPage', 'setAvailableResultsPerPage', null],
             ['defaultSort', 'setDefaultSort', null],
-            ['defaultSense', 'setDefaultSort', null],
+            ['defaultSortDirection', 'setDefaultSort', null],
             ['queryBuilder', 'setQueryBuilder', null],
             ['routeName', 'setRoute', null],
         ];

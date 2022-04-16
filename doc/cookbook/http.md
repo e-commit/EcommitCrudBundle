@@ -66,9 +66,9 @@ class MyHttpController extends AbstractCrudController
 
         //FACULTATIF - Ajout dans la requête HTTP la gestion du tri
         $queryBuilder->setOrderBuilder(function (QueryBuilder $queryBuilder, $orders): void {
-            foreach ($orders as $sort => $sense) {
-                $senseParameter = ($sense === Crud::ASC)? '-' : '';
-                $queryBuilder->addParameter(new QueryBuilderQueryParameter('sort', $senseParameter.$sort));
+            foreach ($orders as $sort => $sortDirection) {
+                $sortDirectionParameter = ($sortDirection === Crud::ASC)? '-' : '';
+                $queryBuilder->addParameter(new QueryBuilderQueryParameter('sort', $sortDirection.$sort));
             }
         });
 

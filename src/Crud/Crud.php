@@ -42,7 +42,7 @@ final class Crud
     protected array $availableResultsPerPage = [];
     protected ?string $defaultSort = null;
     protected array $defaultPersonalizedSort = [];
-    protected ?string $defaultSense = null;
+    protected ?string $defaultSortDirection = null;
     protected ?int $defaultResultsPerPage = null;
     protected \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null $queryBuilder = null;
     protected bool $persistentSettings = false;
@@ -82,7 +82,7 @@ final class Crud
             'availableResultsPerPage' => 'setAvailableResultsPerPage',
             'defaultResultsPerPage' => 'setAvailableResultsPerPage',
             'defaultSort' => 'setDefaultSort',
-            'defaultSense' => 'setDefaultSort',
+            'defaultSortDirection' => 'setDefaultSort',
             'queryBuilder' => 'setQueryBuilder',
             'routeName' => 'setRoute',
         ];
@@ -106,7 +106,7 @@ final class Crud
 
         $this->createDisplaySettingsForm();
 
-        // Process request (resultsPerPage, sort, sense, change_columns)
+        // Process request (resultsPerPage, sort, sortDirection, change_columns)
         $this->processRequest();
 
         // Searcher form: Allocates object
@@ -319,22 +319,22 @@ final class Crud
         return $this->defaultSort;
     }
 
-    public function getDefaultSense(): ?string
+    public function getDefaultSortDirection(): ?string
     {
-        return $this->defaultSense;
+        return $this->defaultSortDirection;
     }
 
     /**
      * Set the default sort.
      *
-     * @param string $sort  Column id
-     * @param const  $sense Sense (Crud::ASC / Crud::DESC)
+     * @param string $sort          Column id
+     * @param const  $sortDirection Sort direction (Crud::ASC / Crud::DESC)
      */
-    public function setDefaultSort(string $sort, string $sense): self
+    public function setDefaultSort(string $sort, string $sortDirection): self
     {
         $this->crudMustNotBeInitialized();
         $this->defaultSort = $sort;
-        $this->defaultSense = $sense;
+        $this->defaultSortDirection = $sortDirection;
 
         return $this;
     }
@@ -348,7 +348,7 @@ final class Crud
      * Set the default personalized sort.
      *
      * @param array $criterias Criterias :
-     *                         If key is defined: Key = Sort  Value = Sense
+     *                         If key is defined: Key = Sort  Value = Sort direction
      *                         If key is not defined: Value = Sort
      */
     public function setDefaultPersonalizedSort(array $criterias): self
@@ -357,7 +357,7 @@ final class Crud
         $this->defaultPersonalizedSort = $criterias;
 
         $this->defaultSort = 'defaultPersonalizedSort';
-        $this->defaultSense = self::ASC; // Used if not defined in criterias
+        $this->defaultSortDirection = self::ASC; // Used if not defined in criterias
 
         return $this;
     }
@@ -565,23 +565,23 @@ final class Crud
             foreach ($this->defaultPersonalizedSort as $key => $value) {
                 if (\is_int($key)) {
                     $sort = $value;
-                    $sense = $this->defaultSense;
+                    $sortDirection = $this->defaultSortDirection;
                 } else {
                     $sort = $key;
-                    $sense = $value;
+                    $sortDirection = $value;
                 }
-                $this->queryBuilder->addOrderBy($sort, $sense);
+                $this->queryBuilder->addOrderBy($sort, $sortDirection);
             }
         } else {
             $columnSortAlias = $this->availableColumns[$columnSortId]->aliasSort;
             if (\is_array($columnSortAlias)) {
                 // Sort alias in many columns
                 foreach ($columnSortAlias as $oneColumnSortAlias) {
-                    $this->queryBuilder->addOrderBy($oneColumnSortAlias, $this->sessionValues->sense);
+                    $this->queryBuilder->addOrderBy($oneColumnSortAlias, $this->sessionValues->sortDirection);
                 }
             } else {
                 // Sort alias in one column
-                $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sense);
+                $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sortDirection);
             }
         }
 
@@ -645,7 +645,7 @@ final class Crud
     public function resetSort(): void
     {
         $this->initIfNecessary();
-        $this->sessionValues->sense = $this->defaultSense;
+        $this->sessionValues->sortDirection = $this->defaultSortDirection;
         $this->sessionValues->sort = $this->defaultSort;
         $this->save();
     }
@@ -654,7 +654,7 @@ final class Crud
     {
         $this->sessionValues->displayedColumns = $this->getDefaultDisplayedColumns();
         $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
-        $this->sessionValues->sense = $this->defaultSense;
+        $this->sessionValues->sortDirection = $this->defaultSortDirection;
         $this->sessionValues->sort = $this->defaultSort;
 
         if ($this->persistentSettings) {
@@ -715,7 +715,7 @@ final class Crud
         $this->changeNumberResultsDisplayed($this->sessionValues->resultsPerPage);
         $this->changeColumnsDisplayed($this->sessionValues->displayedColumns);
         $this->changeSort($this->sessionValues->sort);
-        $this->changeSense($this->sessionValues->sense);
+        $this->changeSortDirection($this->sessionValues->sortDirection);
         $this->changeFilterValues($this->sessionValues->searchFormData);
         $this->changePage($this->sessionValues->page);
     }
@@ -774,17 +774,17 @@ final class Crud
     }
 
     /**
-     * User action: Changes sense.
+     * User action: Changes sort direction.
      */
-    protected function changeSense(mixed $value): void
+    protected function changeSortDirection(mixed $value): void
     {
-        $oldValue = $this->sessionValues->sense;
+        $oldValue = $this->sessionValues->sortDirection;
         if (\is_scalar($value) && (self::ASC === $value || self::DESC === $value)) {
-            $this->sessionValues->sense = $value;
+            $this->sessionValues->sortDirection = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
-            $this->sessionValues->sense = $this->defaultSense;
-            $this->testIfDatabaseMustMeUpdated($oldValue, $this->defaultSense);
+            $this->sessionValues->sortDirection = $this->defaultSortDirection;
+            $this->testIfDatabaseMustMeUpdated($oldValue, $this->defaultSortDirection);
         }
     }
 
@@ -845,8 +845,8 @@ final class Crud
         if ($request->query->has('sort')) {
             $this->changeSort($request->query->get('sort'));
         }
-        if ($request->query->has('sense')) {
-            $this->changeSense($request->query->get('sense'));
+        if ($request->query->has('sort-direction')) {
+            $this->changeSortDirection($request->query->get('sort-direction'));
         }
         if ($request->query->has('page')) {
             $this->changePage($request->query->get('page'));
@@ -907,7 +907,7 @@ final class Crud
             $this->defaultResultsPerPage,
             $this->getDefaultDisplayedColumns(),
             $this->defaultSort,
-            $this->defaultSense,
+            $this->defaultSortDirection,
             ($this->searchForm) ? $this->searchForm->getDefaultData() : null,
         );
 
@@ -959,7 +959,7 @@ final class Crud
                 // Create object in database only if not default values
                 if ($this->sessionValues->displayedColumns != $this->getDefaultDisplayedColumns() ||
                     $this->sessionValues->resultsPerPage != $this->defaultResultsPerPage ||
-                    $this->sessionValues->sense != $this->defaultSense ||
+                    $this->sessionValues->sortDirection != $this->defaultSortDirection ||
                     $this->sessionValues->sort != $this->defaultSort
                 ) {
                     $objectDatabase = new UserCrudSettings();

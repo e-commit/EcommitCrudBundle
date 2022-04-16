@@ -51,19 +51,19 @@ trait TestTrait
 
         switch ($iSort->text()) {
             case '^':
-                $sense = Crud::ASC;
+                $sortDirection = Crud::ASC;
                 break;
             case 'v':
-                $sense = Crud::DESC;
+                $sortDirection = Crud::DESC;
                 break;
             default:
-                throw new \Exception('Bad sense');
+                throw new \Exception('Bad sort direction');
         }
 
         $column = $iSort->filterXPath('ancestor::th')->last()->text();
         $column = str_replace(' '.$iSort->text(), '', $column);
 
-        return [$column, $sense];
+        return [$column, $sortDirection];
     }
 
     protected function getFirstUsername(Crawler $crawler): ?string

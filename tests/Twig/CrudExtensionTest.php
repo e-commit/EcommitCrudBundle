@@ -464,13 +464,13 @@ class CrudExtensionTest extends KernelTestCase
     public function testThColumnSortableActiveAsc(): void
     {
         $html = $this->crudExtension->th($this->environment, 'column1', $this->createCrud());
-        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-active-asc"><a href="/user?sort=column1&amp;sense=DESC" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">label1 <i>^</i></a></th>', $html);
+        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-active-asc"><a href="/user?sort=column1&amp;sort-direction=DESC" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">label1 <i>^</i></a></th>', $html);
     }
 
     public function testThColumnSortableActiveDesc(): void
     {
         $html = $this->crudExtension->th($this->environment, 'column1', $this->createCrud('column1', CRUD::DESC));
-        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-active-desc"><a href="/user?sort=column1&amp;sense=ASC" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">label1 <i>v</i></a></th>', $html);
+        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-active-desc"><a href="/user?sort=column1&amp;sort-direction=ASC" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">label1 <i>v</i></a></th>', $html);
     }
 
     public function testThWithAjaxOptions(): void
@@ -494,9 +494,9 @@ class CrudExtensionTest extends KernelTestCase
     /**
      * @dataProvider getTestThWithAttrOptionsProvider
      */
-    public function testThWithAttrOptions(string $columnId, string $sort, string $sense, string $expected): void
+    public function testThWithAttrOptions(string $columnId, string $sort, string $sortDirection, string $expected): void
     {
-        $html = $this->crudExtension->th($this->environment, $columnId, $this->createCrud($sort, $sense), [
+        $html = $this->crudExtension->th($this->environment, $columnId, $this->createCrud($sort, $sortDirection), [
             'th_attr' => [
                 'not_sortable' => ['class' => 'a', 'data-a' => 'val'],
                 'sortable_active_asc' => ['class' => 'b', 'data-b' => 'val'],
@@ -517,8 +517,8 @@ class CrudExtensionTest extends KernelTestCase
     {
         return [
             ['column3', 'column1', Crud::ASC, '<th class="a ec-crud-th ec-crud-th-not-sortable" data-a="val">label3</th>'],
-            ['column1', 'column1', Crud::ASC, '<th class="b ec-crud-th ec-crud-th-sortable-active-asc" data-b="val"><a href="/user?sort=column1&amp;sense=DESC" class="e ec-crud-ajax-link-auto" data-e="val" data-ec-crud-ajax-update="#myId">label1 <i>^</i></a></th>'],
-            ['column1', 'column1', Crud::DESC, '<th class="c ec-crud-th ec-crud-th-sortable-active-desc" data-c="val"><a href="/user?sort=column1&amp;sense=ASC" class="f ec-crud-ajax-link-auto" data-f="val" data-ec-crud-ajax-update="#myId">label1 <i>v</i></a></th>'],
+            ['column1', 'column1', Crud::ASC, '<th class="b ec-crud-th ec-crud-th-sortable-active-asc" data-b="val"><a href="/user?sort=column1&amp;sort-direction=DESC" class="e ec-crud-ajax-link-auto" data-e="val" data-ec-crud-ajax-update="#myId">label1 <i>^</i></a></th>'],
+            ['column1', 'column1', Crud::DESC, '<th class="c ec-crud-th ec-crud-th-sortable-active-desc" data-c="val"><a href="/user?sort=column1&amp;sort-direction=ASC" class="f ec-crud-ajax-link-auto" data-f="val" data-ec-crud-ajax-update="#myId">label1 <i>v</i></a></th>'],
             ['column2', 'column1', Crud::ASC, '<th class="d ec-crud-th ec-crud-th-sortable-not-active" data-d="val"><a href="/user?sort=column2" class="g ec-crud-ajax-link-auto" data-g="val" data-ec-crud-ajax-update="#myId">label2</a></th>'],
         ];
     }
@@ -721,7 +721,7 @@ class CrudExtensionTest extends KernelTestCase
         ]);
     }
 
-    protected function createCrud(string $sort = 'column1', string $sense = Crud::ASC): Crud
+    protected function createCrud(string $sort = 'column1', string $sortDirection = Crud::ASC): Crud
     {
         $columns = [
             'column1' => new CrudColumn('column1', 'alias1', 'label1', true, true, 'alias1', 'alias1'),
@@ -737,7 +737,7 @@ class CrudExtensionTest extends KernelTestCase
                 'column3',
             ],
             $sort,
-            $sense,
+            $sortDirection,
         );
 
         $crud = $this->getMockBuilder(Crud::class)

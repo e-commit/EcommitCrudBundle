@@ -90,7 +90,7 @@
         {{ block('th_not_sortable', template_name) }}
     {% elseif crud.sessionValues.sort != column.id %}
         {{ block('th_sortable_not_active', template_name) }}
-    {% elseif crud.sessionValues.sense == constant('Ecommit\\CrudBundle\\Crud\\Crud::DESC') %}
+    {% elseif crud.sessionValues.sortDirection == constant('Ecommit\\CrudBundle\\Crud\\Crud::DESC') %}
         {{ block('th_sortable_active_desc', template_name) }}
     {% else %}
         {{ block('th_sortable_active_asc', template_name) }}
@@ -117,7 +117,7 @@
 {% block th_sortable_active_asc %}
     {% set th_attr = th_attr.sortable_active_asc|merge({class: (th_attr.sortable_active_asc.class|default('') ~ ' ec-crud-th ec-crud-th-sortable-active-asc')|trim}) %}
     {% set a_attr = a_attr.sortable_active_asc %}
-    {% set new_sense = constant('Ecommit\\CrudBundle\\Crud\\Crud::DESC') %}
+    {% set new_sort_direction = constant('Ecommit\\CrudBundle\\Crud\\Crud::DESC') %}
     {% set icon_name = 'asc' %}
     {{ block('th_sortable_active', template_name) }}
 {% endblock %}
@@ -125,7 +125,7 @@
 {% block th_sortable_active_desc %}
     {% set th_attr = th_attr.sortable_active_desc|merge({class: (th_attr.sortable_active_desc.class|default('') ~ ' ec-crud-th ec-crud-th-sortable-active-desc')|trim}) %}
     {% set a_attr = a_attr.sortable_active_desc %}
-    {% set new_sense = constant('Ecommit\\CrudBundle\\Crud\\Crud::ASC') %}
+    {% set new_sort_direction = constant('Ecommit\\CrudBundle\\Crud\\Crud::ASC') %}
     {% set icon_name = 'desc' %}
     {{ block('th_sortable_active', template_name) }}
 {% endblock %}
@@ -135,7 +135,7 @@
         {% set a_attr = a_attr|merge({class: (a_attr.class|default('') ~ ' ec-crud-ajax-link-auto')|trim}) %}
     {% endif %}
     <th{% with { attr: th_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-        <a href="{{ path(crud.routeName, crud.routeParams|merge({('sort'): column.id, 'sense': new_sense})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}{% if ajax_options is not null %}{{ ajax_attributes(ajax_options) }}{% endif %}>
+        <a href="{{ path(crud.routeName, crud.routeParams|merge({('sort'): column.id, 'sort-direction': new_sort_direction})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}{% if ajax_options is not null %}{{ ajax_attributes(ajax_options) }}{% endif %}>
             {{- label|trans }} {{ crud_icon(icon_name) -}}
         </a>
     </th>

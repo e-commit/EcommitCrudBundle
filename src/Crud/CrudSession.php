@@ -23,7 +23,7 @@ final class CrudSession
     public int $page = 1;
     public bool $searchFormIsSubmittedAndValid = false;
 
-    public function __construct(public int $resultsPerPage, public array $displayedColumns, public string $sort, public string $sense, public ?SearcherInterface $searchFormData = null)
+    public function __construct(public int $resultsPerPage, public array $displayedColumns, public string $sort, public string $sortDirection, public ?SearcherInterface $searchFormData = null)
     {
     }
 }
