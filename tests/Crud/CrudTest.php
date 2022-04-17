@@ -72,8 +72,8 @@ class CrudTest extends KernelTestCase
 
     public function testGetSessionValues(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createValidCrud()
+            ->init();
 
         $this->assertInstanceOf(CrudSession::class, $crud->getSessionValues());
     }
@@ -105,9 +105,9 @@ class CrudTest extends KernelTestCase
     {
         $crud = $this->createValidCrud()
             ->addColumn('my_column', 'u.alias', 'My Column', ['alias_sort' => 'u.lastName'])
-            ->setDefaultSort('my_column', Crud::ASC);
-        $crud->init();
-        $crud->build();
+            ->setDefaultSort('my_column', Crud::ASC)
+            ->init()
+            ->build();
 
         $this->assertSame(['u.lastName ASC'], $crud->getQueryBuilder()->getDQLPart('orderBy')[0]->getParts());
     }
@@ -311,8 +311,8 @@ class CrudTest extends KernelTestCase
         $crud->createSearchForm(new UserSearcher());
         $this->assertInstanceOf(SearchFormBuilder::class, $crud->getSearchForm());
 
-        $crud->init();
-        $crud->createView();
+        $crud->init()
+            ->createView();
         $this->assertInstanceOf(FormView::class, $crud->getSearchForm());
     }
 
@@ -328,8 +328,8 @@ class CrudTest extends KernelTestCase
         $crud = $this->createValidCrud();
 
         $this->assertInstanceOf(Crud::class, $crud->setBuildPaginator(true));
-        $crud->init();
-        $crud->build();
+        $crud->init()
+            ->build();
 
         $this->assertInstanceOf(DoctrineORMPaginator::class, $crud->getPaginator());
     }
@@ -339,8 +339,8 @@ class CrudTest extends KernelTestCase
         $crud = $this->createValidCrud();
 
         $this->assertInstanceOf(Crud::class, $crud->setBuildPaginator(false));
-        $crud->init();
-        $crud->build();
+        $crud->init()
+            ->build();
 
         $this->assertNull($crud->getPaginator());
     }
@@ -356,10 +356,18 @@ class CrudTest extends KernelTestCase
 
             return $this->createMock(PaginatorInterface::class);
         }));
-        $crud->init();
-        $crud->build();
+        $crud->init()
+            ->build();
 
         $this->assertInstanceOf(PaginatorInterface::class, $crud->getPaginator());
+    }
+
+    public function testBuild(): void
+    {
+        $crud = $this->createValidCrud()
+            ->init();
+
+        $this->assertInstanceOf(Crud::class, $crud->build());
     }
 
     public function testDivIdList(): void
@@ -389,8 +397,8 @@ class CrudTest extends KernelTestCase
         $this->assertInstanceOf(Crud::class, $crud->setDisplayResultsOnlyIfSearch(true));
         $this->assertTrue($crud->getDisplayResultsOnlyIfSearch());
 
-        $crud->init();
-        $crud->build();
+        $crud->init()
+            ->build();
         $this->assertFalse($crud->getDisplayResults());
         $this->assertNull($crud->getPaginator());
     }
@@ -404,8 +412,8 @@ class CrudTest extends KernelTestCase
         $this->assertInstanceOf(Crud::class, $crud->setDisplayResultsOnlyIfSearch(true));
         $this->assertTrue($crud->getDisplayResultsOnlyIfSearch());
 
-        $crud->init();
-        $crud->build();
+        $crud->init()
+            ->build();
         $this->assertTrue($crud->getDisplayResults());
         $this->assertNotNull($crud->getPaginator());
     }
@@ -417,8 +425,8 @@ class CrudTest extends KernelTestCase
         $this->assertTrue($crud->getDisplayResults());
         $this->assertInstanceOf(Crud::class, $crud->setDisplayResults(true));
 
-        $crud->init();
-        $crud->build();
+        $crud->init()
+            ->build();
         $this->assertTrue($crud->getDisplayResults());
         $this->assertNotNull($crud->getPaginator());
     }
@@ -430,17 +438,17 @@ class CrudTest extends KernelTestCase
         $this->assertTrue($crud->getDisplayResults());
         $this->assertInstanceOf(Crud::class, $crud->setDisplayResults(false));
 
-        $crud->init();
-        $crud->build();
+        $crud->init()
+            ->build();
         $this->assertFalse($crud->getDisplayResults());
         $this->assertNull($crud->getPaginator());
     }
 
     public function testDisplayResultsFalseAfterInit(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
-        $crud->build();
+        $crud = $this->createValidCrud()
+            ->init()
+            ->build();
 
         $this->assertInstanceOf(Crud::class, $crud->setDisplayResults(false));
         $this->assertFalse($crud->getDisplayResults());
@@ -473,8 +481,8 @@ class CrudTest extends KernelTestCase
 
         $this->assertNull($crud->getPaginator());
 
-        $crud->init();
-        $crud->build();
+        $crud->init()
+            ->build();
         $this->assertInstanceOf(PaginatorInterface::class, $crud->getPaginator());
 
         $this->assertInstanceOf(Crud::class, $crud->setPaginator(null));
@@ -531,16 +539,16 @@ class CrudTest extends KernelTestCase
         $crud = $this->createValidCrud();
         $this->assertFalse($crud->isInitialized());
 
-        $crud->initIfNecessary();
+        $this->assertInstanceOf(Crud::class, $crud->initIfNecessary());
         $this->assertTrue($crud->isInitialized());
     }
 
     public function testInitIfNecessaryAfterInit(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createValidCrud()
+            ->init()
+            ->initIfNecessary();
 
-        $crud->initIfNecessary();
         $this->assertTrue($crud->isInitialized());
     }
 
@@ -549,19 +557,43 @@ class CrudTest extends KernelTestCase
         $crud = $this->createValidCrud();
         $this->assertFalse($crud->isInitialized());
 
-        $crud->init();
+        $this->assertInstanceOf(Crud::class, $crud->init());
         $this->assertTrue($crud->isInitialized());
     }
 
     public function testInitAfterInit(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createValidCrud()
+            ->init();
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('CRUD already initialized');
 
         $crud->init();
+    }
+
+    public function testReset(): void
+    {
+        $crud = $this->createValidCrud()
+            ->init();
+
+        $this->assertInstanceOf(Crud::class, $crud->reset());
+    }
+
+    public function testResetSort(): void
+    {
+        $crud = $this->createValidCrud()
+            ->init();
+
+        $this->assertInstanceOf(Crud::class, $crud->resetSort());
+    }
+
+    public function testCreateView(): void
+    {
+        $crud = $this->createValidCrud()
+            ->init();
+
+        $this->assertInstanceOf(Crud::class, $crud->createView());
     }
 
     public function testCallCreateSearchFormBeforeRequiredOptions(): void
@@ -609,8 +641,8 @@ class CrudTest extends KernelTestCase
             ->setAvailableResultsPerPage([10, 50, 100], 50)
             ->setDefaultSort('username', Crud::ASC)
             ->setRoute('user_ajax_crud')
-            ->init();
-        $crud->build();
+            ->init()
+            ->build();
     }
 
     /**
@@ -641,8 +673,8 @@ class CrudTest extends KernelTestCase
      */
     public function testCallMethodNotAllowedAfterInitialization(string $method, array $arguments = []): void
     {
-        $crud = $this->createValidCrud(true);
-        $crud->init();
+        $crud = $this->createValidCrud(true)
+            ->init();
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage(sprintf('The method "%s" cannot be called after CRUD initialization', $method));

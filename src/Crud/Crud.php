@@ -69,7 +69,7 @@ final class Crud
     /**
      * Inits the CRUD.
      */
-    public function init(): void
+    public function init(): self
     {
         if ($this->isInitialized) {
             throw new \Exception('CRUD already initialized');
@@ -128,6 +128,8 @@ final class Crud
 
         $this->initializationInProgress = false;
         $this->isInitialized = true;
+
+        return $this;
     }
 
     public function isInitialized(): bool
@@ -135,11 +137,13 @@ final class Crud
         return $this->isInitialized;
     }
 
-    public function initIfNecessary(): void
+    public function initIfNecessary(): self
     {
         if (!$this->isInitialized && !$this->initializationInProgress) {
             $this->init();
         }
+
+        return $this;
     }
 
     protected function crudMustNotBeInitialized(): void
@@ -522,7 +526,7 @@ final class Crud
         return $this;
     }
 
-    public function processSearchForm(): void
+    public function processSearchForm(): self
     {
         $this->crudMustBeInitialized();
         if (!$this->searchForm) {
@@ -531,7 +535,7 @@ final class Crud
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request->query->has('reset')) {
-            return;
+            return $this;
         }
         if ('POST' == $request->getMethod()) {
             if ($this->displayResultsOnlyIfSearch) {
@@ -547,13 +551,17 @@ final class Crud
                 $this->save();
             }
         }
+
+        return $this;
     }
 
-    public function build(): void
+    public function build(): self
     {
         $this->crudMustBeInitialized();
         $this->updateQueryBuilder();
         $this->buildPaginator();
+
+        return $this;
     }
 
     protected function updateQueryBuilder(): void
@@ -625,7 +633,7 @@ final class Crud
     /**
      * Reset search form values.
      */
-    public function reset(): void
+    public function reset(): self
     {
         $this->initIfNecessary();
         if ($this->searchForm) {
@@ -640,14 +648,18 @@ final class Crud
         if ($this->displayResultsOnlyIfSearch) {
             $this->displayResults = false;
         }
+
+        return $this;
     }
 
-    public function resetSort(): void
+    public function resetSort(): self
     {
         $this->initIfNecessary();
         $this->sessionValues->sortDirection = $this->defaultSortDirection;
         $this->sessionValues->sort = $this->defaultSort;
         $this->save();
+
+        return $this;
     }
 
     protected function resetDisplaySettings(): void
@@ -668,7 +680,7 @@ final class Crud
         }
     }
 
-    public function createView(): void
+    public function createView(): self
     {
         $this->crudMustBeInitialized();
         if ($this->searchForm) {
@@ -676,6 +688,8 @@ final class Crud
             $this->searchForm = $this->searchForm->getForm();
         }
         $this->displaySettingsForm = $this->displaySettingsForm->createView();
+
+        return $this;
     }
 
     public function getTwigFunctionsConfiguration(): array
