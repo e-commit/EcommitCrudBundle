@@ -312,6 +312,12 @@ final class Crud
     public function setAvailableResultsPerPage(array $availableResultsPerPage, int $defaultValue): self
     {
         $this->crudMustNotBeInitialized();
+        if (0 === \count($availableResultsPerPage)) {
+            throw new \Exception('The 1st argument of the "setAvailableResultsPerPage" method must contain at least one integer');
+        }
+        if ($availableResultsPerPage !== array_filter($availableResultsPerPage, 'is_int')) {
+            throw new \Exception('The 1st argument of the "setAvailableResultsPerPage" method must contain only integers');
+        }
         $this->availableResultsPerPage = $availableResultsPerPage;
         $this->defaultResultsPerPage = $defaultValue;
 

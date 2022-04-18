@@ -263,6 +263,26 @@ class CrudTest extends KernelTestCase
         $this->assertSame(50, $crud->getDefaultResultsPerPage());
     }
 
+    public function testSetAvailableResultsPerPageWithEmptyArray(): void
+    {
+        $crud = $this->createCrud();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The 1st argument of the "setAvailableResultsPerPage" method must contain at least one integer');
+
+        $crud->setAvailableResultsPerPage([], 1);
+    }
+
+    public function testSetAvailableResultsPerPageWithNotInteger(): void
+    {
+        $crud = $this->createCrud();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The 1st argument of the "setAvailableResultsPerPage" method must contain only integers');
+
+        $crud->setAvailableResultsPerPage([1, '10'], 1);
+    }
+
     public function testSort(): void
     {
         $crud = $this->createCrud();
