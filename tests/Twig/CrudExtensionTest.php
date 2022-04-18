@@ -558,8 +558,8 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testTdWithEscape(): void
     {
-        $html = $this->crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1 é&');
-        $this->assertSame('<td>value1 é&amp;</td>', $html);
+        $html = $this->crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1 é&>"');
+        $this->assertSame('<td>value1 é&amp;&gt;&quot;</td>', $html);
     }
 
     public function testTdWithoutEscape(): void
@@ -572,10 +572,10 @@ class CrudExtensionTest extends KernelTestCase
 
     public function testRepeatedValuesStringFirst(): CrudExtension
     {
-        $html = $this->crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1', [
+        $html = $this->crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1 é&>"', [
             'repeated_values_string' => '"',
         ]);
-        $this->assertSame('<td>value1</td>', $html);
+        $this->assertSame('<td>value1 é&amp;&gt;&quot;</td>', $html);
 
         return $this->crudExtension;
     }
@@ -585,10 +585,10 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testRepeatedValuesStringRepeat(CrudExtension $crudExtension): CrudExtension
     {
-        $html = $crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1', [
+        $html = $crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1 é&>"', [
             'repeated_values_string' => 'Bis',
         ]);
-        $this->assertSame('<td title="value1">Bis</td>', $html);
+        $this->assertSame('<td title="value1 é&amp;&gt;&quot;">Bis</td>', $html);
 
         return $crudExtension;
     }
@@ -598,10 +598,10 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testRepeatedValuesStringOtherColumn(CrudExtension $crudExtension): CrudExtension
     {
-        $html = $crudExtension->td($this->environment, 'column2', $this->createCrud(), 'value1', [
+        $html = $crudExtension->td($this->environment, 'column2', $this->createCrud(), 'value1 é&>"', [
             'repeated_values_string' => 'Bis',
         ]);
-        $this->assertSame('<td>value1</td>', $html);
+        $this->assertSame('<td>value1 é&amp;&gt;&quot;</td>', $html);
 
         return $crudExtension;
     }
@@ -611,10 +611,10 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testRepeatedValuesStringOtherColumnRepeat(CrudExtension $crudExtension): CrudExtension
     {
-        $html = $crudExtension->td($this->environment, 'column2', $this->createCrud(), 'value1', [
+        $html = $crudExtension->td($this->environment, 'column2', $this->createCrud(), 'value1 é&>"', [
             'repeated_values_string' => 'Bis',
         ]);
-        $this->assertSame('<td title="value1">Bis</td>', $html);
+        $this->assertSame('<td title="value1 é&amp;&gt;&quot;">Bis</td>', $html);
 
         return $crudExtension;
     }
@@ -624,11 +624,11 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testRepeatedValuesStringRepeatWithMarkup(CrudExtension $crudExtension): CrudExtension
     {
-        $markup = new Markup('value1', 'UTF-8');
+        $markup = new Markup('value1 é&>"', 'UTF-8');
         $html = $crudExtension->td($this->environment, 'column1', $this->createCrud(), $markup, [
             'repeated_values_string' => 'Bis',
         ]);
-        $this->assertSame('<td title="value1">Bis</td>', $html);
+        $this->assertSame('<td title="value1 é&amp;&gt;&quot;">Bis</td>', $html);
 
         return $crudExtension;
     }
@@ -638,7 +638,7 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testRepeatedValuesStringRepeatWithTitleAttr(CrudExtension $crudExtension): CrudExtension
     {
-        $html = $crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1', [
+        $html = $crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value1 é&>"', [
             'repeated_values_string' => 'Bis',
             'td_attr' => ['title' => 'Repeated'],
         ]);
@@ -652,10 +652,10 @@ class CrudExtensionTest extends KernelTestCase
      */
     public function testRepeatedValuesStringNotRepeat(CrudExtension $crudExtension): CrudExtension
     {
-        $html = $crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value2', [
+        $html = $crudExtension->td($this->environment, 'column1', $this->createCrud(), 'value2 é&>"', [
             'repeated_values_string' => 'Bis',
         ]);
-        $this->assertSame('<td>value2</td>', $html);
+        $this->assertSame('<td>value2 é&amp;&gt;&quot;</td>', $html);
 
         return $crudExtension;
     }
