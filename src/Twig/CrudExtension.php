@@ -586,15 +586,16 @@ final class CrudExtension extends AbstractExtension
      * @param array $options Options:
      *                       * auto_class: Auto CSS class used. Default: ec-crud-ajax-form-auto
      *                       * ajax_options: See "ajaxAttributes" method options
+     *                       * + form_start function options
      */
     public function formStartAjax(FormView $formView, array $options = []): string
     {
         $autoClass = 'ec-crud-ajax-form-auto';
-        if (isset($options['auto_class']) && null !== isset($options['auto_class'])) {
+        if (isset($options['auto_class']) && null !== $options['auto_class']) {
             $autoClass = $options['auto_class'];
             unset($options['auto_class']);
         }
-        if (isset($options['attr']['class'])) {
+        if (isset($options['attr']['class']) && null !== $options['attr']['class']) {
             $options['attr']['class'] = sprintf('%s %s', $autoClass, $options['attr']['class']);
         } else {
             $options['attr']['class'] = $autoClass;

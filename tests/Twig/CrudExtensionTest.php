@@ -120,6 +120,16 @@ class CrudExtensionTest extends KernelTestCase
         ]);
     }
 
+    public function testFormStartAjaxWithFormStartOptions(): void
+    {
+        $html = $this->crudExtension->formStartAjax($this->createFormView(), [
+            'method' => 'get',
+        ]);
+
+        $xpath = '//form[@method="get" and @action="/url" and contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")]';
+        $this->assertMatchesXpath($html, $xpath);
+    }
+
     /**
      * @dataProvider getTestAjaxAttributesProvider
      */
