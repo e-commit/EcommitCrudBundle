@@ -147,7 +147,8 @@
 {% apply spaceless %}
     {% if repeated_value %}
         {% if td_attr.title is not defined %}
-            {% set td_attr = td_attr|merge({title: value}) %}
+            {% set title_value = title_value|default(value) %}
+            {% set td_attr = td_attr|merge({title: title_value}) %}
         {% endif %}
         {% set value = options.repeated_values_string %}
     {% endif %}
