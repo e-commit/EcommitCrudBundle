@@ -73,11 +73,8 @@
     {% if page %}
         {% set li_attr_child = li_attr_child|default([]) %}
         {% set a_attr_child = a_attr_child|default([]) %}
-        {% if ajax_options is not null %}
-            {% set a_attr_child = a_attr_child|merge({class: (a_attr_child.class|default('') ~ ' ec-crud-ajax-link-auto')|trim}) %}
-        {% endif %}
         <li{% with { attr: li_attr_child } %}{{ block('attributes', template_name) }}{% endwith %}>
-            <a href="{{ path(route_name, route_params|merge({(attribute_page): page})) }}"{% with { attr: a_attr_child } %}{{ block('attributes', template_name) }}{% endwith %}{% if ajax_options is not null %}{{ ajax_attributes(ajax_options) }}{% endif %}>{{ page_label }}</a>
+            <a href="{{ path(route_name, route_params|merge({(attribute_page): page})) }}"{% with { attr: a_attr_child } %}{{ block('attributes', template_name) }}{% endwith %}>{{ page_label }}</a>
         </li>
     {% endif %}
 {% endblock %}
@@ -106,11 +103,8 @@
 {% block th_sortable_not_active %}
     {% set th_attr = th_attr.sortable_not_active|merge({class: (th_attr.sortable_not_active.class|default('') ~ ' ec-crud-th ec-crud-th-sortable-not-active')|trim}) %}
     {% set a_attr = a_attr.sortable_not_active %}
-    {% if ajax_options is not null %}
-        {% set a_attr = a_attr|merge({class: (a_attr.class|default('') ~ ' ec-crud-ajax-link-auto')|trim}) %}
-    {% endif %}
     <th{% with { attr: th_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-        <a href="{{ path(crud.routeName, crud.routeParams|merge({('sort'): column.id})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}{% if ajax_options is not null %}{{ ajax_attributes(ajax_options) }}{% endif %}>{{ label|trans }}</a>
+        <a href="{{ path(crud.routeName, crud.routeParams|merge({('sort'): column.id})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}>{{ label|trans }}</a>
     </th>
 {% endblock %}
 
@@ -131,11 +125,8 @@
 {% endblock %}
 
 {% block th_sortable_active %}
-    {% if ajax_options is not null %}
-        {% set a_attr = a_attr|merge({class: (a_attr.class|default('') ~ ' ec-crud-ajax-link-auto')|trim}) %}
-    {% endif %}
     <th{% with { attr: th_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-        <a href="{{ path(crud.routeName, crud.routeParams|merge({('sort'): column.id, 'sort-direction': new_sort_direction})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}{% if ajax_options is not null %}{{ ajax_attributes(ajax_options) }}{% endif %}>
+        <a href="{{ path(crud.routeName, crud.routeParams|merge({('sort'): column.id, 'sort-direction': new_sort_direction})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
             {{- label|trans }} {{ crud_icon(icon_name) -}}
         </a>
     </th>
@@ -237,6 +228,9 @@
 
 {% block search_form_start %}
 {% apply spaceless %}
+    {% if form_attr.novalidate is not defined %}
+        {% set form_attr = form_attr|merge({novalidate: 'novalidate'}) %}
+    {% endif %}
     {{ form_start(crud.searchForm, {'attr': form_attr}) }}
 {% endapply %}
 {% endblock %}

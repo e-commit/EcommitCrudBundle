@@ -17,6 +17,7 @@ use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\Paginator\PaginatorInterface;
 use Symfony\Component\Form\FormRendererInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
@@ -169,7 +170,7 @@ final class CrudExtension extends AbstractExtension
                     $liResolver->setAllowedTypes($option, 'array');
                 }
             },
-            'a_attr' => function (OptionsResolver $aResolver): void {
+            'a_attr' => function (OptionsResolver $aResolver, Options $parent): void {
                 $aResolver->setDefaults([
                     'first_page' => [],
                     'previous_page' => [],
@@ -180,6 +181,17 @@ final class CrudExtension extends AbstractExtension
                 ]);
                 foreach (['first_page', 'previous_page', 'current_page', 'next_page', 'last_page', 'other_page'] as $option) {
                     $aResolver->setAllowedTypes($option, 'array');
+                    $aResolver->addNormalizer($option, function (Options $options, $value) use ($parent) {
+                        if (null !== $parent['ajax_options']) {
+                            return array_merge(
+                                $value,
+                                ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-ajax-link-auto' : 'ec-crud-ajax-link-auto'],
+                                $this->getAjaxAttributes($this->validateAjaxOptions($parent['ajax_options'])),
+                            );
+                        }
+
+                        return $value;
+                    });
                 }
             },
             'render' => null,
@@ -282,7 +294,7 @@ final class CrudExtension extends AbstractExtension
                     $thResolver->setAllowedTypes($option, 'array');
                 }
             },
-            'a_attr' => function (OptionsResolver $aResolver): void {
+            'a_attr' => function (OptionsResolver $aResolver, Options $parent): void {
                 $aResolver->setDefaults([
                     'sortable_active_asc' => [],
                     'sortable_active_desc' => [],
@@ -290,6 +302,17 @@ final class CrudExtension extends AbstractExtension
                 ]);
                 foreach (['sortable_active_asc', 'sortable_active_desc', 'sortable_not_active'] as $option) {
                     $aResolver->setAllowedTypes($option, 'array');
+                    $aResolver->addNormalizer($option, function (Options $options, $value) use ($parent) {
+                        if (null !== $parent['ajax_options']) {
+                            return array_merge(
+                                $value,
+                                ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-ajax-link-auto' : 'ec-crud-ajax-link-auto'],
+                                $this->getAjaxAttributes($this->validateAjaxOptions($parent['ajax_options'])),
+                            );
+                        }
+
+                        return $value;
+                    });
                 }
             },
             'render' => null,
@@ -297,6 +320,13 @@ final class CrudExtension extends AbstractExtension
             'block' => 'th',
         ]);
         $resolver->setAllowedTypes('ajax_options', ['null', 'array']);
+        $resolver->addNormalizer('ajax_options', function (Options $options, $value) use ($crud) {
+            if (!isset($value['update'])) {
+                $value['update'] = '#'.$crud->getDivIdList();
+            }
+
+            return $value;
+        });
         $resolver->setAllowedTypes('label', ['null', 'string']);
         $options = $resolver->resolve($this->buildOptions('crud_th', $options, $crud));
 
@@ -313,10 +343,6 @@ final class CrudExtension extends AbstractExtension
                 'crud' => $crud,
                 'options' => $options,
             ]);
-        }
-
-        if (!isset($options['ajax_options']['update'])) {
-            $options['ajax_options']['update'] = '#'.$crud->getDivIdList();
         }
 
         // If the label was not defined, we take default label
@@ -458,6 +484,18 @@ final class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('form_attr', ['array']);
+        $resolver->addNormalizer('form_attr', function (Options $options, $value) use ($crud) {
+            return array_merge(
+                [
+                    'data-crud-search-id' => $crud->getDivIdSearch(),
+                    'data-crud-list-id' => $crud->getDivIdList(),
+                ],
+                $crud->getSearchForm()->vars['attr'],
+                $value,
+                $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options'])),
+                ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-search-form' : 'ec-crud-search-form'],
+            );
+        });
         $options = $resolver->resolve($this->buildOptions('crud_search_form_start', $options, $crud));
 
         if ($options['render']) {
@@ -465,26 +503,6 @@ final class CrudExtension extends AbstractExtension
                 'crud' => $crud,
                 'options' => $options,
             ]);
-        }
-
-        $options['form_attr'] = array_merge(
-            [
-                'data-crud-search-id' => $crud->getDivIdSearch(),
-                'data-crud-list-id' => $crud->getDivIdList(),
-            ],
-            $crud->getSearchForm()->vars['attr'],
-            $options['form_attr'],
-            $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options']))
-        );
-        $class = 'ec-crud-search-form';
-        if (isset($options['form_attr']['class'])) {
-            $options['form_attr']['class'] = sprintf('%s %s', $class, $options['form_attr']['class']);
-        } else {
-            $options['form_attr']['class'] = $class;
-        }
-
-        if (!isset($options['form_attr']['novalidate'])) {
-            $options['form_attr']['novalidate'] = 'novalidate';
         }
 
         return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
@@ -549,6 +567,18 @@ final class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('button_attr', ['array']);
+        $resolver->addNormalizer('button_attr', function (Options $options, $value) use ($crud) {
+            return array_merge(
+                [
+                    'data-crud-search-id' => $crud->getDivIdSearch(),
+                    'data-crud-list-id' => $crud->getDivIdList(),
+                    'data-ec-crud-ajax-url' => $crud->getSearchUrl(['reset' => 1]),
+                ],
+                $value,
+                $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options'])),
+                ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-search-reset' : 'ec-crud-search-reset'],
+            );
+        });
         $options = $resolver->resolve($this->buildOptions('crud_search_form_reset', $options, $crud));
 
         if ($options['render']) {
@@ -556,22 +586,6 @@ final class CrudExtension extends AbstractExtension
                 'crud' => $crud,
                 'options' => $options,
             ]);
-        }
-
-        $options['button_attr'] = array_merge(
-            [
-                'data-crud-search-id' => $crud->getDivIdSearch(),
-                'data-crud-list-id' => $crud->getDivIdList(),
-                'data-ec-crud-ajax-url' => $crud->getSearchUrl(['reset' => 1]),
-            ],
-            $options['button_attr'],
-            $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options']))
-        );
-        $class = 'ec-crud-search-reset';
-        if (isset($options['button_attr']['class'])) {
-            $options['button_attr']['class'] = sprintf('%s %s', $class, $options['button_attr']['class']);
-        } else {
-            $options['button_attr']['class'] = $class;
         }
 
         return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [
