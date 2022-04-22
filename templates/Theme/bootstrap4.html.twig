@@ -21,6 +21,19 @@
     {% endif %}
 {% endblock %}
 
+{# td #}
+
+{% block td %}
+{% apply spaceless %}
+    {% if repeated_value %}
+        {% if td_attr['data-toggle'] is not defined %}
+            {% set td_attr = td_attr|merge({'data-toggle': 'tooltip'}) %}
+        {% endif %}
+    {% endif %}
+    {{ parent() }}
+{% endapply %}
+{% endblock %}
+
 {# Display settings #}
 
 {% block display_settings_button %}
