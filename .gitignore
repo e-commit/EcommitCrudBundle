@@ -1,6 +1,7 @@
 .php-cs-fixer.cache
 .phpunit.result.cache
 composer.lock
+/composer-require-checker.phar
 /drivers/
 /node_modules/
 /tests/Functional/App/public/build/
