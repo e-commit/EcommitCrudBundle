@@ -933,7 +933,7 @@ final class Crud
 
         // If persistent settings is enabled -> Retrieve from database
         if ($this->persistentSettings) {
-            $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
+            $objectDatabase = $this->container->get('doctrine')->getRepository(UserCrudSettings::class)->findOneBy(
                 [
                     'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
                     'crudName' => $this->sessionName,
@@ -963,7 +963,7 @@ final class Crud
 
         // Save in database
         if ($this->persistentSettings && $this->updateDatabase) {
-            $objectDatabase = $this->container->get('doctrine')->getRepository('EcommitCrudBundle:UserCrudSettings')->findOneBy(
+            $objectDatabase = $this->container->get('doctrine')->getRepository(UserCrudSettings::class)->findOneBy(
                 [
                     'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
                     'crudName' => $this->sessionName,
