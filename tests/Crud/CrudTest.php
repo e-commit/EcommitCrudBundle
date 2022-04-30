@@ -939,6 +939,17 @@ class CrudTest extends KernelTestCase
         ];
     }
 
+    public function testChangeFilterValuesWithoutSearchForm(): void
+    {
+        $crud = $this->createValidCrud();
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, new UserSearcher());
+        $this->assertNull($crud->getSessionValues()->searchFormData);
+    }
+
     protected function createCrud(string $sessionName = 'session_name', array $filters = [], mixed $sessionValue = null): Crud
     {
         $session = $this->createMock(SessionInterface::class);

@@ -814,6 +814,8 @@ final class Crud
     protected function changeFilterValues(?SearcherInterface $value): void
     {
         if (!$this->searchForm) {
+            $this->sessionValues->searchFormData = null;
+
             return;
         }
         if (null !== $value && $value::class === \get_class($this->searchForm->getDefaultData())) {
