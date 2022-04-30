@@ -811,7 +811,7 @@ final class Crud
     /**
      * User action: Changes search form values.
      */
-    protected function changeFilterValues(SearcherInterface $value): void
+    protected function changeFilterValues(?SearcherInterface $value): void
     {
         if (!$this->searchForm) {
             return;

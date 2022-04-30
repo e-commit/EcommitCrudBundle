@@ -51,7 +51,7 @@ class CrudTest extends KernelTestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The session name format is invalid');
 
-        $this->createCrud($sessionName);
+        $this->createCrud(sessionName: $sessionName);
     }
 
     public function getTestCrudWithInvalidSessionNameProvider(): array
@@ -66,7 +66,7 @@ class CrudTest extends KernelTestCase
 
     public function testGetSessionName(): void
     {
-        $crud = $this->createCrud('session_name');
+        $crud = $this->createCrud(sessionName: 'session_name');
         $this->assertSame('session_name', $crud->getSessionName());
     }
 
@@ -118,7 +118,7 @@ class CrudTest extends KernelTestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The column id "'.$columnId.'" is too long');
 
-        $crud = $this->createCrud('session_name');
+        $crud = $this->createCrud();
         $crud->addColumn($columnId, 'alias', 'label');
     }
 
@@ -159,7 +159,7 @@ class CrudTest extends KernelTestCase
     {
         $this->expectException(UndefinedOptionsException::class);
 
-        $crud = $this->createCrud('session_name');
+        $crud = $this->createCrud();
         $crud->addColumn('column1', 'alias1', 'label1', [
             'bad_option' => 'value',
         ]);
@@ -169,7 +169,7 @@ class CrudTest extends KernelTestCase
     {
         $this->expectException(InvalidOptionsException::class);
 
-        $crud = $this->createCrud('session_name');
+        $crud = $this->createCrud();
         $crud->addColumn('column1', 'alias1', 'label1', [
             'sortable' => 'not_bool',
         ]);
@@ -179,7 +179,7 @@ class CrudTest extends KernelTestCase
     {
         $this->expectException(InvalidOptionsException::class);
 
-        $crud = $this->createCrud('session_name');
+        $crud = $this->createCrud();
         $crud->addColumn('column1', 'alias1', 'label1', [
             'default_displayed' => 'not_bool',
         ]);
@@ -190,7 +190,7 @@ class CrudTest extends KernelTestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The column "invalid" does not exist');
 
-        $crud = $this->createCrud('session_name');
+        $crud = $this->createCrud();
         $crud->getColumn('invalid');
     }
 
@@ -236,7 +236,7 @@ class CrudTest extends KernelTestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The column "invalid" does not exist');
 
-        $crud = $this->createCrud('session_name');
+        $crud = $this->createCrud();
         $crud->getVirtualColumn('invalid');
     }
 
@@ -410,7 +410,7 @@ class CrudTest extends KernelTestCase
 
     public function testDisplayResultsOnlyIfSearch(): void
     {
-        $crud = $this->createValidCrud(true);
+        $crud = $this->createValidCrud(withSearcher: true);
 
         $this->assertTrue($crud->getDisplayResults());
         $this->assertFalse($crud->getDisplayResultsOnlyIfSearch());
@@ -425,7 +425,7 @@ class CrudTest extends KernelTestCase
 
     public function testDisplayResultsOnlyIfSearchWithoutSearcher(): void
     {
-        $crud = $this->createValidCrud(false);
+        $crud = $this->createValidCrud();
 
         $this->assertTrue($crud->getDisplayResults());
         $this->assertFalse($crud->getDisplayResultsOnlyIfSearch());
@@ -670,7 +670,7 @@ class CrudTest extends KernelTestCase
      */
     public function testCallMethodNotAllowedBeforeInitialization(string $method, array $arguments = []): void
     {
-        $crud = $this->createValidCrud(true);
+        $crud = $this->createValidCrud(withSearcher: true);
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage(sprintf('The method "%s" cannot be called before CRUD initialization', $method));
@@ -693,7 +693,7 @@ class CrudTest extends KernelTestCase
      */
     public function testCallMethodNotAllowedAfterInitialization(string $method, array $arguments = []): void
     {
-        $crud = $this->createValidCrud(true)
+        $crud = $this->createValidCrud(withSearcher: true)
             ->init();
 
         $this->expectException(\Exception::class);
@@ -721,12 +721,30 @@ class CrudTest extends KernelTestCase
         ];
     }
 
-    protected function createCrud(string $sessionName = 'session_name', array $filters = []): Crud
+    public function testLoadSessionWithSearchForm(): void
+    {
+        $sessionValue = new CrudSession(10, ['username'], 'firstName', Crud::ASC, new UserSearcher());
+        $crud = $this->createValidCrud(crud: $this->createCrud(sessionValue: clone $sessionValue), withSearcher: true);
+        $crud->init();
+
+        $this->assertEquals($sessionValue, $crud->getSessionValues());
+    }
+
+    public function testLoadSessionWithoutSearchForm(): void
+    {
+        $sessionValue = new CrudSession(10, ['username'], 'firstName', Crud::ASC);
+        $crud = $this->createValidCrud(crud: $this->createCrud(sessionValue: clone $sessionValue));
+        $crud->init();
+
+        $this->assertEquals($sessionValue, $crud->getSessionValues());
+    }
+
+    protected function createCrud(string $sessionName = 'session_name', array $filters = [], mixed $sessionValue = null): Crud
     {
         $session = $this->createMock(SessionInterface::class);
         $session->expects($this->any())
             ->method('get')
-            ->willReturn(null);
+            ->willReturn($sessionValue);
         $session->expects($this->any())
             ->method('set');
 
@@ -766,14 +784,14 @@ class CrudTest extends KernelTestCase
         return $crud;
     }
 
-    protected function createValidCrud(bool $withSearcher = false): Crud
+    protected function createValidCrud(?Crud $crud = null, bool $withSearcher = false): Crud
     {
         $queryBuilder = self::getContainer()->get(ManagerRegistry::class)->getRepository(TestUser::class)
             ->createQueryBuilder('u')
             ->select('u');
 
-        $crud = $this->createCrud('session_name')
-            ->addColumn('username', 'u.username', 'username', ['default_displayed' => false])
+        $crud = ($crud) ?: $this->createCrud('session_name');
+        $crud->addColumn('username', 'u.username', 'username', ['default_displayed' => false])
             ->addColumn('firstName', 'u.firstName', 'first_name')
             ->setQueryBuilder($queryBuilder)
             ->setAvailableResultsPerPage([10, 50, 100], 50)
