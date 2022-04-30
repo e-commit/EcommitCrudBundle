@@ -739,6 +739,206 @@ class CrudTest extends KernelTestCase
         $this->assertEquals($sessionValue, $crud->getSessionValues());
     }
 
+    public function testChangeNumberResultsDisplayed(): void
+    {
+        $crud = $this->createValidCrud();
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeNumberResultsDisplayed');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, 10);
+        $this->assertSame(10, $crud->getSessionValues()->resultsPerPage);
+    }
+
+    public function testChangeNumberResultsDisplayedWithBadValue(): void
+    {
+        $crud = $this->createValidCrud();
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeNumberResultsDisplayed');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, 99);
+        $this->assertSame(50, $crud->getSessionValues()->resultsPerPage);
+    }
+
+    public function testChangeColumnsDisplayed(): void
+    {
+        $crud = $this->createValidCrud();
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeColumnsDisplayed');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, ['username']);
+        $this->assertSame(['username'], $crud->getSessionValues()->displayedColumns);
+    }
+
+    /**
+     * @dataProvider getTestChangeColumnsDisplayedWithBadValueProvider
+     */
+    public function testChangeColumnsDisplayedWithBadValue(array $value): void
+    {
+        $crud = $this->createValidCrud();
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeColumnsDisplayed');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, $value);
+        $this->assertSame(['firstName'], $crud->getSessionValues()->displayedColumns);
+    }
+
+    public function getTestChangeColumnsDisplayedWithBadValueProvider(): array
+    {
+        return [
+            [['bad_column']],
+            [[]],
+        ];
+    }
+
+    public function testChangeSort(): void
+    {
+        $crud = $this->createValidCrud();
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, 'firstName');
+        $this->assertSame('firstName', $crud->getSessionValues()->sort);
+    }
+
+    /**
+     * @dataProvider getTestChangeSortWithBadValueProvider
+     */
+    public function testChangeSortWithBadValue(mixed $value): void
+    {
+        $crud = $this->createValidCrud()
+            ->addColumn('column_not_sortable', 'alias', 'label', ['sortable' => false])
+            ->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, $value);
+        $this->assertSame('username', $crud->getSessionValues()->sort);
+    }
+
+    public function getTestChangeSortWithBadValueProvider(): array
+    {
+        return [
+            [null],
+            [['val']], // Not scalar
+            ['bad_column'],
+            ['column_not_sortable'],
+            ['defaultPersonalizedSort'],
+        ];
+    }
+
+    public function testChangeSortPersonalizedSort(): void
+    {
+        $crud = $this->createValidCrud()
+            ->setDefaultPersonalizedSort(['criteria'])
+            ->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, 'defaultPersonalizedSort');
+        $this->assertSame('defaultPersonalizedSort', $crud->getSessionValues()->sort);
+    }
+
+    /**
+     * @dataProvider getTestChangeSortPersonalizedSortWithBadValueProvider
+     */
+    public function testChangeSortPersonalizedSortWithBadValue(mixed $value): void
+    {
+        $crud = $this->createValidCrud()
+            ->setDefaultPersonalizedSort(['criteria'])
+            ->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, $value);
+        $this->assertSame('defaultPersonalizedSort', $crud->getSessionValues()->sort);
+    }
+
+    public function getTestChangeSortPersonalizedSortWithBadValueProvider(): array
+    {
+        return [
+            [null],
+            [['val']], // Not scalar
+            ['bad_column'],
+            ['column_not_sortable'],
+        ];
+    }
+
+    public function testChangeSortDirection(): void
+    {
+        $crud = $this->createValidCrud();
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSortDirection');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, Crud::ASC);
+        $this->assertSame(Crud::ASC, $crud->getSessionValues()->sortDirection);
+    }
+
+    /**
+     * @dataProvider getTestChangeSortDirectionWithBadValueProvider
+     */
+    public function testChangeSortDirectionWithBadValue(mixed $value): void
+    {
+        $crud = $this->createValidCrud();
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSortDirection');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, $value);
+        $this->assertSame(Crud::DESC, $crud->getSessionValues()->sortDirection);
+    }
+
+    public function getTestChangeSortDirectionWithBadValueProvider(): array
+    {
+        return [
+            [null],
+            [['val']], // Not scalar
+            ['bad_direction'],
+        ];
+    }
+
+    public function testChangeFilterValues(): void
+    {
+        $crud = $this->createValidCrud(withSearcher: true);
+        $crud->init();
+
+        $value = new UserSearcher();
+        $value->username = 'val';
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, $value);
+        $this->assertEquals($value, $crud->getSessionValues()->searchFormData);
+    }
+
+    /**
+     * @dataProvider getTestChangeFilterValuesWithBadValueProvider
+     */
+    public function testChangeFilterValuesWithBadValue(?SearcherInterface $value): void
+    {
+        $crud = $this->createValidCrud(withSearcher: true);
+        $crud->init();
+
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($crud, $value);
+        $this->assertNotEquals($value, $crud->getSessionValues()->searchFormData);
+        $this->assertEquals(new UserSearcher(), $crud->getSessionValues()->searchFormData);
+    }
+
+    public function getTestChangeFilterValuesWithBadValueProvider(): array
+    {
+        return [
+            [null],
+            [$this->createMock(SearcherInterface::class)],
+        ];
+    }
+
     protected function createCrud(string $sessionName = 'session_name', array $filters = [], mixed $sessionValue = null): Crud
     {
         $session = $this->createMock(SessionInterface::class);
