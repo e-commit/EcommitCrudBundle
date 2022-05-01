@@ -28,18 +28,18 @@ class EntitiesToChoicesTransformer extends AbstractEntityTransformer
         parent::__construct($queryBuilder, $identifier, $choiceLabel, $throwExceptionIfValueNotFoundInReverse);
     }
 
-    public function transform(mixed $collection)
+    public function transform(mixed $value)
     {
-        if (null === $collection) {
+        if (null === $value) {
             return [];
         }
 
-        if (!($collection instanceof Collection)) {
-            throw new UnexpectedTypeException($collection, Collection::class);
+        if (!($value instanceof Collection)) {
+            throw new UnexpectedTypeException($value, Collection::class);
         }
 
         $results = [];
-        foreach ($collection as $entity) {
+        foreach ($value as $entity) {
             $identifier = (string) $this->accessor->getValue($entity, $this->identifier);
             $label = $this->extractLabel($entity);
 
@@ -49,28 +49,28 @@ class EntitiesToChoicesTransformer extends AbstractEntityTransformer
         return $results;
     }
 
-    public function reverseTransform(mixed $identifiers)
+    public function reverseTransform(mixed $value)
     {
         $collection = new ArrayCollection();
 
-        if ('' === $identifiers || null === $identifiers) {
+        if ('' === $value || null === $value) {
             return $collection;
         }
 
-        if (!\is_array($identifiers)) {
+        if (!\is_array($value)) {
             throw new TransformationFailedException('This collection must be an array');
         }
-        $identifiers = ScalarValues::filterScalarValues($identifiers);
+        $value = ScalarValues::filterScalarValues($value);
 
-        if (0 === \count($identifiers)) {
+        if (0 === \count($value)) {
             return $collection;
         }
-        $identifiers = array_unique($identifiers);
-        if (\count($identifiers) > $this->maxResults) {
+        $value = array_unique($value);
+        if (\count($value) > $this->maxResults) {
             throw new TransformationFailedException(sprintf('This collection should contain %s elements or less.', $this->maxResults));
         }
 
-        $hash = $this->getCacheHash($identifiers);
+        $hash = $this->getCacheHash($value);
         if (\array_key_exists($hash, $this->cachedResults)) {
             $collection = $this->cachedResults[$hash];
         } else {
@@ -79,14 +79,14 @@ class EntitiesToChoicesTransformer extends AbstractEntityTransformer
             try {
                 $queryBuilderLoader = new ORMQueryBuilderLoader($this->queryBuilder);
 
-                foreach ($queryBuilderLoader->getEntitiesByIds($this->identifier, $identifiers) as $entity) {
+                foreach ($queryBuilderLoader->getEntitiesByIds($this->identifier, $value) as $entity) {
                     $collection->add($entity);
                 }
             } catch (\Exception $exception) {
                 throw new TransformationFailedException('Tranformation: Query Error');
             }
 
-            if ($collection->count() !== \count($identifiers) && $this->throwExceptionIfValueNotFoundInReverse) {
+            if ($collection->count() !== \count($value) && $this->throwExceptionIfValueNotFoundInReverse) {
                 throw new TransformationFailedException('Entities not found');
             }
 

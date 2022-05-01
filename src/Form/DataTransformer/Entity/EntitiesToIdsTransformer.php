@@ -18,18 +18,18 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 class EntitiesToIdsTransformer extends EntitiesToChoicesTransformer
 {
-    public function transform(mixed $collection)
+    public function transform(mixed $value)
     {
-        if (null === $collection) {
+        if (null === $value) {
             return [];
         }
 
-        if (!($collection instanceof Collection)) {
-            throw new UnexpectedTypeException($collection, Collection::class);
+        if (!($value instanceof Collection)) {
+            throw new UnexpectedTypeException($value, Collection::class);
         }
 
         $results = [];
-        foreach ($collection as $entity) {
+        foreach ($value as $entity) {
             $identifier = (string) $this->accessor->getValue($entity, $this->identifier);
 
             $results[] = $identifier;

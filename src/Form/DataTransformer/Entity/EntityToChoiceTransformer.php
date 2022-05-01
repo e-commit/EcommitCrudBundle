@@ -19,35 +19,35 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 class EntityToChoiceTransformer extends AbstractEntityTransformer
 {
-    public function transform(mixed $entity)
+    public function transform(mixed $value)
     {
-        if (null === $entity || '' === $entity) {
+        if (null === $value || '' === $value) {
             return null;
         }
 
-        if (!\is_object($entity)) {
-            throw new UnexpectedTypeException($entity, 'object');
+        if (!\is_object($value)) {
+            throw new UnexpectedTypeException($value, 'object');
         }
 
-        $identifier = (string) $this->accessor->getValue($entity, $this->identifier);
-        $label = $this->extractLabel($entity);
+        $identifier = (string) $this->accessor->getValue($value, $this->identifier);
+        $label = $this->extractLabel($value);
 
         $results[$identifier] = $label;
 
         return $results;
     }
 
-    public function reverseTransform(mixed $identifier)
+    public function reverseTransform(mixed $value)
     {
-        if ('' === $identifier || null === $identifier) {
+        if ('' === $value || null === $value) {
             return null;
         }
 
-        if (!\is_scalar($identifier)) {
+        if (!\is_scalar($value)) {
             throw new TransformationFailedException('Value is not scalar');
         }
 
-        $hash = $this->getCacheHash($identifier);
+        $hash = $this->getCacheHash($value);
         if (\array_key_exists($hash, $this->cachedResults)) {
             $entity = $this->cachedResults[$hash];
         } else {
@@ -55,13 +55,13 @@ class EntityToChoiceTransformer extends AbstractEntityTransformer
 
             try {
                 $queryBuilderLoader = new ORMQueryBuilderLoader($this->queryBuilder);
-                $entities = $queryBuilderLoader->getEntitiesByIds($this->identifier, [$identifier]);
+                $entities = $queryBuilderLoader->getEntitiesByIds($this->identifier, [$value]);
             } catch (\Exception $exception) {
                 throw new TransformationFailedException('Tranformation: Query Error');
             }
             if (1 !== \count($entities)) {
                 if ($this->throwExceptionIfValueNotFoundInReverse) {
-                    throw new TransformationFailedException(sprintf('The entity with key "%s" could not be found or is not unique', $identifier));
+                    throw new TransformationFailedException(sprintf('The entity with key "%s" could not be found or is not unique', (string) $value));
                 }
 
                 return null;

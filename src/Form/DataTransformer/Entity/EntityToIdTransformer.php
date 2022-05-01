@@ -17,17 +17,17 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 class EntityToIdTransformer extends EntityToChoiceTransformer
 {
-    public function transform(mixed $entity)
+    public function transform(mixed $value)
     {
-        if (null === $entity || '' === $entity) {
+        if (null === $value || '' === $value) {
             return null;
         }
 
-        if (!\is_object($entity)) {
-            throw new UnexpectedTypeException($entity, 'object');
+        if (!\is_object($value)) {
+            throw new UnexpectedTypeException($value, 'object');
         }
 
-        $identifier = (string) $this->accessor->getValue($entity, $this->identifier);
+        $identifier = (string) $this->accessor->getValue($value, $this->identifier);
 
         return $identifier;
     }

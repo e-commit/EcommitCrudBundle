@@ -338,7 +338,7 @@ final class Crud
      * Set the default sort.
      *
      * @param string $sort          Column id
-     * @param const  $sortDirection Sort direction (Crud::ASC / Crud::DESC)
+     * @param string $sortDirection Sort direction (Crud::ASC / Crud::DESC)
      */
     public function setDefaultSort(string $sort, string $sortDirection): self
     {
@@ -489,9 +489,7 @@ final class Crud
     }
 
     /**
-     * Returns the search form.
-     *
-     * @return SearchFormBuilder (before createView) or FormView (after createView)
+     * Returns the search form (SearchFormBuilder object before createView or FormView object after createView).
      */
     public function getSearchForm(): SearchFormBuilder|FormView|null
     {
@@ -611,7 +609,7 @@ final class Crud
             return;
         }
 
-        if (\is_object($this->buildPaginator) && $this->buildPaginator instanceof \Closure) {
+        if ($this->buildPaginator instanceof \Closure) {
             // Case: Manual paginator (by closure) is enabled
             $this->paginator = $this->buildPaginator->__invoke(
                 $this->queryBuilder,
@@ -876,9 +874,7 @@ final class Crud
     }
 
     /**
-     * Returns the search form.
-     *
-     * @return Form (before createView) or FormView (after createView)
+     * Returns the search form (FormInterface object before createView or FormView object after createView).
      */
     public function getDisplaySettingsForm(): FormInterface|FormView|null
     {

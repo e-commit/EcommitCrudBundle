@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Ecommit\CrudBundle\Crud;
 
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -53,9 +54,12 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
                 'render_list' => $this->renderCrudView($this->getTemplateName($options['template_generator'], 'list'), $data),
             ]);
         } elseif ($request->query->has('display-settings')) {
+            /** @var FormView $displaySettingsForm */
+            $displaySettingsForm = $crud->getDisplaySettingsForm();
+
             return new JsonResponse([
                 'render_list' => $this->renderCrudView($this->getTemplateName($options['template_generator'], 'list'), $data),
-                'form_is_valid' => $crud->getDisplaySettingsForm()->vars['valid'],
+                'form_is_valid' => $displaySettingsForm->vars['valid'],
             ]);
         }
 

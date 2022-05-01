@@ -485,12 +485,15 @@ final class CrudExtension extends AbstractExtension
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('form_attr', ['array']);
         $resolver->addNormalizer('form_attr', function (Options $options, $value) use ($crud) {
+            /** @var FormView $searchForm */
+            $searchForm = $crud->getSearchForm();
+
             return array_merge(
                 [
                     'data-crud-search-id' => $crud->getDivIdSearch(),
                     'data-crud-list-id' => $crud->getDivIdList(),
                 ],
-                $crud->getSearchForm()->vars['attr'],
+                $searchForm->vars['attr'],
                 $value,
                 $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options'])),
                 ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-search-form' : 'ec-crud-search-form'],
@@ -709,7 +712,7 @@ final class CrudExtension extends AbstractExtension
         return $this->renderBlock($environment, $iconTheme, $iconName);
     }
 
-    protected function renderBlock(Environment $environment, string $templateName, string $blockName, array $parameters = []): ?string
+    protected function renderBlock(Environment $environment, string $templateName, string $blockName, array $parameters = []): string
     {
         $template = $environment->load($templateName);
 

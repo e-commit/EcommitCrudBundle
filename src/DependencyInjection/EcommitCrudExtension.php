@@ -29,18 +29,18 @@ class EcommitCrudExtension extends Extension
      *
      * @throws \InvalidArgumentException When provided tag is not defined in this extension
      */
-    public function load(array $config, ContainerBuilder $container): void
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $config);
+        $configs = $this->processConfiguration($configuration, $configs);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../../config'));
         $loader->load('services.xml');
         $loader->load('filters.xml');
 
-        $container->setParameter('ecommit_crud.theme', $config['theme']);
-        $container->setParameter('ecommit_crud.icon_theme', $config['icon_theme']);
-        $container->setParameter('ecommit_crud.twig_functions_configuration', $config['twig_functions_configuration']);
+        $container->setParameter('ecommit_crud.theme', $configs['theme']);
+        $container->setParameter('ecommit_crud.icon_theme', $configs['icon_theme']);
+        $container->setParameter('ecommit_crud.twig_functions_configuration', $configs['twig_functions_configuration']);
 
         $container->registerForAutoconfiguration(FilterInterface::class)->addTag('ecommit_crud.filter');
     }
