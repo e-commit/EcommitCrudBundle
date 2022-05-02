@@ -349,7 +349,7 @@ final class CrudExtension extends AbstractExtension
         // If the label was not defined, we take default label
         $label = $options['label'];
         if (null === $label) {
-            $label = $column->label;
+            $label = $column->getLabel();
         }
 
         return $this->renderBlock($environment, $options['theme'], $options['block'], array_merge($options, [

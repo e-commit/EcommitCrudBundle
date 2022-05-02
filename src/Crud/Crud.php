@@ -202,15 +202,20 @@ final class Crud
         $resolver->setAllowedTypes('default_displayed', 'bool');
         $options = $resolver->resolve($options);
 
-        $column = new CrudColumn(
-            $id,
-            $alias,
-            $label,
-            $options['sortable'],
-            $options['default_displayed'],
-            $options['alias_search'],
-            $options['alias_sort']
-        );
+        $columnOptions = [
+            'id' => $id,
+            'alias' => $alias,
+            'label' => $label,
+            'sortable' => $options['sortable'],
+            'displayed_by_default' => $options['default_displayed'],
+        ];
+        if (null !== $options['alias_search']) {
+            $columnOptions['alias_search'] = $options['alias_search'];
+        }
+        if (null !== $options['alias_sort']) {
+            $columnOptions['alias_sort'] = $options['alias_sort'];
+        }
+        $column = new CrudColumn($columnOptions);
         $this->availableColumns[$id] = $column;
 
         return $this;
@@ -239,8 +244,8 @@ final class Crud
     {
         $columns = [];
         foreach ($this->availableColumns as $column) {
-            if ($column->defaultDisplayed) {
-                $columns[] = $column->id;
+            if ($column->isDisplayedByDefault()) {
+                $columns[] = $column->getId();
             }
         }
         if (0 == \count($columns)) {
@@ -262,7 +267,10 @@ final class Crud
         if (\array_key_exists($id, $this->availableColumns) || \array_key_exists($id, $this->availableVirtualColumns)) {
             throw new \Exception(sprintf('The column "%s" already exists', $id));
         }
-        $column = new CrudColumn($id, $aliasSearch, null, false, false, null, null);
+        $column = new CrudColumn([
+            'id' => $id,
+            'alias' => $aliasSearch,
+        ]);
         $this->availableVirtualColumns[$id] = $column;
 
         return $this;
@@ -586,7 +594,7 @@ final class Crud
                 $this->queryBuilder->addOrderBy($sort, $sortDirection);
             }
         } else {
-            $columnSortAlias = $this->availableColumns[$columnSortId]->aliasSort;
+            $columnSortAlias = $this->availableColumns[$columnSortId]->getAliasSort();
             if (\is_array($columnSortAlias)) {
                 // Sort alias in many columns
                 foreach ($columnSortAlias as $oneColumnSortAlias) {
@@ -780,7 +788,7 @@ final class Crud
     {
         $oldValue = $this->sessionValues->sort;
         $availableColumns = $this->availableColumns;
-        if ((\is_string($value) && \array_key_exists($value, $availableColumns) && $availableColumns[$value]->sortable)
+        if ((\is_string($value) && \array_key_exists($value, $availableColumns) && $availableColumns[$value]->isSortable())
             || (\is_string($value) && 'defaultPersonalizedSort' === $value && $this->defaultPersonalizedSort)) {
             $this->sessionValues->sort = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
@@ -888,7 +896,7 @@ final class Crud
         }
         $columnsChoices = [];
         foreach ($this->getColumns() as $column) {
-            $columnsChoices[$column->id] = $column->label;
+            $columnsChoices[$column->getId()] = $column->getLabel();
         }
         $data = [
             'resultsPerPage' => $this->getSessionValues()->resultsPerPage,

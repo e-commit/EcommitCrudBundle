@@ -734,10 +734,10 @@ class CrudExtensionTest extends KernelTestCase
     protected function createCrud(string $sort = 'column1', string $sortDirection = Crud::ASC): Crud
     {
         $columns = [
-            'column1' => new CrudColumn('column1', 'alias1', 'label1', true, true, 'alias1', 'alias1'),
-            'column2' => new CrudColumn('column2', 'alias2', 'label2', true, false, 'alias2', 'alias2'),
-            'column3' => new CrudColumn('column3', 'alias3', 'label3', false, true, 'alias3', 'alias3'),
-            'column4' => new CrudColumn('column4', 'alias4', 'label4', true, true, 'alias4', 'alias4'),
+            'column1' => new CrudColumn(['id' => 'column1', 'alias' => 'alias1', 'label' => 'label1']),
+            'column2' => new CrudColumn(['id' => 'column2', 'alias' => 'alias2', 'label' => 'label2', 'displayed_by_default' => false]),
+            'column3' => new CrudColumn(['id' => 'column3', 'alias' => 'alias3', 'label' => 'label3', 'sortable' => false]),
+            'column4' => new CrudColumn(['id' => 'column4', 'alias' => 'alias4', 'label' => 'label4']),
         ];
         $crudSession = new CrudSession(
             10,

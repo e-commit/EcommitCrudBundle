@@ -90,8 +90,8 @@ class CrudTest extends KernelTestCase
             'alias_search' => 'alias_search2',
             'alias_sort' => 'alias_sort2',
         ]));
-        $column1 = new CrudColumn('username', 'u.username', 'username', true, true);
-        $column2 = new CrudColumn('firstName', 'u.firstName', 'first_name', false, false, 'alias_search2', 'alias_sort2');
+        $column1 = new CrudColumn(['id' => 'username', 'alias' => 'u.username', 'label' => 'username']);
+        $column2 = new CrudColumn(['id' => 'firstName', 'alias' => 'u.firstName', 'label' => 'first_name', 'sortable' => false, 'displayed_by_default' => false, 'alias_search' => 'alias_search2', 'alias_sort' => 'alias_sort2']);
         $this->assertEquals($column1, $crud->getColumn('username'));
         $this->assertEquals($column2, $crud->getColumn('firstName'));
         $columns = [
@@ -219,8 +219,8 @@ class CrudTest extends KernelTestCase
         $this->assertInstanceOf(Crud::class, $crud->addVirtualColumn('columnv1', 'aliasv1'));
         $this->assertInstanceOf(Crud::class, $crud->addVirtualColumn('columnv2', 'aliasv2'));
 
-        $column1 = new CrudColumn('columnv1', 'aliasv1', null, false, false);
-        $column2 = new CrudColumn('columnv2', 'aliasv2', null, false, false);
+        $column1 = new CrudColumn(['id' => 'columnv1', 'alias' => 'aliasv1']);
+        $column2 = new CrudColumn(['id' => 'columnv2', 'alias' => 'aliasv2']);
         $this->assertEquals($column1, $crud->getVirtualColumn('columnv1'));
         $this->assertEquals($column2, $crud->getVirtualColumn('columnv2'));
 

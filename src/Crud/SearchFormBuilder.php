@@ -146,7 +146,7 @@ final class SearchFormBuilder
         foreach ($this->filters as $property => $filter) {
             if ($filter['options']['label'] instanceof CrudColumnReference) {
                 if (\array_key_exists($filter['options']['label']->id, $columns)) {
-                    $this->filters[$property]['options']['label'] = $columns[$filter['options']['label']->id]->label;
+                    $this->filters[$property]['options']['label'] = $columns[$filter['options']['label']->id]->getLabel();
                 } elseif (\array_key_exists($filter['options']['alias_search']->id, $virtualColumns)) {
                     $this->filters[$property]['options']['label'] = null;
                 }
@@ -154,9 +154,9 @@ final class SearchFormBuilder
 
             if ($filter['options']['alias_search'] instanceof CrudColumnReference) {
                 if (\array_key_exists($filter['options']['alias_search']->id, $columns)) {
-                    $this->filters[$property]['options']['alias_search'] = $columns[$filter['options']['alias_search']->id]->aliasSearch;
+                    $this->filters[$property]['options']['alias_search'] = $columns[$filter['options']['alias_search']->id]->getAliasSearch();
                 } elseif (\array_key_exists($filter['options']['alias_search']->id, $virtualColumns)) {
-                    $this->filters[$property]['options']['alias_search'] = $virtualColumns[$filter['options']['alias_search']->id]->aliasSearch;
+                    $this->filters[$property]['options']['alias_search'] = $virtualColumns[$filter['options']['alias_search']->id]->getAliasSearch();
                 }
             }
         }
