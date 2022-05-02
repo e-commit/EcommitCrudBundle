@@ -33,7 +33,7 @@ class TextFilter extends AbstractFilter
         $builder->addField($property, $options['type'], $typeOptions);
     }
 
-    public function updateQueryBuilder($queryBuilder, string $property, $value, array $options): void
+    public function updateQueryBuilder(mixed $queryBuilder, string $property, mixed $value, array $options): void
     {
         if (null === $value || '' === $value || !\is_string($value)) {
             return;

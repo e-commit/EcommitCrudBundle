@@ -20,7 +20,7 @@ interface SearcherInterface
 {
     public function buildForm(SearchFormBuilder $builder, array $options): void;
 
-    public function updateQueryBuilder($queryBuilder, array $options): void;
+    public function updateQueryBuilder(mixed $queryBuilder, array $options): void;
 
     public function configureOptions(OptionsResolver $resolver): void;
 }

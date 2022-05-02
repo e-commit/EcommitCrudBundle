@@ -115,6 +115,7 @@ final class Crud
             // We have not to allocate directelly the "$this->sessionValues->searchFormData" object
             // because otherwise it will be linked to form, and will be updated when the "bind" function will
             // be called (If form is not valid, the session values will still be updated: Undesirable behavior)
+            /** @psalm-suppress PossiblyInvalidClone */
             $values = clone $this->sessionValues->searchFormData;
             try {
                 $this->searchForm->getForm()->setData($values);
@@ -774,15 +775,13 @@ final class Crud
 
     /**
      * User Action: Changes sort.
-     *
-     * @param string $value Column id
      */
     protected function changeSort(mixed $value): void
     {
         $oldValue = $this->sessionValues->sort;
         $availableColumns = $this->availableColumns;
-        if ((\is_scalar($value) && \array_key_exists($value, $availableColumns) && $availableColumns[$value]->sortable)
-            || (\is_scalar($value) && 'defaultPersonalizedSort' === $value && $this->defaultPersonalizedSort)) {
+        if ((\is_string($value) && \array_key_exists($value, $availableColumns) && $availableColumns[$value]->sortable)
+            || (\is_string($value) && 'defaultPersonalizedSort' === $value && $this->defaultPersonalizedSort)) {
             $this->sessionValues->sort = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
@@ -797,7 +796,7 @@ final class Crud
     protected function changeSortDirection(mixed $value): void
     {
         $oldValue = $this->sessionValues->sortDirection;
-        if (\is_scalar($value) && (self::ASC === $value || self::DESC === $value)) {
+        if (\is_string($value) && (self::ASC === $value || self::DESC === $value)) {
             $this->sessionValues->sortDirection = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
@@ -980,10 +979,14 @@ final class Crud
                     $this->sessionValues->sortDirection != $this->defaultSortDirection ||
                     $this->sessionValues->sort != $this->defaultSort
                 ) {
-                    $objectDatabase = new UserCrudSettings();
-                    $objectDatabase->setUser($this->container->get('security.token_storage')->getToken()->getUser());
-                    $objectDatabase->setCrudName($this->sessionName);
-                    $objectDatabase->updateFromSessionManager($this->sessionValues);
+                    $objectDatabase = new UserCrudSettings(
+                        $this->container->get('security.token_storage')->getToken()->getUser(),
+                        $this->sessionName,
+                        $this->sessionValues->resultsPerPage,
+                        $this->sessionValues->displayedColumns,
+                        $this->sessionValues->sort,
+                        $this->sessionValues->sortDirection
+                    );
                     $em->persist($objectDatabase);
                     $em->flush();
                 }

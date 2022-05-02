@@ -22,7 +22,7 @@ abstract class AbstractSearcher implements SearcherInterface
     {
     }
 
-    public function updateQueryBuilder($queryBuilder, array $options): void
+    public function updateQueryBuilder(mixed $queryBuilder, array $options): void
     {
     }
 

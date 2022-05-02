@@ -160,7 +160,7 @@ class CitySearcher extends AbstractSearcher
         ]);
     }
 
-    public function updateQueryBuilder($queryBuilder, array $options): void
+    public function updateQueryBuilder(mixed $queryBuilder, array $options): void
     {
         //Traitement de la recherche
 

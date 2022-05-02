@@ -29,12 +29,14 @@ final class QueryBuilder implements QueryBuilderInterface
     protected ?\Closure $orderBuilder = null;
     protected ?\Closure $paginationBuilder = null;
     protected array $orders = [];
+    protected HttpClientInterface $client;
 
-    public function __construct(protected string $url, protected string $httpMethod, protected ?HttpClientInterface $client = null)
+    public function __construct(protected string $url, protected string $httpMethod, ?HttpClientInterface $client = null)
     {
-        if (null === $this->client) {
-            $this->client = HttpClient::create();
+        if (null === $client) {
+            $client = HttpClient::create();
         }
+        $this->client = $client;
     }
 
     /**

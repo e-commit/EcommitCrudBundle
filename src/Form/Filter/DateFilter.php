@@ -35,7 +35,7 @@ class DateFilter extends AbstractFilter
         $builder->addField($property, $type, $typeOptions);
     }
 
-    public function updateQueryBuilder($queryBuilder, string $property, $value, array $options): void
+    public function updateQueryBuilder(mixed $queryBuilder, string $property, mixed $value, array $options): void
     {
         if (null === $value || '' === $value || !$value instanceof \DateTimeInterface) {
             return;

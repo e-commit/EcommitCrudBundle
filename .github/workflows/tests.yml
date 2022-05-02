@@ -131,4 +131,4 @@ jobs:
 
             -   name: Run Psalm
                 if: matrix.static-analysis
-                run: php vendor/bin/psalm --stats --output-format=github --php-version=8.1
+                run: php vendor/bin/psalm --stats --output-format=github

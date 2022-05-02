@@ -38,7 +38,7 @@ trait CollectionFilterTrait
         ];
     }
 
-    protected function updateCollectionQueryBuilder($queryBuilder, string $property, $value, array $options): void
+    protected function updateCollectionQueryBuilder(mixed $queryBuilder, string $property, mixed $value, array $options): void
     {
         if (null === $value || '' === $value || [] === $value) {
             return;

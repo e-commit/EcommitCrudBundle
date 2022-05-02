@@ -33,7 +33,7 @@ class CarSearcher extends AbstractSearcher
         ]);
     }
     
-    public function updateQueryBuilder($queryBuilder, array $options): void
+    public function updateQueryBuilder(mixed $queryBuilder, array $options): void
     {
         //Traitement du filtre de recherche "name"
         if (null !== $this->name) {
@@ -61,7 +61,7 @@ class CarSearcher extends AbstractSearcher
      */
     public $name;
 
-    public function updateQueryBuilder($queryBuilder, array $options): void
+    public function updateQueryBuilder(mixed $queryBuilder, array $options): void
     {
         //Traitement du filtre de recherche "name"
         if (null !== $this->name) {

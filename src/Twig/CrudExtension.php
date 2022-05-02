@@ -25,13 +25,13 @@ use Twig\TwigFunction;
 
 final class CrudExtension extends AbstractExtension
 {
-    protected $lastTdValues = [];
+    protected array $lastTdValues = [];
 
     public function __construct(protected FormRendererInterface $formRenderer, protected string $theme, protected string $iconTheme, protected array $configuration)
     {
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'ecommit_crud_crud_extension';
     }
@@ -181,7 +181,7 @@ final class CrudExtension extends AbstractExtension
                 ]);
                 foreach (['first_page', 'previous_page', 'current_page', 'next_page', 'last_page', 'other_page'] as $option) {
                     $aResolver->setAllowedTypes($option, 'array');
-                    $aResolver->addNormalizer($option, function (Options $options, $value) use ($parent) {
+                    $aResolver->addNormalizer($option, function (Options $options, mixed $value) use ($parent): array {
                         if (null !== $parent['ajax_options']) {
                             return array_merge(
                                 $value,
@@ -261,6 +261,7 @@ final class CrudExtension extends AbstractExtension
 
         $options = $this->buildOptions('crud_paginator_links', $options, $crud);
 
+        /** @psalm-suppress PossiblyNullArgument */
         return $this->paginatorLinks($environment, $crud->getPaginator(), $crud->getRouteName(), $crud->getRouteParams(), $options);
     }
 
@@ -302,7 +303,7 @@ final class CrudExtension extends AbstractExtension
                 ]);
                 foreach (['sortable_active_asc', 'sortable_active_desc', 'sortable_not_active'] as $option) {
                     $aResolver->setAllowedTypes($option, 'array');
-                    $aResolver->addNormalizer($option, function (Options $options, $value) use ($parent) {
+                    $aResolver->addNormalizer($option, function (Options $options, mixed $value) use ($parent): array {
                         if (null !== $parent['ajax_options']) {
                             return array_merge(
                                 $value,
@@ -320,7 +321,7 @@ final class CrudExtension extends AbstractExtension
             'block' => 'th',
         ]);
         $resolver->setAllowedTypes('ajax_options', ['null', 'array']);
-        $resolver->addNormalizer('ajax_options', function (Options $options, $value) use ($crud) {
+        $resolver->addNormalizer('ajax_options', function (Options $options, mixed $value) use ($crud): array {
             if (!isset($value['update'])) {
                 $value['update'] = '#'.$crud->getDivIdList();
             }
@@ -484,7 +485,7 @@ final class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('form_attr', ['array']);
-        $resolver->addNormalizer('form_attr', function (Options $options, $value) use ($crud) {
+        $resolver->addNormalizer('form_attr', function (Options $options, mixed $value) use ($crud): array {
             /** @var FormView $searchForm */
             $searchForm = $crud->getSearchForm();
 
@@ -570,7 +571,7 @@ final class CrudExtension extends AbstractExtension
         ]);
         $resolver->setAllowedTypes('ajax_options', ['array']);
         $resolver->setAllowedTypes('button_attr', ['array']);
-        $resolver->addNormalizer('button_attr', function (Options $options, $value) use ($crud) {
+        $resolver->addNormalizer('button_attr', function (Options $options, mixed $value) use ($crud): array {
             return array_merge(
                 [
                     'data-crud-search-id' => $crud->getDivIdSearch(),

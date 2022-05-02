@@ -32,6 +32,7 @@ class EntityToChoiceTransformer extends AbstractEntityTransformer
         $identifier = (string) $this->accessor->getValue($value, $this->identifier);
         $label = $this->extractLabel($value);
 
+        /** @psalm-suppress PossiblyUndefinedVariable */
         $results[$identifier] = $label;
 
         return $results;

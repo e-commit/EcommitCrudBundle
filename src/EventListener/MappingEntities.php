@@ -18,7 +18,7 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
 final class MappingEntities
 {
-    protected $isLoad = false;
+    protected bool $isLoad = false;
 
     public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs): void
     {
@@ -28,6 +28,7 @@ final class MappingEntities
             return;
         }
 
+        /** @var string $className */
         $className = $metadata->getName();
         if (!$this->isLoad && is_subclass_of($className, 'Ecommit\CrudBundle\Entity\UserCrudInterface')) {
             $userCrudSettingsMetadata = $eventArgs->getEntityManager()->getMetadataFactory()->getMetadataFor('Ecommit\CrudBundle\Entity\UserCrudSettings');

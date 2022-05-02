@@ -24,7 +24,7 @@ class NumberFilter extends IntegerFilter
         $builder->addField($property, NumberType::class, $typeOptions);
     }
 
-    protected function testNumberValue($value): bool
+    protected function testNumberValue(mixed $value): bool
     {
         return is_numeric($value);
     }

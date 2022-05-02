@@ -51,7 +51,7 @@ class EntityAjaxFilter extends AbstractFilter
         }
     }
 
-    public function updateQueryBuilder($queryBuilder, string $property, $value, array $options): void
+    public function updateQueryBuilder(mixed $queryBuilder, string $property, mixed $value, array $options): void
     {
         $this->updateCollectionQueryBuilder($queryBuilder, $property, $value, $options);
     }

@@ -22,23 +22,33 @@ class UserCrudSettings
 {
     #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: 'Ecommit\CrudBundle\Entity\UserCrudInterface')]
-    protected $user;
+    protected UserCrudInterface $user;
 
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 255, name: 'crud_name')]
-    protected $crudName;
+    protected string $crudName;
 
     #[ORM\Column(type: 'integer', name: 'results_displayed')]
-    protected $resultsDisplayed;
+    protected int $resultsDisplayed;
 
     #[ORM\Column(type: 'json', name: 'displayed_columns')]
-    protected $displayedColumns = [];
+    protected array $displayedColumns = [];
 
     #[ORM\Column(type: 'string', length: 100)]
-    protected $sort;
+    protected string $sort;
 
     #[ORM\Column(type: 'string', length: 4)]
-    protected $sortDirection;
+    protected string $sortDirection;
+
+    public function __construct(UserCrudInterface $user, string $crudName, int $resultsDisplayed, array $displayedColumns, string $sort, string $sortDirection)
+    {
+        $this->user = $user;
+        $this->crudName = $crudName;
+        $this->resultsDisplayed = $resultsDisplayed;
+        $this->displayedColumns = $displayedColumns;
+        $this->sort = $sort;
+        $this->sortDirection = $sortDirection;
+    }
 
     public function setCrudName(string $crudName): self
     {

@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Form\Type;
 
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
 use Ecommit\CrudBundle\Form\DataTransformer\Entity\EntitiesToChoicesTransformer;
 use Ecommit\CrudBundle\Form\DataTransformer\Entity\EntityToChoiceTransformer;
 use Symfony\Component\Form\AbstractType;
@@ -84,7 +86,7 @@ class EntityAjaxType extends AbstractType
             'identifier' => null, // Internal
         ]);
 
-        $emNormalizer = function (Options $options, $em) {
+        $emNormalizer = function (Options $options, ?string $em): ObjectManager {
             if (null !== $em) {
                 return $this->registry->getManager($em);
             }
@@ -98,7 +100,7 @@ class EntityAjaxType extends AbstractType
         };
         $resolver->setNormalizer('em', $emNormalizer);
 
-        $queryBuilderNormalizer = function (Options $options, $queryBuilder) {
+        $queryBuilderNormalizer = function (Options $options, null|QueryBuilder|\Closure $queryBuilder): QueryBuilder {
             $em = $options['em'];
             $class = $options['class'];
 
@@ -116,7 +118,7 @@ class EntityAjaxType extends AbstractType
         };
         $resolver->setNormalizer('query_builder', $queryBuilderNormalizer);
 
-        $identifierNormalizer = function (Options $options, $identifier) {
+        $identifierNormalizer = function (Options $options, ?string $identifier): string {
             if (null !== $identifier) {
                 return $identifier;
             }

@@ -31,7 +31,7 @@ class IntegerFilter extends AbstractFilter
         $builder->addField($property, IntegerType::class, $typeOptions);
     }
 
-    public function updateQueryBuilder($queryBuilder, string $property, $value, array $options): void
+    public function updateQueryBuilder(mixed $queryBuilder, string $property, mixed $value, array $options): void
     {
         if (null === $value || '' === $value || !\is_scalar($value) || !$this->testNumberValue($value)) {
             return;
@@ -43,7 +43,7 @@ class IntegerFilter extends AbstractFilter
             ->setParameter($parameterName, $value);
     }
 
-    protected function testNumberValue($value): bool
+    protected function testNumberValue(mixed $value): bool
     {
         return \is_int($value) || (\is_string($value) && preg_match('/^\d+$/', $value));
     }

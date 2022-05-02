@@ -20,7 +20,7 @@ interface FilterInterface
 {
     public function buildForm(SearchFormBuilder $builder, string $property, array $options): void;
 
-    public function updateQueryBuilder($queryBuilder, string $property, $value, array $options): void;
+    public function updateQueryBuilder(mixed $queryBuilder, string $property, mixed $value, array $options): void;
 
     public function configureOptions(OptionsResolver $resolver): void;
 

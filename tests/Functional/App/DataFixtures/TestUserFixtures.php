@@ -46,13 +46,14 @@ class TestUserFixtures extends Fixture
             $this->addReference('user_'.$data[0].$data[1], $user);
         }
 
-        $userCrudSettings = new UserCrudSettings();
-        $userCrudSettings->setUser($this->getReference('user_EveReste'))
-            ->setCrudName('crud_persistent_settings')
-            ->setDisplayedColumns(['username', 'firstName'])
-            ->setResultsDisplayed(50)
-            ->setSort('firstName')
-            ->setSortDirection(Crud::DESC);
+        $userCrudSettings = new UserCrudSettings(
+            $this->getReference('user_EveReste'),
+            'crud_persistent_settings',
+            50,
+            ['username', 'firstName'],
+            'firstName',
+            Crud::DESC
+        );
         $manager->persist($userCrudSettings);
 
         $manager->flush();

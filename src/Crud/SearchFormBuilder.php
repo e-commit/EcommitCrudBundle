@@ -97,6 +97,7 @@ final class SearchFormBuilder
 
     public function addField(string $property, string $type, array $options = []): self
     {
+        /** @psalm-suppress PossiblyUndefinedMethod */
         $this->form->add($property, $type, $options);
 
         return $this;
@@ -129,7 +130,9 @@ final class SearchFormBuilder
             $filterService->buildForm($this, $property, $filter['options']);
         }
 
+        /** @psalm-suppress PossiblyUndefinedMethod */
         $this->form->setAction($this->crud->getSearchUrl());
+        /** @psalm-suppress PossiblyUndefinedMethod */
         $this->form = $this->form->getForm();
 
         return $this;
@@ -161,6 +164,7 @@ final class SearchFormBuilder
 
     public function createFormView(): self
     {
+        /** @psalm-suppress PossiblyUndefinedMethod */
         $this->form = $this->form->createView();
 
         return $this;
