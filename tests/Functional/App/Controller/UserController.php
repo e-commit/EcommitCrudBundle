@@ -20,7 +20,7 @@ use Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher\UserSearcher;
 
 class UserController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         $em = $this->container->get('doctrine')->getManager();
 
@@ -28,17 +28,22 @@ class UserController extends AbstractCrudController
             ->createQueryBuilder('u')
             ->select('u');
 
-        $crud = $this->createCrud(static::getCrudName());
-        $crud->addColumn('username', 'u.username', 'username', ['default_displayed' => false])
+        $crudConfig = $this->createCrudConfig(static::getCrudName())
+            ->addColumn('username', 'u.username', 'username', ['displayed_by_default' => false])
             ->addColumn('firstName', 'u.firstName', 'first_name')
             ->addColumn('lastName', 'u.lastName', 'last_name')
             ->setQueryBuilder($queryBuilder)
-            ->setAvailableResultsPerPage([5, 10, 50], 5)
+            ->setMaxPerPage([5, 10, 50], 5)
             ->setDefaultSort('firstName', Crud::ASC)
             ->createSearchForm(new UserSearcher())
             ->setRoute(static::getCrudRouteName(), static::getCrudRouteParams())
             ->setPersistentSettings(static::getPersistentSettings());
 
+        return $crudConfig->getOptions();
+    }
+
+    protected function beforeBuild(Crud $crud, array $data): array
+    {
         $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request->query->has('manual-reset')) {
             $crud->reset();
@@ -47,7 +52,7 @@ class UserController extends AbstractCrudController
             $crud->resetSort();
         }
 
-        return $crud;
+        return $data;
     }
 
     public function getCrudName(): string

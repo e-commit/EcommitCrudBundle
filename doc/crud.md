@@ -96,7 +96,7 @@ class Category
 Nous devons créer une classe contrôleur héritant la classe abstraite `Ecommit\CrudBundle\Controller\AbstractCrudController`. 
 
 Notre classe doit surcharger les méthodes abstraites :
-* getCrud
+* getCrudOptions
 * getTemplateName
 
 ```php
@@ -111,7 +111,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         $em = $this->getDoctrine()->getManager();
         $queryBuilder = $em->createQueryBuilder();
@@ -119,19 +119,19 @@ class MyCrudController extends AbstractCrudController
             ->select('c1, c2')
             ->innerJoin('c1.category', 'c2');
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id')
-            ->addColumn('name', 'c1.name', 'Name')
-            ->addColumn('category', 'c2.name', 'Category', ['alias_search' => 'c2.id'])
-            ->addColumn('purchase_date', 'c1.purchaseDate', 'Purchase date')
-            ->addColumn('active', 'c1.active', 'Active')
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crud->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id'])
+            ->addColumn(['id' => 'name', 'alias' => 'c1.name', 'label' => 'Name'])
+            ->addColumn(['id' => 'category', 'alias' =>  'c2.name', 'label' =>  'Category', 'alias_search' => 'c2.id'])
+            ->addColumn(['id' => 'purchase_date', 'alias' =>  'c1.purchaseDate', 'label' =>  'Purchase date')
+            ->addColumn(['id' => 'active', 'alias' =>  'c1.active', 'label' =>  'Active')
             ->setQueryBuilder($queryBuilder)
-            ->setAvailableResultsPerPage([2, 5, 10], 5)
+            ->setMaxPerPage([2, 5, 10], 5)
             ->setDefaultSort('id', Crud::ASC)
             ->setRoute('my_crud_ajax')
             ->setPersistentSettings(true); //Enregistre les paramètres d'affichage en base de données. Par défaut: false
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
     
     protected function getTemplateName(string $action): string
@@ -157,20 +157,19 @@ class MyCrudController extends AbstractCrudController
 }
 ```
 
-Explications de configCrud():
+Explications de getCrudOptions():
 
-* Avec `$this->createCrud('my_crud')`, nous créons un CRUD (instance de `Ecommit\CrudBundle\Crud\Crud`) dont le nom est `my_crud`.
-* Nous déclarons chaque colonne du CRUD par la méthode `addColumn()`. Cette méthode prend en paramètres :
-    * Id de la colonne (Nous donnons un ID à la colonne). Cet ID est totalement indépendant des noms de colonnes DQL/SQL. **Dans ce document, à chaque fois que nous parlerons de l'ID d'une colonne, c'est ce paramètre qui sera concerné. Requis**
-    * Alias Doctrine (du query builder) utilisé pour la requête Doctrine **Requis**
-    * Label donné à la colonne (le label sera traduit si traduction est active sur le projet) **Requis**
-    * Tableau d'options (facultatif):
-        * **sortable**: Booléen qui définit si on active (ou non) le tri sur cette colonne **Défaut: True**
-        * **default_displayed**: Booléen qui définit si on affiche (ou non) cette colonne par défaut **Défaut: True**
-        * **alias_search**: Alias Doctrine utilisé lors de la recherche DQL/SQL. Si pas défini, utilise l'alias Doctrine défini en 2ème paramètre
-        * **alias_sort**: Alias Doctrine (chaine de caractères ou tableau de chaines de caractères) utilisé(s) lors du tri sur cette colonne. Si pas défini, utilise l'alias Doctrine défini en 2ème paramètre
+* Avec `$this->createCrudConfig('my_crud')`, nous créons une configuration de CRUD (instance de `Ecommit\CrudBundle\Crud\CrudConfig`) dont le nom est `my_crud`.
+* Nous déclarons chaque colonne du CRUD par la méthode `addColumn()`. Cette méthode prend en paramètre un tableau d'options :
+    * **id** : Id de la colonne (Nous donnons un ID à la colonne). Cet ID est totalement indépendant des noms de colonnes DQL/SQL. **Dans ce document, à chaque fois que nous parlerons de l'ID d'une colonne, c'est ce paramètre qui sera concerné. Requis**
+    * **alias** : Alias Doctrine (du query builder) utilisé pour la requête Doctrine **Requis**
+    * **label** : Label donné à la colonne (le label sera traduit si traduction est active sur le projet)
+    * **sortable**: Booléen qui définit si on active (ou non) le tri sur cette colonne **Défaut: True**
+    * **displayed_by_default**: Booléen qui définit si on affiche (ou non) cette colonne par défaut **Défaut: True**
+    * **alias_search**: Alias Doctrine utilisé lors de la recherche DQL/SQL. Si pas défini, utilise l'alias Doctrine défini par l'option `alias`
+    * **alias_sort**: Alias Doctrine (chaine de caractères ou tableau de chaines de caractères) utilisé(s) lors du tri sur cette colonne. Si pas défini, utilise l'alias Doctrine défini par l'option `alias`
 * Nous donnons la requête Doctrine (sous forme d'objet QueryBuilder ou d'une fonction anonyme) avec la méthode setQueryBuilder() Le moteur du CRUD modifiera automatiquement cette requête, en fonction des actions demandées par l'utilisateur
-* Nous définissions les paramètres du nombre de pages avec la méthode `setAvailableResultsPerPage()`. Cette méthode prend 2 paramètres :
+* Nous définissions les paramètres du nombre de pages avec la méthode `setMaxPerPage()`. Cette méthode prend 2 paramètres :
     * Un tableau contenant les différents nombres possibles du nombre de résultats par page. **Requis**
     * Le nombre de résultats par page, par défaut. **Requis**
 * Nous définissions le tri par défaut par la méthode `setDefaultSort`. Cette méthode prend 2 paramètres :
@@ -178,7 +177,7 @@ Explications de configCrud():
     * Le sens du tri par défaut (`Crud::ASC` ou `Crud::DESC`). **Requis**
 * On définit par la fonction `setRoute` la route Ajax utilisée pour mettre à jour notre liste
 * On active par la fonction `setPersistentSettings` l'enregistrement des propriétés d'affichage des utilisateurs en base de données. Par défaut, désactivé.
-* On retourne notre objet créé
+* On retourne notre objet créé pour la création du CRUD
 
 ## Ajout templates
 
@@ -353,18 +352,18 @@ namespace App\Controller;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         //...
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id')
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crudConfig->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id'])
             //...
             ->setRoute('my_crud_ajax')
 +           ->createSearchForm(new CarSearcher())
             //...
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 }
 ```

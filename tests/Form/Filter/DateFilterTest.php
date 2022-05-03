@@ -22,7 +22,7 @@ class DateFilterTest extends AbstractFilterTest
     {
         $this->expectException(MissingOptionsException::class);
 
-        $crud = $this->createCrud('e.createdAt');
+        $crud = $this->createCrud($this->createCrudConfig('e.createdAt'));
         $crud->getSearchForm()->addFilter('propertyName', DateFilter::class);
     }
 
@@ -31,12 +31,12 @@ class DateFilterTest extends AbstractFilterTest
      */
     public function testViewAndQueryBuilder($modelData, bool $withTime, string $comparator, $expectedViewData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.createdAt', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.createdAt', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', DateFilter::class, [
             'comparator' => $comparator,
             'with_time' => $withTime,
         ]);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
@@ -85,12 +85,10 @@ class DateFilterTest extends AbstractFilterTest
      */
     public function testInvalidInput($modelData): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', DateFilter::class, [
             'comparator' => DateFilter::GREATER_THAN,
         ]);
-
-        $crud->init();
 
         $this->checkQueryBuilder($crud, null, []);
     }
@@ -108,13 +106,13 @@ class DateFilterTest extends AbstractFilterTest
      */
     public function testSubmit($withTime, $submittedData, $expectedModelData, $expectedViewData): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', DateFilter::class, [
             'comparator' => DateFilter::GREATER_THAN,
             'with_time' => $withTime,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -146,12 +144,12 @@ class DateFilterTest extends AbstractFilterTest
      */
     public function testSubmitInvalidFormat($submittedData): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', DateFilter::class, [
             'comparator' => DateFilter::GREATER_THAN,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -175,7 +173,7 @@ class DateFilterTest extends AbstractFilterTest
      */
     public function testViewAndQueryBuilderWithSingleTextWidget($modelData, bool $withTime, string $comparator, $expectedViewData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.createdAt', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.createdAt', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', DateFilter::class, [
             'comparator' => $comparator,
             'with_time' => $withTime,
@@ -185,7 +183,7 @@ class DateFilterTest extends AbstractFilterTest
                 'html5' => false,
             ],
         ]);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
@@ -212,7 +210,7 @@ class DateFilterTest extends AbstractFilterTest
      */
     public function testSubmitWithSingleTextWidget($withTime, $submittedData, $expectedModelData, $expectedViewData): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', DateFilter::class, [
             'comparator' => DateFilter::GREATER_THAN,
             'with_time' => $withTime,
@@ -223,7 +221,7 @@ class DateFilterTest extends AbstractFilterTest
             ],
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);

@@ -24,9 +24,9 @@ class NullFilterTest extends AbstractFilterTest
      */
     public function testViewAndQueryBuilder($modelData, $expectedChecked, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', static::TEST_FILTER);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame('1', $view->children['propertyName']->vars['value']);
         $this->assertSame($expectedChecked, $view->children['propertyName']->vars['checked']);
@@ -53,10 +53,10 @@ class NullFilterTest extends AbstractFilterTest
      */
     public function testSubmit($submittedData, $expectedModelData): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', static::TEST_FILTER);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);

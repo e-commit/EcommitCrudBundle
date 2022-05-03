@@ -15,6 +15,7 @@ namespace Ecommit\CrudBundle\Tests\Functional\App\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Crud\Crud;
+use Ecommit\CrudBundle\Crud\CrudConfig;
 use Ecommit\CrudBundle\Crud\CrudFactory;
 use Ecommit\CrudBundle\Crud\CrudResponseGenerator;
 use Ecommit\CrudBundle\Tests\Functional\App\Entity\TestUser;
@@ -32,16 +33,17 @@ class UserWithoutTraitController extends AbstractController
             ->createQueryBuilder('u')
             ->select('u');
 
-        $crud = $this->container->get(CrudFactory::class)->create($sessionName);
-        $crud->addColumn('username', 'u.username', 'username', ['default_displayed' => false])
+        $crudConfig = new CrudConfig($sessionName);
+        $crudConfig->addColumn('username', 'u.username', 'username', ['displayed_by_default' => false])
             ->addColumn('firstName', 'u.firstName', 'first_name')
             ->addColumn('lastName', 'u.lastName', 'last_name')
             ->setQueryBuilder($queryBuilder)
-            ->setAvailableResultsPerPage([5, 5, 10, 50], 5)
+            ->setMaxPerPage([5, 5, 10, 50], 5)
             ->setDefaultSort('firstName', Crud::ASC)
             ->createSearchForm(new UserSearcher())
             ->setRoute('user_without_trait_ajax_crud', $routeParams)
             ->setPersistentSettings(true);
+        $crud = $this->container->get(CrudFactory::class)->create($crudConfig->getOptions());
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
         if ($request->query->has('manual-reset')) {

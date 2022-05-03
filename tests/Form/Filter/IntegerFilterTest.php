@@ -24,7 +24,7 @@ class IntegerFilterTest extends AbstractFilterTest
     {
         $this->expectException(MissingOptionsException::class);
 
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', static::TEST_FILTER);
     }
 
@@ -33,11 +33,11 @@ class IntegerFilterTest extends AbstractFilterTest
      */
     public function testViewAndQueryBuilder($modelData, string $comparator, $expectedViewData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', static::TEST_FILTER, [
             'comparator' => $comparator,
         ]);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
@@ -72,12 +72,10 @@ class IntegerFilterTest extends AbstractFilterTest
 
     public function testInvalidInput(): void
     {
-        $crud = $this->createCrud('e.name', ['not-scalar']);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', ['not-scalar']));
         $crud->getSearchForm()->addFilter('propertyName', static::TEST_FILTER, [
             'comparator' => IntegerFilter::GREATER_THAN,
         ]);
-
-        $crud->init();
 
         $this->checkQueryBuilder($crud, null, []);
     }
@@ -87,12 +85,12 @@ class IntegerFilterTest extends AbstractFilterTest
      */
     public function testSubmit($submittedData, $expectedModelData, $expectedViewData): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', static::TEST_FILTER, [
             'comparator' => IntegerFilter::GREATER_THAN,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -118,12 +116,12 @@ class IntegerFilterTest extends AbstractFilterTest
      */
     public function testSubmitInvalidFormat($submittedData): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', static::TEST_FILTER, [
             'comparator' => IntegerFilter::GREATER_THAN,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);

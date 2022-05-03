@@ -22,21 +22,8 @@
             </errorLevel>
         </ArgumentTypeCoercion>
 
-        <PossiblyNullArgument>
-            <errorLevel type="suppress">
-                <file name="src/Crud/Crud.php" />
-            </errorLevel>
-        </PossiblyNullArgument>
-
-        <PossiblyNullPropertyAssignmentValue>
-            <errorLevel type="suppress">
-                <file name="src/Crud/Crud.php" />
-            </errorLevel>
-        </PossiblyNullPropertyAssignmentValue>
-
         <PossiblyNullReference>
             <errorLevel type="suppress">
-                <file name="src/Crud/Crud.php" />
                 <file name="src/DependencyInjection/Configuration.php" />
             </errorLevel>
         </PossiblyNullReference>
@@ -48,11 +35,5 @@
                 <directory name="src/Form/Filter" />
             </errorLevel>
         </PossiblyUndefinedMethod>
-
-        <PropertyNotSetInConstructor>
-            <errorLevel type="suppress">
-                <file name="src/Crud/Crud.php" />
-            </errorLevel>
-        </PropertyNotSetInConstructor>
     </issueHandlers>
 </psalm>

@@ -22,9 +22,9 @@ class BooleanFilterTest extends AbstractFilterTest
      */
     public function testViewAndQueryBuilder($modelData, $expectedViewData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
@@ -43,10 +43,8 @@ class BooleanFilterTest extends AbstractFilterTest
 
     public function testInvalidInput(): void
     {
-        $crud = $this->createCrud('e.name', 'bad-value');
+        $crud = $this->createCrud($this->createCrudConfig('e.name', 'bad-value'));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class);
-
-        $crud->init();
 
         $this->checkQueryBuilder($crud, null, []);
     }
@@ -56,12 +54,10 @@ class BooleanFilterTest extends AbstractFilterTest
      */
     public function testValueTrueOption($modelData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class, [
             'value_true' => 'val',
         ]);
-
-        $crud->init();
 
         $this->checkQueryBuilder($crud, $whereExpected, $parametersExpected);
     }
@@ -81,12 +77,10 @@ class BooleanFilterTest extends AbstractFilterTest
      */
     public function testValueFalseOption($modelData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class, [
             'value_false' => 'val',
         ]);
-
-        $crud->init();
 
         $this->checkQueryBuilder($crud, $whereExpected, $parametersExpected);
     }
@@ -106,12 +100,10 @@ class BooleanFilterTest extends AbstractFilterTest
      */
     public function testValueFalseNullOption($modelData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class, [
             'value_false' => null,
         ]);
-
-        $crud->init();
 
         $this->checkQueryBuilder($crud, $whereExpected, $parametersExpected);
     }
@@ -131,12 +123,10 @@ class BooleanFilterTest extends AbstractFilterTest
      */
     public function testNotNullIsTrueOption($notNullIsTrue, $modelData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class, [
             'not_null_is_true' => $notNullIsTrue,
         ]);
-
-        $crud->init();
 
         $this->checkQueryBuilder($crud, $whereExpected, $parametersExpected);
     }
@@ -161,12 +151,10 @@ class BooleanFilterTest extends AbstractFilterTest
      */
     public function testNullIsFalseOption($nullIsFalse, $modelData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.name', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class, [
             'null_is_false' => $nullIsFalse,
         ]);
-
-        $crud->init();
 
         $this->checkQueryBuilder($crud, $whereExpected, $parametersExpected);
     }
@@ -191,10 +179,10 @@ class BooleanFilterTest extends AbstractFilterTest
      */
     public function testSubmit($submittedData, $expectedModelData, $expectedViewData): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -218,10 +206,10 @@ class BooleanFilterTest extends AbstractFilterTest
 
     public function testSubmitInvalidFormat(): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => ['not-scalar'],
         ]);
@@ -234,10 +222,10 @@ class BooleanFilterTest extends AbstractFilterTest
 
     public function testSubmitBadChoice(): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', BooleanFilter::class);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => 'bad-value',
         ]);

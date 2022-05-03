@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Crud\Crud;
+use Ecommit\CrudBundle\Crud\CrudConfig;
 use Ecommit\CrudBundle\Crud\CrudFactory;
 use Ecommit\CrudBundle\Tests\Functional\App\Entity\EntityManyToOne;
 use Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher\EntityToManyToOneSearcher;
@@ -78,7 +79,15 @@ abstract class AbstractFilterTest extends KernelTestCase
                 return static::getContainer()->get('ecommit_crud.locator')->get($name);
             });
 
-        $this->crudFactory = new CrudFactory($container);
+        $this->crudFactory = $this->getMockBuilder(CrudFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->crudFactory->method('create')->willReturnCallback(function (array $options) use ($container) {
+            return $this->getMockBuilder(Crud::class)
+                ->setConstructorArgs([$options, $container])
+                ->onlyMethods(['save', 'buildSearchForm']) // buildSearchForm: Disable search form creation
+                ->getMock();
+        });
     }
 
     protected function tearDown(): void
@@ -88,35 +97,47 @@ abstract class AbstractFilterTest extends KernelTestCase
         $this->crudFactory = null;
     }
 
-    protected function createCrud(string $alias, $propertyData = null): Crud
+    protected function createCrudConfig(string $alias, $propertyData = null): CrudConfig
     {
         $searcher = new EntityToManyToOneSearcher();
         $searcher->propertyName = $propertyData;
 
         $queryBuilder = $this->em->getRepository(EntityManyToOne::class)->createQueryBuilder('e');
 
-        $crud = $this->crudFactory->create('session_name');
-        $crud->addColumn('propertyName', $alias, 'label1')
+        $crudConfig = new CrudConfig('session_name');
+        $crudConfig->addColumn('propertyName', $alias, 'label1')
             ->addColumn('id', 'e.id', 'id')
             ->setQueryBuilder($queryBuilder)
-            ->setAvailableResultsPerPage([5, 5, 10, 50], 5)
+            ->setMaxPerPage([5, 5, 10, 50], 5)
             ->setDefaultSort('id', Crud::ASC)
             ->createSearchForm($searcher)
             ->setRoute('user_ajax_crud');
 
-        return $crud;
+        return $crudConfig;
     }
 
-    protected function initCrudAndGetForm(Crud $crud): FormInterface
+    protected function createCrud(CrudConfig $crudConfig): Crud
     {
-        $crud->init();
+        return $this->crudFactory->create($crudConfig->getOptions());
+    }
+
+    protected function createForm(Crud $crud): void
+    {
+        // Replaces "Crud::buildSearchForm" mocked
+        $crud->getSearchForm()->createForm();
+        $crud->getSearchForm()->getForm()->setData(clone $crud->getSessionValues()->searchFormData);
+    }
+
+    protected function createAndGetForm(Crud $crud): FormInterface
+    {
+        $this->createForm($crud);
 
         return $crud->getSearchForm()->getForm();
     }
 
-    protected function initCrudAndGetFormView(Crud $crud): FormView
+    protected function createFormAndGetFormView(Crud $crud): FormView
     {
-        $crud->init();
+        $this->createForm($crud);
         $crud->getSearchForm()->createFormView();
 
         return $crud->getSearchForm()->getForm();

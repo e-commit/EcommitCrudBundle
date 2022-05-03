@@ -80,8 +80,27 @@ final class SearchFormBuilder
             'required' => false,
             'type_options' => [],
             'update_query_builder' => null,
-            'alias_search' => fn (Options $options) => new CrudColumnReference($options['column_id']),
-            'label' => fn (Options $options) => new CrudColumnReference($options['column_id']),
+            'alias_search' => function (Options $options) {
+                $columns = $this->crud->getColumns();
+                if (\array_key_exists($options['column_id'], $columns)) {
+                    return $columns[$options['column_id']]->getAliasSearch();
+                }
+
+                $virtualColumns = $this->crud->getVirtualColumns();
+                if (\array_key_exists($options['column_id'], $virtualColumns)) {
+                    return $virtualColumns[$options['column_id']]->getAliasSearch();
+                }
+
+                return null;
+            },
+            'label' => function (Options $options) {
+                $columns = $this->crud->getColumns();
+                if (\array_key_exists($options['column_id'], $columns)) {
+                    return $columns[$options['column_id']]->getLabel();
+                }
+
+                return null;
+            },
         ]);
         $resolver->setAllowedTypes('update_query_builder', ['null', 'callable']);
         $filterService->configureOptions($resolver);
@@ -115,7 +134,6 @@ final class SearchFormBuilder
     public function createForm(): self
     {
         $this->defaultData->buildForm($this, $this->options);
-        $this->resolveFilters();
 
         // Add filters
         foreach ($this->filters as $property => $filter) {
@@ -136,30 +154,6 @@ final class SearchFormBuilder
         $this->form = $this->form->getForm();
 
         return $this;
-    }
-
-    protected function resolveFilters(): void
-    {
-        $columns = $this->crud->getColumns();
-        $virtualColumns = $this->crud->getVirtualColumns();
-
-        foreach ($this->filters as $property => $filter) {
-            if ($filter['options']['label'] instanceof CrudColumnReference) {
-                if (\array_key_exists($filter['options']['label']->id, $columns)) {
-                    $this->filters[$property]['options']['label'] = $columns[$filter['options']['label']->id]->getLabel();
-                } elseif (\array_key_exists($filter['options']['alias_search']->id, $virtualColumns)) {
-                    $this->filters[$property]['options']['label'] = null;
-                }
-            }
-
-            if ($filter['options']['alias_search'] instanceof CrudColumnReference) {
-                if (\array_key_exists($filter['options']['alias_search']->id, $columns)) {
-                    $this->filters[$property]['options']['alias_search'] = $columns[$filter['options']['alias_search']->id]->getAliasSearch();
-                } elseif (\array_key_exists($filter['options']['alias_search']->id, $virtualColumns)) {
-                    $this->filters[$property]['options']['alias_search'] = $virtualColumns[$filter['options']['alias_search']->id]->getAliasSearch();
-                }
-            }
-        }
     }
 
     public function createFormView(): self

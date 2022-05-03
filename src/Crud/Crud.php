@@ -20,87 +20,188 @@ use Ecommit\DoctrineUtils\Paginator\DoctrinePaginatorBuilder;
 use Ecommit\Paginator\PaginatorInterface;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
 
 final class Crud
 {
     public const DESC = 'DESC';
     public const ASC = 'ASC';
 
+    /**
+     * @var array{
+     *     session_name: string,
+     *     columns: array<string, CrudColumn>,
+     *     virtual_columns: array<string, CrudColumn>,
+     *     max_per_page_choices: array<int>,
+     *     default_max_per_page: int,
+     *     default_sort: string,
+     *     default_sort_direction: string,
+     *     default_personalized_sort: array,
+     *     query_builder: \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface,
+     *     route_name: string,
+     *     route_parameters: array,
+     *     search_form_data: ?SearcherInterface,
+     *     search_form_type: ?string,
+     *     search_form_options: array,
+     *     display_results_only_if_search: bool,
+     *     build_paginator: bool|\Closure|array,
+     *     persistent_settings: bool,
+     *     div_id_search: string,
+     *     div_id_list: string,
+     *     twig_functions_configuration: array,
+     * }
+     */
+    protected array $options;
+
     protected CrudSession $sessionValues;
     protected SearchFormBuilder|FormView|null $searchForm = null;
-    protected FormInterface|FormView|null $displaySettingsForm = null;
-    protected bool $isInitialized = false;
-    protected bool $initializationInProgress = false;
-    protected array $availableColumns = [];
-    protected array $availableVirtualColumns = [];
-    protected array $availableResultsPerPage = [];
-    protected ?string $defaultSort = null;
-    protected array $defaultPersonalizedSort = [];
-    protected ?string $defaultSortDirection = null;
-    protected ?int $defaultResultsPerPage = null;
-    protected \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null $queryBuilder = null;
-    protected bool $persistentSettings = false;
+    /** @psalm-suppress PropertyNotSetInConstructor */
+    protected FormInterface|FormView $displaySettingsForm;
     protected bool $updateDatabase = false;
     protected ?PaginatorInterface $paginator = null;
-    protected bool|\Closure|array $buildPaginator = true;
-    protected bool $displayResultsOnlyIfSearch = false;
     protected bool $displayResults = true;
-    protected array $twigFunctionsConfiguration = [];
-    protected ?string $routeName = null;
-    protected array $routeParams = [];
-    protected string $divIdSearch = 'crud_search';
-    protected string $divIdList = 'crud_list';
 
-    public function __construct(protected string $sessionName, protected ContainerInterface $container)
+    public function __construct(array $options, protected ContainerInterface $container)
     {
-        if (!preg_match('/^[a-zA-Z0-9_]{1,50}$/', $sessionName)) {
-            throw new \Exception('The session name format is invalid');
+        $resolver = new OptionsResolver();
+        $resolver->setRequired([
+            'session_name',
+            'columns',
+            'max_per_page_choices',
+            'default_max_per_page',
+            'default_sort',
+            'query_builder',
+            'route_name',
+        ]);
+        $resolver->setDefaults([
+            'virtual_columns' => [],
+            'default_sort_direction' => self::ASC,
+            'default_personalized_sort' => [],
+            'route_parameters' => [],
+            'search_form_data' => null,
+            'search_form_type' => null,
+            'search_form_options' => [],
+            'display_results_only_if_search' => false,
+            'build_paginator' => true,
+            'persistent_settings' => false,
+            'div_id_search' => 'crud_search',
+            'div_id_list' => 'crud_list',
+            'twig_functions_configuration' => [],
+        ]);
+
+        $resolver->setAllowedTypes('session_name', 'string');
+        $resolver->setAllowedValues('session_name', Validation::createCallable(
+            new Assert\Regex(pattern: '/^[a-zA-Z0-9_]{1,50}$/', message: 'Invalid session_name format.'),
+        ));
+
+        $resolver->setAllowedTypes('columns', ['array']);
+        $resolver->setAllowedValues('columns', Validation::createCallable(
+            new Assert\Count(min: 1, minMessage: 'The CRUD should contain 1 column or more.'),
+        ));
+        $resolver->setNormalizer('columns', function (Options $options, array $value): array {
+            $columns = [];
+            foreach ($value as $column) {
+                if (\is_array($column)) {
+                    $column = new CrudColumn($column);
+                } elseif (!$column instanceof CrudColumn) {
+                    throw new \Exception('A column must be an array or a CrudColum instance.');
+                }
+                if (\array_key_exists($column->getId(), $columns)) {
+                    throw new \Exception(sprintf('The column "column1" already exists.', $column->getId()));
+                }
+                $columns[$column->getId()] = $column;
+            }
+
+            return $columns;
+        });
+
+        $resolver->setAllowedTypes('virtual_columns', 'array');
+        $resolver->setNormalizer('virtual_columns', function (Options $options, array $value): array {
+            $columns = [];
+            foreach ($value as $column) {
+                if (\is_array($column)) {
+                    $column = new CrudColumn($column);
+                } elseif (!$column instanceof CrudColumn) {
+                    throw new \Exception('A column must be an array or a CrudColum instance.');
+                }
+                if (\array_key_exists($column->getId(), $columns)) {
+                    throw new \Exception(sprintf('The column "column1" already exists.', $column->getId()));
+                }
+                $columns[$column->getId()] = $column;
+            }
+
+            return $columns;
+        });
+
+        $resolver->setAllowedTypes('max_per_page_choices', 'int[]');
+        $resolver->setAllowedValues('max_per_page_choices', Validation::createCallable(
+            new Assert\Count(min: 1, minMessage: 'The max_per_page_choices should contain 1 value or more.'),
+        ));
+        $resolver->setAllowedTypes('default_max_per_page', 'int');
+
+        $resolver->setAllowedTypes('default_sort', 'string');
+        $resolver->setAllowedValues('default_sort_direction', [self::ASC, self::DESC]);
+        $resolver->setAllowedTypes('default_personalized_sort', 'string[]');
+
+        $resolver->setAllowedTypes('query_builder', [
+            \Doctrine\ORM\QueryBuilder::class,
+            \Doctrine\DBAL\Query\QueryBuilder::class,
+            QueryBuilderInterface::class,
+        ]);
+
+        $resolver->setAllowedTypes('route_name', 'string');
+        $resolver->setAllowedTypes('route_parameters', 'array');
+
+        $resolver->setAllowedTypes('search_form_data', ['null', SearcherInterface::class]);
+        $resolver->setAllowedTypes('search_form_type', ['null', 'string']);
+        $resolver->setAllowedTypes('search_form_options', 'array');
+
+        $resolver->setAllowedTypes('display_results_only_if_search', 'bool');
+        $resolver->setAllowedTypes('build_paginator', ['bool', \Closure::class, 'array']);
+
+        $resolver->setAllowedTypes('persistent_settings', 'bool');
+        $resolver->setNormalizer('persistent_settings', function (Options $options, bool $value): bool {
+            if ($value && (null === $this->container->get('security.token_storage')->getToken() || !($this->container->get('security.token_storage')->getToken()->getUser() instanceof UserInterface))) {
+                return false;
+            }
+
+            return $value;
+        });
+
+        $resolver->setAllowedTypes('div_id_search', 'string');
+        $resolver->setAllowedTypes('div_id_list', 'string');
+
+        $resolver->setAllowedTypes('twig_functions_configuration', 'array');
+
+        $this->options = $resolver->resolve($options);
+
+        // Check duplicates in columns / vitual columns
+        $duplicates = array_intersect_key($this->options['columns'], $this->options['virtual_columns']);
+        if (\count($duplicates) > 0) {
+            throw new \Exception(sprintf('The column "column1" already exists.', array_keys($duplicates)[0]));
         }
+
+        $this->init();
 
         return $this;
     }
 
-    /**
-     * Inits the CRUD.
-     */
-    public function init(): self
+    protected function init(): void
     {
-        if ($this->isInitialized) {
-            throw new \Exception('CRUD already initialized');
-        }
-        $this->initializationInProgress = true;
-
-        // Cheks not empty values
-        $checkValues = [
-            'availableColumns' => 'addColumn',
-            'availableResultsPerPage' => 'setAvailableResultsPerPage',
-            'defaultResultsPerPage' => 'setAvailableResultsPerPage',
-            'defaultSort' => 'setDefaultSort',
-            'defaultSortDirection' => 'setDefaultSort',
-            'queryBuilder' => 'setQueryBuilder',
-            'routeName' => 'setRoute',
-        ];
-        foreach ($checkValues as $value => $method) {
-            if (empty($this->$value)) {
-                throw new \Exception(sprintf('The CRUD configuration is not complete. You must call the "%s" method', $method));
-            }
-        }
-
-        if ($this->searchForm) {
-            $this->searchForm->createForm();
-        }
+        $this->createSearchForm();
 
         // Loads user values inside this object
         $this->load();
 
         // Display or not results
-        if ($this->searchForm && $this->displayResultsOnlyIfSearch) {
+        if ($this->searchForm && $this->getDisplayResultsOnlyIfSearch()) {
             $this->displayResults = $this->sessionValues->searchFormIsSubmittedAndValid;
         }
 
@@ -109,116 +210,47 @@ final class Crud
         // Process request (resultsPerPage, sort, sortDirection, change_columns)
         $this->processRequest();
 
-        // Searcher form: Allocates object
-        if ($this->searchForm && !$this->container->get('request_stack')->getCurrentRequest()->query->has('reset')) {
-            // IMPORTANT
-            // We have not to allocate directelly the "$this->sessionValues->searchFormData" object
-            // because otherwise it will be linked to form, and will be updated when the "bind" function will
-            // be called (If form is not valid, the session values will still be updated: Undesirable behavior)
-            /** @psalm-suppress PossiblyInvalidClone */
-            $values = clone $this->sessionValues->searchFormData;
-            try {
-                $this->searchForm->getForm()->setData($values);
-            } catch (TransformationFailedException $exception) {
-                // Avoid error if data stored in session is invalid
-            }
-        }
+        $this->buildSearchForm();
 
         // Saves
         $this->save();
-
-        $this->initializationInProgress = false;
-        $this->isInitialized = true;
-
-        return $this;
     }
 
-    public function isInitialized(): bool
+    protected function createSearchForm(): void
     {
-        return $this->isInitialized;
-    }
-
-    public function initIfNecessary(): self
-    {
-        if (!$this->isInitialized && !$this->initializationInProgress) {
-            $this->init();
+        if ($this->options['search_form_data']) {
+            $this->searchForm = new SearchFormBuilder($this->container, $this, $this->options['search_form_data'], $this->options['search_form_type'], $this->options['search_form_options']);
         }
-
-        return $this;
     }
 
-    protected function crudMustNotBeInitialized(): void
+    protected function buildSearchForm(): void
     {
-        if (!$this->isInitialized) {
+        if (!$this->searchForm) {
             return;
         }
 
-        $caller = debug_backtrace()[1]['function'];
-        throw new \Exception(sprintf('The method "%s" cannot be called after CRUD initialization', $caller));
-    }
+        $this->searchForm->createForm();
 
-    protected function crudMustBeInitialized(): void
-    {
-        if ($this->isInitialized || $this->initializationInProgress) {
+        // Allocates object
+        if ($this->container->get('request_stack')->getCurrentRequest()->query->has('reset')) {
             return;
         }
-
-        $caller = debug_backtrace()[1]['function'];
-        throw new \Exception(sprintf('The method "%s" cannot be called before CRUD initialization', $caller));
+        // IMPORTANT
+        // We have not to allocate directelly the "$this->sessionValues->searchFormData" object
+        // because otherwise it will be linked to form, and will be updated when the "bind" function will
+        // be called (If form is not valid, the session values will still be updated: Undesirable behavior)
+        /** @psalm-suppress PossiblyInvalidClone */
+        $values = clone $this->sessionValues->searchFormData;
+        try {
+            $this->searchForm->getForm()->setData($values);
+        } catch (TransformationFailedException $exception) {
+            // Avoid error if data stored in session is invalid
+        }
     }
 
-    /**
-     * Add a column inside the crud.
-     *
-     * @param string $id      Column id (used everywhere inside the crud)
-     * @param string $alias   Column SQL alias
-     * @param string $label   Column label (used in the header table)
-     * @param array  $options Options:
-     *                        * sortable: If the column is sortable (Default: true)
-     *                        * default_displayed: If the column is displayed, by default (Default: true)
-     *                        * alias_search: Column SQL alias, used during searchs. If null, $alias is used.
-     *                        * alias_sort: Column(s) SQL alias (string or array of strings), used during sorting. If null, $alias is used.
-     */
-    public function addColumn(string $id, string $alias, string $label, array $options = []): self
+    public function getOptions(): array
     {
-        $this->crudMustNotBeInitialized();
-        if (mb_strlen($id) > 100) {
-            throw new \Exception(sprintf('The column id "%s" is too long', $id));
-        }
-        if (\array_key_exists($id, $this->availableColumns) || \array_key_exists($id, $this->availableVirtualColumns)) {
-            throw new \Exception(sprintf('The column "%s" already exists', $id));
-        }
-
-        $resolver = new OptionsResolver();
-        $resolver->setDefaults(
-            [
-                'sortable' => true,
-                'default_displayed' => true,
-                'alias_search' => null,
-                'alias_sort' => null,
-            ]
-        );
-        $resolver->setAllowedTypes('sortable', 'bool');
-        $resolver->setAllowedTypes('default_displayed', 'bool');
-        $options = $resolver->resolve($options);
-
-        $columnOptions = [
-            'id' => $id,
-            'alias' => $alias,
-            'label' => $label,
-            'sortable' => $options['sortable'],
-            'displayed_by_default' => $options['default_displayed'],
-        ];
-        if (null !== $options['alias_search']) {
-            $columnOptions['alias_search'] = $options['alias_search'];
-        }
-        if (null !== $options['alias_sort']) {
-            $columnOptions['alias_sort'] = $options['alias_sort'];
-        }
-        $column = new CrudColumn($columnOptions);
-        $this->availableColumns[$id] = $column;
-
-        return $this;
+        return $this->options;
     }
 
     /**
@@ -226,15 +258,15 @@ final class Crud
      */
     public function getColumns(): array
     {
-        return $this->availableColumns;
+        return $this->options['columns'];
     }
 
     public function getColumn(string $columnId): CrudColumn
     {
-        if (isset($this->availableColumns[$columnId])) {
-            return $this->availableColumns[$columnId];
+        if (isset($this->options['columns'][$columnId])) {
+            return $this->options['columns'][$columnId];
         }
-        throw new \Exception(sprintf('The column "%s" does not exist', $columnId));
+        throw new \Exception(sprintf('The column "%s" does not exist.', $columnId));
     }
 
     /**
@@ -243,37 +275,16 @@ final class Crud
     public function getDefaultDisplayedColumns(): array
     {
         $columns = [];
-        foreach ($this->availableColumns as $column) {
+        foreach ($this->getColumns() as $column) {
             if ($column->isDisplayedByDefault()) {
                 $columns[] = $column->getId();
             }
         }
         if (0 == \count($columns)) {
-            throw new \Exception('At least one column is required');
+            throw new \Exception('The CRUD should contain 1 displayed column or more.');
         }
 
         return $columns;
-    }
-
-    /**
-     * Add a virtual column inside the crud.
-     *
-     * @param string $id          Column id (used everywhere inside the crud)
-     * @param string $aliasSearch column SQL alias, used during searchs
-     */
-    public function addVirtualColumn(string $id, string $aliasSearch): self
-    {
-        $this->crudMustNotBeInitialized();
-        if (\array_key_exists($id, $this->availableColumns) || \array_key_exists($id, $this->availableVirtualColumns)) {
-            throw new \Exception(sprintf('The column "%s" already exists', $id));
-        }
-        $column = new CrudColumn([
-            'id' => $id,
-            'alias' => $aliasSearch,
-        ]);
-        $this->availableVirtualColumns[$id] = $column;
-
-        return $this;
     }
 
     /**
@@ -281,123 +292,55 @@ final class Crud
      */
     public function getVirtualColumns(): array
     {
-        return $this->availableVirtualColumns;
+        return $this->options['virtual_columns'];
     }
 
     public function getVirtualColumn(string $columnId): CrudColumn
     {
-        if (isset($this->availableVirtualColumns[$columnId])) {
-            return $this->availableVirtualColumns[$columnId];
+        if (isset($this->options['virtual_columns'][$columnId])) {
+            return $this->options['virtual_columns'][$columnId];
         }
-        throw new \Exception(sprintf('The column "%s" does not exist', $columnId));
+        throw new \Exception(sprintf('The column "%s" does not exist.', $columnId));
     }
 
-    public function getQueryBuilder(): \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface|null
+    public function getQueryBuilder(): \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface
     {
-        return $this->queryBuilder;
+        return $this->options['query_builder'];
     }
 
-    public function setQueryBuilder(\Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface $queryBuilder): self
+    public function getMaxPerPageChoices(): array
     {
-        $this->crudMustNotBeInitialized();
-        $this->queryBuilder = $queryBuilder;
-
-        return $this;
+        return $this->options['max_per_page_choices'];
     }
 
-    public function getAvailableResultsPerPage(): array
+    public function getDefaultMaxPerPage(): int
     {
-        return $this->availableResultsPerPage;
+        return $this->options['default_max_per_page'];
     }
 
-    /**
-     * Return default results per page.
-     */
-    public function getDefaultResultsPerPage(): ?int
+    public function getDefaultSort(): string
     {
-        return $this->defaultResultsPerPage;
+        return $this->options['default_sort'];
     }
 
-    public function setAvailableResultsPerPage(array $availableResultsPerPage, int $defaultValue): self
+    public function getDefaultSortDirection(): string
     {
-        $this->crudMustNotBeInitialized();
-        if (0 === \count($availableResultsPerPage)) {
-            throw new \Exception('The 1st argument of the "setAvailableResultsPerPage" method must contain at least one integer');
-        }
-        if ($availableResultsPerPage !== array_filter($availableResultsPerPage, 'is_int')) {
-            throw new \Exception('The 1st argument of the "setAvailableResultsPerPage" method must contain only integers');
-        }
-        $this->availableResultsPerPage = $availableResultsPerPage;
-        $this->defaultResultsPerPage = $defaultValue;
-
-        return $this;
-    }
-
-    public function getDefaultSort(): ?string
-    {
-        return $this->defaultSort;
-    }
-
-    public function getDefaultSortDirection(): ?string
-    {
-        return $this->defaultSortDirection;
-    }
-
-    /**
-     * Set the default sort.
-     *
-     * @param string $sort          Column id
-     * @param string $sortDirection Sort direction (Crud::ASC / Crud::DESC)
-     */
-    public function setDefaultSort(string $sort, string $sortDirection): self
-    {
-        $this->crudMustNotBeInitialized();
-        $this->defaultSort = $sort;
-        $this->defaultSortDirection = $sortDirection;
-
-        return $this;
+        return $this->options['default_sort_direction'];
     }
 
     public function getDefaultPersonalizedSort(): array
     {
-        return $this->defaultPersonalizedSort;
+        return $this->options['default_personalized_sort'];
     }
 
-    /**
-     * Set the default personalized sort.
-     *
-     * @param array $criterias Criterias :
-     *                         If key is defined: Key = Sort  Value = Sort direction
-     *                         If key is not defined: Value = Sort
-     */
-    public function setDefaultPersonalizedSort(array $criterias): self
+    public function getRouteName(): string
     {
-        $this->crudMustNotBeInitialized();
-        $this->defaultPersonalizedSort = $criterias;
-
-        $this->defaultSort = 'defaultPersonalizedSort';
-        $this->defaultSortDirection = self::ASC; // Used if not defined in criterias
-
-        return $this;
+        return $this->options['route_name'];
     }
 
-    public function setRoute(string $routeName, array $parameters = []): self
+    public function getRouteParameters(): array
     {
-        $this->crudMustNotBeInitialized();
-        $this->routeName = $routeName;
-        $this->routeParams = $parameters;
-
-        return $this;
-    }
-
-    public function getRouteName(): ?string
-    {
-        return $this->routeName;
-    }
-
-    public function getRouteParams(): array
-    {
-        return $this->routeParams;
+        return $this->options['route_parameters'];
     }
 
     /**
@@ -405,9 +348,9 @@ final class Crud
      */
     public function getUrl(array $parameters = []): string
     {
-        $parameters = array_merge($this->routeParams, $parameters);
+        $parameters = array_merge($this->getRouteParameters(), $parameters);
 
-        return $this->container->get('router')->generate($this->routeName, $parameters);
+        return $this->container->get('router')->generate($this->getRouteName(), $parameters);
     }
 
     /**
@@ -415,27 +358,19 @@ final class Crud
      */
     public function getSearchUrl(array $parameters = []): string
     {
-        $parameters = array_merge($this->routeParams, ['search' => 1], $parameters);
+        $parameters = array_merge($this->getRouteParameters(), ['search' => 1], $parameters);
 
-        return $this->container->get('router')->generate($this->routeName, $parameters);
+        return $this->container->get('router')->generate($this->getRouteName(), $parameters);
     }
 
     public function getSessionName(): string
     {
-        return $this->sessionName;
+        return $this->options['session_name'];
     }
 
     public function getDisplayResultsOnlyIfSearch(): bool
     {
-        return $this->displayResultsOnlyIfSearch;
-    }
-
-    public function setDisplayResultsOnlyIfSearch(bool $displayResultsOnlyIfSearch): self
-    {
-        $this->crudMustNotBeInitialized();
-        $this->displayResultsOnlyIfSearch = $displayResultsOnlyIfSearch;
-
-        return $this;
+        return $this->options['display_results_only_if_search'];
     }
 
     public function getDisplayResults(): bool
@@ -453,17 +388,6 @@ final class Crud
         return $this;
     }
 
-    /**
-     * Enables (or not) the auto build paginator.
-     */
-    public function setBuildPaginator(bool|\Closure|array $value): self
-    {
-        $this->crudMustNotBeInitialized();
-        $this->buildPaginator = $value;
-
-        return $this;
-    }
-
     public function getPaginator(): ?PaginatorInterface
     {
         return $this->paginator;
@@ -476,24 +400,8 @@ final class Crud
         return $this;
     }
 
-    /*
-     * Use (or not) persistent settings.
-     */
-    public function setPersistentSettings(bool $value): self
-    {
-        $this->crudMustNotBeInitialized();
-        if ($value && (null === $this->container->get('security.token_storage')->getToken() || !($this->container->get('security.token_storage')->getToken()->getUser() instanceof UserInterface))) {
-            $value = false;
-        }
-        $this->persistentSettings = $value;
-
-        return $this;
-    }
-
     public function getSessionValues(): CrudSession
     {
-        $this->crudMustBeInitialized();
-
         return $this->sessionValues;
     }
 
@@ -505,45 +413,20 @@ final class Crud
         return $this->searchForm;
     }
 
-    public function createSearchForm(SearcherInterface $defaultData, ?string $type = null, array $options = []): self
-    {
-        $this->crudMustNotBeInitialized();
-        $this->searchForm = new SearchFormBuilder($this->container, $this, $defaultData, $type, $options);
-
-        return $this;
-    }
-
     public function getDivIdSearch(): string
     {
-        return $this->divIdSearch;
-    }
-
-    public function setDivIdSearch(string $divIdSearch): self
-    {
-        $this->crudMustNotBeInitialized();
-        $this->divIdSearch = $divIdSearch;
-
-        return $this;
+        return $this->options['div_id_search'];
     }
 
     public function getDivIdList(): string
     {
-        return $this->divIdList;
-    }
-
-    public function setDivIdList(string $divIdList): self
-    {
-        $this->crudMustNotBeInitialized();
-        $this->divIdList = $divIdList;
-
-        return $this;
+        return $this->options['div_id_list'];
     }
 
     public function processSearchForm(): self
     {
-        $this->crudMustBeInitialized();
         if (!$this->searchForm) {
-            throw new NotFoundHttpException('Crud: Search form does not exist');
+            throw new NotFoundHttpException('Crud: Search form does not exist.');
         }
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
@@ -551,12 +434,12 @@ final class Crud
             return $this;
         }
         if ('POST' == $request->getMethod()) {
-            if ($this->displayResultsOnlyIfSearch) {
+            if ($this->getDisplayResultsOnlyIfSearch()) {
                 $this->displayResults = false;
             }
             $searchForm = $this->searchForm->getForm();
             $searchForm->handleRequest($request);
-            if ($searchForm->isSubmitted() && $searchForm->isValid() && false !== $this->buildPaginator) {
+            if ($searchForm->isSubmitted() && $searchForm->isValid() && false !== $this->options['build_paginator']) {
                 $this->displayResults = true;
                 $this->sessionValues->searchFormIsSubmittedAndValid = true;
                 $this->changeFilterValues($searchForm->getData());
@@ -570,7 +453,6 @@ final class Crud
 
     public function build(): self
     {
-        $this->crudMustBeInitialized();
         $this->updateQueryBuilder();
         $this->buildPaginator();
 
@@ -583,45 +465,46 @@ final class Crud
         $columnSortId = $this->sessionValues->sort;
         if ('defaultPersonalizedSort' == $columnSortId) {
             // Default personalised sort is used
-            foreach ($this->defaultPersonalizedSort as $key => $value) {
+            foreach ($this->getDefaultPersonalizedSort() as $key => $value) {
                 if (\is_int($key)) {
                     $sort = $value;
-                    $sortDirection = $this->defaultSortDirection;
+                    $sortDirection = $this->getDefaultSortDirection();
                 } else {
                     $sort = $key;
                     $sortDirection = $value;
                 }
-                $this->queryBuilder->addOrderBy($sort, $sortDirection);
+                $this->getQueryBuilder()->addOrderBy($sort, $sortDirection);
             }
         } else {
-            $columnSortAlias = $this->availableColumns[$columnSortId]->getAliasSort();
+            $columnSortAlias = $this->getColumn($columnSortId)->getAliasSort();
             if (\is_array($columnSortAlias)) {
                 // Sort alias in many columns
                 foreach ($columnSortAlias as $oneColumnSortAlias) {
-                    $this->queryBuilder->addOrderBy($oneColumnSortAlias, $this->sessionValues->sortDirection);
+                    $this->getQueryBuilder()->addOrderBy($oneColumnSortAlias, $this->sessionValues->sortDirection);
                 }
             } else {
                 // Sort alias in one column
-                $this->queryBuilder->orderBy($columnSortAlias, $this->sessionValues->sortDirection);
+                $this->getQueryBuilder()->orderBy($columnSortAlias, $this->sessionValues->sortDirection);
             }
         }
 
         // Adds form searcher filters
         if ($this->searchForm) {
-            $this->searchForm->updateQueryBuilder($this->queryBuilder, $this->sessionValues->searchFormData);
+            /** @psalm-suppress PossiblyNullArgument */
+            $this->searchForm->updateQueryBuilder($this->getQueryBuilder(), $this->sessionValues->searchFormData);
         }
     }
 
     protected function buildPaginator(): void
     {
-        if (!$this->displayResults || false === $this->buildPaginator) {
+        if (!$this->displayResults || false === $this->options['build_paginator']) {
             return;
         }
 
-        if ($this->buildPaginator instanceof \Closure) {
+        if ($this->options['build_paginator'] instanceof \Closure) {
             // Case: Manual paginator (by closure) is enabled
-            $this->paginator = $this->buildPaginator->__invoke(
-                $this->queryBuilder,
+            $this->paginator = $this->options['build_paginator']->__invoke(
+                $this->getQueryBuilder(),
                 $this->sessionValues->page,
                 $this->sessionValues->resultsPerPage
             );
@@ -631,12 +514,12 @@ final class Crud
 
         // Case: Auto paginator is enabled
         $paginatorOptions = [];
-        if (\is_array($this->buildPaginator)) {
-            $paginatorOptions = $this->buildPaginator;
+        if (\is_array($this->options['build_paginator'])) {
+            $paginatorOptions = $this->options['build_paginator'];
         }
 
         $this->paginator = DoctrinePaginatorBuilder::createDoctrinePaginator(
-            $this->queryBuilder,
+            $this->getQueryBuilder(),
             $this->sessionValues->page,
             $this->sessionValues->resultsPerPage,
             $paginatorOptions
@@ -648,7 +531,6 @@ final class Crud
      */
     public function reset(): self
     {
-        $this->initIfNecessary();
         if ($this->searchForm) {
             $newValue = clone $this->searchForm->getDefaultData();
             $this->changeFilterValues($newValue);
@@ -658,7 +540,7 @@ final class Crud
         $this->changePage(1);
         $this->save();
 
-        if ($this->displayResultsOnlyIfSearch) {
+        if ($this->getDisplayResultsOnlyIfSearch()) {
             $this->displayResults = false;
         }
 
@@ -667,9 +549,8 @@ final class Crud
 
     public function resetSort(): self
     {
-        $this->initIfNecessary();
-        $this->sessionValues->sortDirection = $this->defaultSortDirection;
-        $this->sessionValues->sort = $this->defaultSort;
+        $this->sessionValues->sortDirection = $this->getDefaultSortDirection();
+        $this->sessionValues->sort = $this->getDefaultSort();
         $this->save();
 
         return $this;
@@ -678,16 +559,16 @@ final class Crud
     protected function resetDisplaySettings(): void
     {
         $this->sessionValues->displayedColumns = $this->getDefaultDisplayedColumns();
-        $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
-        $this->sessionValues->sortDirection = $this->defaultSortDirection;
-        $this->sessionValues->sort = $this->defaultSort;
+        $this->sessionValues->resultsPerPage = $this->getDefaultMaxPerPage();
+        $this->sessionValues->sortDirection = $this->getDefaultSortDirection();
+        $this->sessionValues->sort = $this->getDefaultSort();
 
-        if ($this->persistentSettings) {
+        if ($this->options['persistent_settings']) {
             // Remove settings in database
             $qb = $this->container->get('doctrine')->getManager()->createQueryBuilder();
             $qb->delete('EcommitCrudBundle:UserCrudSettings', 's')
                 ->andWhere('s.user = :user AND s.crudName = :crud_name')
-                ->setParameters(['user' => $this->container->get('security.token_storage')->getToken()->getUser(), 'crud_name' => $this->sessionName])
+                ->setParameters(['user' => $this->container->get('security.token_storage')->getToken()->getUser(), 'crud_name' => $this->getSessionName()])
                 ->getQuery()
                 ->execute();
         }
@@ -695,7 +576,6 @@ final class Crud
 
     public function createView(): self
     {
-        $this->crudMustBeInitialized();
         if ($this->searchForm) {
             $this->searchForm->createFormView();
             $this->searchForm = $this->searchForm->getForm();
@@ -707,23 +587,16 @@ final class Crud
 
     public function getTwigFunctionsConfiguration(): array
     {
-        return $this->twigFunctionsConfiguration;
+        return $this->options['twig_functions_configuration'];
     }
 
     public function getTwigFunctionConfiguration(string $function): array
     {
-        if (isset($this->twigFunctionsConfiguration[$function])) {
-            return $this->twigFunctionsConfiguration[$function];
+        if (isset($this->options['twig_functions_configuration'][$function])) {
+            return $this->options['twig_functions_configuration'][$function];
         }
 
         return [];
-    }
-
-    public function setTwigFunctionsConfiguration(array $twigFunctionsConfiguration): self
-    {
-        $this->twigFunctionsConfiguration = $twigFunctionsConfiguration;
-
-        return $this;
     }
 
     protected function testIfDatabaseMustMeUpdated(mixed $oldValue, mixed $newValue): void
@@ -753,10 +626,10 @@ final class Crud
     protected function changeNumberResultsDisplayed(int $value): void
     {
         $oldValue = $this->sessionValues->resultsPerPage;
-        if (\in_array($value, $this->availableResultsPerPage)) {
+        if (\in_array($value, $this->getMaxPerPageChoices())) {
             $this->sessionValues->resultsPerPage = $value;
         } else {
-            $this->sessionValues->resultsPerPage = $this->defaultResultsPerPage;
+            $this->sessionValues->resultsPerPage = $this->getDefaultMaxPerPage();
         }
         $this->testIfDatabaseMustMeUpdated($oldValue, $value);
     }
@@ -768,9 +641,9 @@ final class Crud
     {
         $oldValue = $this->sessionValues->displayedColumns;
         $newDisplayedColumns = [];
-        $availableColumns = $this->availableColumns;
+        $columns = $this->getColumns();
         foreach ($value as $columnName) {
-            if (\array_key_exists($columnName, $availableColumns)) {
+            if (\array_key_exists($columnName, $columns)) {
                 $newDisplayedColumns[] = $columnName;
             }
         }
@@ -787,14 +660,14 @@ final class Crud
     protected function changeSort(mixed $value): void
     {
         $oldValue = $this->sessionValues->sort;
-        $availableColumns = $this->availableColumns;
-        if ((\is_string($value) && \array_key_exists($value, $availableColumns) && $availableColumns[$value]->isSortable())
-            || (\is_string($value) && 'defaultPersonalizedSort' === $value && $this->defaultPersonalizedSort)) {
+        $columns = $this->getColumns();
+        if ((\is_string($value) && \array_key_exists($value, $columns) && $columns[$value]->isSortable())
+            || (\is_string($value) && 'defaultPersonalizedSort' === $value && $this->getDefaultPersonalizedSort())) {
             $this->sessionValues->sort = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
-            $this->sessionValues->sort = $this->defaultSort;
-            $this->testIfDatabaseMustMeUpdated($oldValue, $this->defaultSort);
+            $this->sessionValues->sort = $this->getDefaultSort();
+            $this->testIfDatabaseMustMeUpdated($oldValue, $this->getDefaultSort());
         }
     }
 
@@ -808,8 +681,8 @@ final class Crud
             $this->sessionValues->sortDirection = $value;
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
-            $this->sessionValues->sortDirection = $this->defaultSortDirection;
-            $this->testIfDatabaseMustMeUpdated($oldValue, $this->defaultSortDirection);
+            $this->sessionValues->sortDirection = $this->getDefaultSortDirection();
+            $this->testIfDatabaseMustMeUpdated($oldValue, $this->getDefaultSortDirection());
         }
     }
 
@@ -891,7 +764,7 @@ final class Crud
     protected function createDisplaySettingsForm(): void
     {
         $resultsPerPageChoices = [];
-        foreach ($this->getAvailableResultsPerPage() as $number) {
+        foreach ($this->getMaxPerPageChoices() as $number) {
             $resultsPerPageChoices[$number] = $number;
         }
         $columnsChoices = [];
@@ -918,7 +791,7 @@ final class Crud
     protected function load(): void
     {
         $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
-        $object = $session->get($this->sessionName); // Load from session
+        $object = $session->get($this->getSessionName()); // Load from session
 
         if (!empty($object)) {
             $this->sessionValues = $object;
@@ -929,19 +802,19 @@ final class Crud
 
         // If session is null => Assign default value
         $this->sessionValues = new CrudSession(
-            $this->defaultResultsPerPage,
+            $this->getDefaultMaxPerPage(),
             $this->getDefaultDisplayedColumns(),
-            $this->defaultSort,
-            $this->defaultSortDirection,
+            $this->getDefaultSort(),
+            $this->getDefaultSortDirection(),
             ($this->searchForm) ? $this->searchForm->getDefaultData() : null,
         );
 
         // If persistent settings is enabled -> Retrieve from database
-        if ($this->persistentSettings) {
+        if ($this->options['persistent_settings']) {
             $objectDatabase = $this->container->get('doctrine')->getRepository(UserCrudSettings::class)->findOneBy(
                 [
                     'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
-                    'crudName' => $this->sessionName,
+                    'crudName' => $this->getSessionName(),
                 ]
             );
             if ($objectDatabase) {
@@ -964,14 +837,14 @@ final class Crud
         if (\is_object($this->sessionValues->searchFormData)) {
             $sessionValues->searchFormData = clone $this->sessionValues->searchFormData;
         }
-        $session->set($this->sessionName, $sessionValues);
+        $session->set($this->getSessionName(), $sessionValues);
 
         // Save in database
-        if ($this->persistentSettings && $this->updateDatabase) {
+        if ($this->options['persistent_settings'] && $this->updateDatabase) {
             $objectDatabase = $this->container->get('doctrine')->getRepository(UserCrudSettings::class)->findOneBy(
                 [
                     'user' => $this->container->get('security.token_storage')->getToken()->getUser(),
-                    'crudName' => $this->sessionName,
+                    'crudName' => $this->getSessionName(),
                 ]
             );
             $em = $this->container->get('doctrine')->getManager();
@@ -983,13 +856,13 @@ final class Crud
             } else {
                 // Create object in database only if not default values
                 if ($this->sessionValues->displayedColumns != $this->getDefaultDisplayedColumns() ||
-                    $this->sessionValues->resultsPerPage != $this->defaultResultsPerPage ||
-                    $this->sessionValues->sortDirection != $this->defaultSortDirection ||
-                    $this->sessionValues->sort != $this->defaultSort
+                    $this->sessionValues->resultsPerPage != $this->getDefaultMaxPerPage() ||
+                    $this->sessionValues->sortDirection != $this->getDefaultSortDirection() ||
+                    $this->sessionValues->sort != $this->getDefaultSort()
                 ) {
                     $objectDatabase = new UserCrudSettings(
                         $this->container->get('security.token_storage')->getToken()->getUser(),
-                        $this->sessionName,
+                        $this->getSessionName(),
                         $this->sessionValues->resultsPerPage,
                         $this->sessionValues->displayedColumns,
                         $this->sessionValues->sort,

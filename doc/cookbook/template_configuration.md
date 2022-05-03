@@ -17,7 +17,7 @@ Ces options par défaut peuvent être définies :
 
 L'ordre de priorité prise en compte pour les options est le suivant :
 * Options définies lors de l'appel de la méthode Twig
-* Options définies dans le CRUD
+* Options définies dans les options du CRUD
 * Options définies dans l'application
 * Options par défaut de EcommitCrudBundle
 
@@ -44,12 +44,12 @@ namespace App\Controller;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         //...
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id')
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crudConfig->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id'])
             //...
             ->setRoute('my_crud_ajax')
 +           ->setTwigFunctionsConfiguration([
@@ -61,7 +61,7 @@ class MyCrudController extends AbstractCrudController
 +           ])
             //...
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 
     //...

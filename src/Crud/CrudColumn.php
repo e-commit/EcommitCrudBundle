@@ -15,6 +15,8 @@ namespace Ecommit\CrudBundle\Crud;
 
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Validation;
 
 final class CrudColumn
 {
@@ -25,7 +27,7 @@ final class CrudColumn
      *     label: string,
      *     sortable: bool,
      *     displayed_by_default: bool,
-     *     alias_sort: string,
+     *     alias_sort: string|array,
      *     alias_search: string
      * }
      */
@@ -58,11 +60,14 @@ final class CrudColumn
             'alias_search' => fn (Options $options): string => $options['alias'],
         ]);
         $resolver->setAllowedTypes('id', 'string');
+        $resolver->setAllowedValues('id', Validation::createCallable(
+            new Length(max: 100, maxMessage: 'The column id "{{ value }}" is too long. It should have {{ limit }} character or less')
+        ));
         $resolver->setAllowedTypes('alias', 'string');
         $resolver->setAllowedTypes('label', 'string');
         $resolver->setAllowedTypes('sortable', 'bool');
         $resolver->setAllowedTypes('displayed_by_default', 'bool');
-        $resolver->setAllowedTypes('alias_sort', 'string');
+        $resolver->setAllowedTypes('alias_sort', ['string', 'array']);
         $resolver->setAllowedTypes('alias_search', 'string');
 
         $this->options = $resolver->resolve($options);
@@ -98,7 +103,7 @@ final class CrudColumn
         return $this->options['alias_search'];
     }
 
-    public function getAliasSort(): string
+    public function getAliasSort(): string|array
     {
         return $this->options['alias_sort'];
     }

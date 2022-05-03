@@ -15,32 +15,42 @@ namespace Ecommit\CrudBundle\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Crud\Crud;
+use Ecommit\CrudBundle\Crud\CrudConfig;
 use Ecommit\CrudBundle\Crud\CrudFactory;
 use Ecommit\CrudBundle\Crud\CrudResponseGenerator;
 use Symfony\Component\HttpFoundation\Response;
 
 trait CrudControllerTrait
 {
-    abstract protected function getCrud(): Crud;
+    abstract protected function getCrudOptions(): array;
 
     abstract protected function getTemplateName(string $action): string;
 
-    final protected function createCrud(string $sessionName): Crud
+    protected function createCrudConfig(?string $sessionName = null): CrudConfig
     {
-        return $this->container->get(CrudFactory::class)->create($sessionName);
+        return new CrudConfig($sessionName);
+    }
+
+    final protected function createCrud(array $options): Crud
+    {
+        return $this->container->get(CrudFactory::class)->create($options);
     }
 
     public function getCrudResponse(): Response
     {
-        return $this->container->get(CrudResponseGenerator::class)->getResponse($this->getCrud(), $this->getCrudOptions());
+        $crud = $this->createCrud($this->getCrudOptions());
+
+        return $this->container->get(CrudResponseGenerator::class)->getResponse($crud, $this->getCrudResponseGeneratorOptions());
     }
 
     public function getAjaxCrudResponse(): Response
     {
-        return $this->container->get(CrudResponseGenerator::class)->getAjaxResponse($this->getCrud(), $this->getCrudOptions());
+        $crud = $this->createCrud($this->getCrudOptions());
+
+        return $this->container->get(CrudResponseGenerator::class)->getAjaxResponse($crud, $this->getCrudResponseGeneratorOptions());
     }
 
-    protected function getCrudOptions(): array
+    protected function getCrudResponseGeneratorOptions(): array
     {
         return [
             'template_generator' => fn (string $action) => $this->getTemplateName($action),

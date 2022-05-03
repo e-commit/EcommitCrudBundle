@@ -12,18 +12,18 @@ use Ecommit\CrudBundle\Crud\Crud;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         //...
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id')
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crudConfig->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id'])
             //...
             ->setRoute('my_crud_ajax')
             ->setDefaultSort('id', Crud::ASC)
             //...
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 
     //...
@@ -42,18 +42,18 @@ use Ecommit\CrudBundle\Crud\Crud;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         //...
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id',  ['alias_sort' => ['c1.id', 'c1.name']])
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crudConfig->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id',  'alias_sort' => ['c1.id', 'c1.name']])
             //...
             ->setRoute('my_crud_ajax')
             ->setDefaultSort('id', Crud::ASC)
             //...
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 
     //...
@@ -72,12 +72,12 @@ use Ecommit\CrudBundle\Crud\Crud;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         //...
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id')
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crudConfig->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id'])
             //...
             ->setRoute('my_crud_ajax')
             ->setDefaultPersonalizedSort([
@@ -86,7 +86,7 @@ class MyCrudController extends AbstractCrudController
             ])
             //...
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 
     //...

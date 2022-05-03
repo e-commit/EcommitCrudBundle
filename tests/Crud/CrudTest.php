@@ -14,82 +14,76 @@ declare(strict_types=1);
 namespace Ecommit\CrudBundle\Tests\Crud;
 
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Persistence\ManagerRegistry;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Crud\CrudColumn;
-use Ecommit\CrudBundle\Crud\CrudFilters;
+use Ecommit\CrudBundle\Crud\CrudConfig;
 use Ecommit\CrudBundle\Crud\CrudSession;
 use Ecommit\CrudBundle\Crud\SearchFormBuilder;
-use Ecommit\CrudBundle\Form\Filter\FilterInterface;
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
-use Ecommit\CrudBundle\Tests\Functional\App\Entity\TestUser;
 use Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher\UserSearcher;
 use Ecommit\DoctrineUtils\Paginator\DoctrineORMPaginator;
 use Ecommit\Paginator\PaginatorInterface;
-use Psr\Container\ContainerInterface;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
-use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
+use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
-class CrudTest extends KernelTestCase
+class CrudTest extends AbstractCrudTest
 {
-    protected function setUp(): void
-    {
-        self::bootKernel();
-    }
-
     /**
      * @dataProvider getTestCrudWithInvalidSessionNameProvider
      */
-    public function testCrudWithInvalidSessionName(string $sessionName): void
+    public function testCrudWithInvalidSessionName(mixed $sessionName, string $expectedException, string $expectedExceptionMessage): void
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('The session name format is invalid');
+        $this->expectException($expectedException);
+        $this->expectExceptionMessageMatches($expectedExceptionMessage);
 
-        $this->createCrud(sessionName: $sessionName);
+        $crudOptions = $this->createValidCrudConfig();
+        $crudOptions['session_name'] = $sessionName;
+        $this->createCrud($crudOptions);
     }
 
     public function getTestCrudWithInvalidSessionNameProvider(): array
     {
         return [
-            [''],
-            ['aa#bb'],
-            ['aa bb'],
-            [str_pad('', 101, 'a')],
+            ['', InvalidOptionsException::class, '/The option "session_name" with value ".*" is invalid/'],
+            ['aa#bb', ValidationFailedException::class, '/Invalid session_name format/'],
+            ['aa bb', ValidationFailedException::class, '/Invalid session_name format/'],
+            [str_pad('', 101, 'a'), ValidationFailedException::class, '/Invalid session_name format/'],
+            [1, InvalidOptionsException::class, '/The option "session_name" with value 1 is expected to be of type "string", but is of type "int"/'],
         ];
     }
 
     public function testGetSessionName(): void
     {
-        $crud = $this->createCrud(sessionName: 'session_name');
+        $crud = $this->createCrud($this->createValidCrudConfig());
         $this->assertSame('session_name', $crud->getSessionName());
     }
 
     public function testGetSessionValues(): void
     {
-        $crud = $this->createValidCrud()
-            ->init();
-
+        $crud = $this->createCrud($this->createValidCrudConfig());
         $this->assertInstanceOf(CrudSession::class, $crud->getSessionValues());
     }
 
     public function testColumns(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig()
+            ->resetOptions('columns')
+            ->addColumn(['id' => 'username', 'alias' => 'u.username', 'label' => 'username'])
+            ->addColumn(new CrudColumn([
+                'id' => 'firstName',
+                'alias' => 'u.firstName',
+                'label' => 'first_name',
+                'sortable' => false,
+                'displayed_by_default' => false,
+                'alias_search' => 'alias_search2',
+                'alias_sort' => 'alias_sort2',
+            ]));
 
-        $this->assertSame([], $crud->getColumns());
-        $this->assertInstanceOf(Crud::class, $crud->addColumn('username', 'u.username', 'username'));
-        $this->assertInstanceOf(Crud::class, $crud->addColumn('firstName', 'u.firstName', 'first_name', [
-            'sortable' => false,
-            'default_displayed' => false,
-            'alias_search' => 'alias_search2',
-            'alias_sort' => 'alias_sort2',
-        ]));
+        $crud = $this->createCrud($crudConfig);
         $column1 = new CrudColumn(['id' => 'username', 'alias' => 'u.username', 'label' => 'username']);
         $column2 = new CrudColumn(['id' => 'firstName', 'alias' => 'u.firstName', 'label' => 'first_name', 'sortable' => false, 'displayed_by_default' => false, 'alias_search' => 'alias_search2', 'alias_sort' => 'alias_sort2']);
         $this->assertEquals($column1, $crud->getColumn('username'));
@@ -103,23 +97,12 @@ class CrudTest extends KernelTestCase
 
     public function testAddColumnWithAliasSort(): void
     {
-        $crud = $this->createValidCrud()
+        $crudConfig = $this->createValidCrudConfig()
             ->addColumn('my_column', 'u.alias', 'My Column', ['alias_sort' => 'u.lastName'])
-            ->setDefaultSort('my_column', Crud::ASC)
-            ->init()
-            ->build();
+            ->setDefaultSort('my_column', Crud::ASC);
+        $crud = $this->createCrud($crudConfig)->build();
 
         $this->assertSame(['u.lastName ASC'], $crud->getQueryBuilder()->getDQLPart('orderBy')[0]->getParts());
-    }
-
-    public function testAddColumnTooLong(): void
-    {
-        $columnId = str_pad('', 101, 'a');
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('The column id "'.$columnId.'" is too long');
-
-        $crud = $this->createCrud();
-        $crud->addColumn($columnId, 'alias', 'label');
     }
 
     /**
@@ -127,76 +110,78 @@ class CrudTest extends KernelTestCase
      */
     public function testAddColumnAlreadyExists(callable $callback): void
     {
+        $crudConfig = $this->createValidCrudConfig();
+        $callback($crudConfig);
+
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The column "column1" already exists');
-
-        $callback($this->createCrud());
+        $this->createCrud($crudConfig);
     }
 
     public function getTestAddColumnAlreadyExistsProvider(): array
     {
         return [
-            [function (Crud $crud): void {
-                $crud->addColumn('column1', 'alias1', 'label1')
-                    ->addColumn('column1', 'alias1', 'label1');
+            [function (CrudConfig $crudConfig): void {
+                $crudConfig->addColumn(['id' => 'column1', 'alias' => 'alias1'])
+                    ->addColumn(['id' => 'column1', 'alias' => 'alias1']);
             }],
-            [function (Crud $crud): void {
-                $crud->addVirtualColumn('column1', 'alias1', 'label1')
-                    ->addVirtualColumn('column1', 'alias1', 'label1');
+            [function (CrudConfig $crudConfig): void {
+                $crudConfig->addVirtualColumn(['id' => 'column1', 'alias' => 'alias1'])
+                    ->addVirtualColumn(['id' => 'column1', 'alias' => 'alias1']);
             }],
-            [function (Crud $crud): void {
-                $crud->addColumn('column1', 'alias1', 'label1')
-                    ->addVirtualColumn('column1', 'alias1', 'label1');
+            [function (CrudConfig $crudConfig): void {
+                $crudConfig->addColumn(['id' => 'column1', 'alias' => 'alias1'])
+                    ->addVirtualColumn(['id' => 'column1', 'alias' => 'alias1']);
             }],
-            [function (Crud $crud): void {
-                $crud->addVirtualColumn('column1', 'alias1', 'label1')
-                    ->addColumn('column1', 'alias1', 'label1');
+            [function (CrudConfig $crudConfig): void {
+                $crudConfig->addVirtualColumn(['id' => 'column1', 'alias' => 'alias1'])
+                    ->addColumn(['id' => 'column1', 'alias' => 'alias1']);
             }],
         ];
     }
 
-    public function testAddColumnWithInvalidOption(): void
+    public function testAddBadColumns(): void
     {
-        $this->expectException(UndefinedOptionsException::class);
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['columns'] = 'bad';
 
-        $crud = $this->createCrud();
-        $crud->addColumn('column1', 'alias1', 'label1', [
-            'bad_option' => 'value',
-        ]);
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "columns" with value "bad" is expected to be of type "array"');
+        $this->createCrud($crudConfig);
     }
 
-    public function testAddColumnWithInvalidTypeSortableOption(): void
+    public function testAddBadColumn(): void
     {
-        $this->expectException(InvalidOptionsException::class);
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn('bad_value');
 
-        $crud = $this->createCrud();
-        $crud->addColumn('column1', 'alias1', 'label1', [
-            'sortable' => 'not_bool',
-        ]);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('A column must be an array or a CrudColum instance');
+        $this->createCrud($crudConfig);
     }
 
-    public function testAddColumnWithInvalidTypeDefaultDisplayedOption(): void
+    public function testNoColumn(): void
     {
-        $this->expectException(InvalidOptionsException::class);
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['columns'] = [];
 
-        $crud = $this->createCrud();
-        $crud->addColumn('column1', 'alias1', 'label1', [
-            'default_displayed' => 'not_bool',
-        ]);
+        $this->expectException(ValidationFailedException::class);
+        $this->expectExceptionMessage('The CRUD should contain 1 column or more');
+        $this->createCrud($crudConfig);
     }
 
     public function testGetColumnNotExists(): void
     {
+        $crud = $this->createCrud($this->createValidCrudConfig());
+
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The column "invalid" does not exist');
-
-        $crud = $this->createCrud();
         $crud->getColumn('invalid');
     }
 
     public function testGetDefaultDisplayedColumns(): void
     {
-        $crud = $this->createValidCrud();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertSame(['firstName'], $crud->getDefaultDisplayedColumns());
     }
@@ -204,21 +189,22 @@ class CrudTest extends KernelTestCase
     public function testGetDefaultDisplayedColumnsEmpty(): void
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('At least one column is required');
+        $this->expectExceptionMessage('The CRUD should contain 1 displayed column or more');
 
-        $crud = $this->createCrud();
-        $crud->getDefaultDisplayedColumns();
+        $crudConfig = $this->createValidCrudConfig();
+        $columns = $crudConfig['columns'];
+        $columns[1]['displayed_by_default'] = false;
+        $crudConfig['columns'] = $columns;
+        $this->createCrud($crudConfig);
     }
 
     public function testVirtualColumns(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig()
+            ->addVirtualColumn(['id' => 'columnv1', 'alias' => 'aliasv1'])
+            ->addVirtualColumn(new CrudColumn(['id' => 'columnv2', 'alias' => 'aliasv2']));
 
-        $this->assertSame([], $crud->getVirtualColumns());
-
-        $this->assertInstanceOf(Crud::class, $crud->addVirtualColumn('columnv1', 'aliasv1'));
-        $this->assertInstanceOf(Crud::class, $crud->addVirtualColumn('columnv2', 'aliasv2'));
-
+        $crud = $this->createCrud($crudConfig);
         $column1 = new CrudColumn(['id' => 'columnv1', 'alias' => 'aliasv1']);
         $column2 = new CrudColumn(['id' => 'columnv2', 'alias' => 'aliasv2']);
         $this->assertEquals($column1, $crud->getVirtualColumn('columnv1'));
@@ -231,124 +217,302 @@ class CrudTest extends KernelTestCase
         $this->assertEquals($columns, $crud->getVirtualColumns());
     }
 
+    public function testAddBadVirtualColumns(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['virtual_columns'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "virtual_columns" with value "bad" is expected to be of type "array"');
+        $this->createCrud($crudConfig);
+    }
+
+    public function testAddBadVirtualColumn(): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->addVirtualColumn('bad');
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('A column must be an array or a CrudColum instance');
+        $this->createCrud($crudConfig);
+    }
+
     public function testGetVirtualColumnNotExists(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The column "invalid" does not exist');
 
-        $crud = $this->createCrud();
+        $crud = $this->createCrud($this->createValidCrudConfig());
         $crud->getVirtualColumn('invalid');
     }
 
-    public function testQueryBuilder(): void
+    /**
+     * @dataProvider getTestQueryBuilderProvider
+     */
+    public function testQueryBuilder(mixed $queryBuilder): void
     {
-        $crud = $this->createCrud();
-
-        $this->assertNull($crud->getQueryBuilder());
-        $queryBuilder = self::getContainer()->get(ManagerRegistry::class)->getRepository(TestUser::class)
-            ->createQueryBuilder('u')
-            ->select('u');
-        $this->assertInstanceOf(Crud::class, $crud->setQueryBuilder($queryBuilder));
+        $crudConfig = $this->createValidCrudConfig()
+            ->setQueryBuilder($queryBuilder);
+        $crud = $this->createCrud($crudConfig);
         $this->assertSame($queryBuilder, $crud->getQueryBuilder());
     }
 
-    public function testAvailableResultsPerPage(): void
+    public function getTestQueryBuilderProvider(): array
     {
-        $crud = $this->createCrud();
-
-        $this->assertSame([], $crud->getAvailableResultsPerPage());
-        $this->assertNull($crud->getDefaultResultsPerPage());
-        $this->assertInstanceOf(Crud::class, $crud->setAvailableResultsPerPage([10, 50, 100], 50));
-        $this->assertSame([10, 50, 100], $crud->getAvailableResultsPerPage());
-        $this->assertSame(50, $crud->getDefaultResultsPerPage());
+        return [
+            [$this->createMock(\Doctrine\ORM\QueryBuilder::class)],
+            [$this->createMock(\Doctrine\DBAL\Query\QueryBuilder::class)],
+            [$this->createMock(\Ecommit\CrudBundle\Crud\QueryBuilderInterface::class)],
+        ];
     }
 
-    public function testSetAvailableResultsPerPageWithEmptyArray(): void
+    public function testSetBadQueryBuilder(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['query_builder'] = 'bad';
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('The 1st argument of the "setAvailableResultsPerPage" method must contain at least one integer');
-
-        $crud->setAvailableResultsPerPage([], 1);
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "query_builder" with value "bad" is expected to be');
+        $this->createCrud($crudConfig);
     }
 
-    public function testSetAvailableResultsPerPageWithNotInteger(): void
+    public function testMaxPerPage(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig()
+            ->setMaxPerPage([10, 50, 100], 50);
+        $crud = $this->createCrud($crudConfig);
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('The 1st argument of the "setAvailableResultsPerPage" method must contain only integers');
-
-        $crud->setAvailableResultsPerPage([1, '10'], 1);
+        $this->assertSame([10, 50, 100], $crud->getMaxPerPageChoices());
+        $this->assertSame(50, $crud->getDefaultMaxPerPage());
     }
 
-    public function testSort(): void
+    public function testSetMaxPerPageChoicesWithEmptyArray(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig()
+            ->setMaxPerPage([], 50);
 
-        $this->assertNull($crud->getDefaultSort());
-        $this->assertNull($crud->getDefaultSortDirection());
-        $this->assertInstanceOf(Crud::class, $crud->setDefaultSort('username', Crud::DESC));
+        $this->expectException(ValidationFailedException::class);
+        $this->expectExceptionMessage('The max_per_page_choices should contain 1 value or more');
+
+        $this->createCrud($crudConfig);
+    }
+
+    public function testAddBadMaxPerPageChoices(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['max_per_page_choices'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "max_per_page_choices" with value "bad" is expected to be of type "int[]"');
+        $this->createCrud($crudConfig);
+    }
+
+    public function testAddBadDefaultMaxPerPage(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['default_max_per_page'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "default_max_per_page" with value "bad" is expected to be of type "int"');
+        $this->createCrud($crudConfig);
+    }
+
+    public function testDefaultSort(): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->setDefaultSort('username', Crud::DESC);
+        $crud = $this->createCrud($crudConfig);
+
         $this->assertSame('username', $crud->getDefaultSort());
         $this->assertSame(Crud::DESC, $crud->getDefaultSortDirection());
     }
 
+    public function testAddBadDefaultSort(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['default_sort'] = 1;
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "default_sort" with value 1 is expected to be of type "string"');
+        $this->createCrud($crudConfig);
+    }
+
+    public function testAddBadDefaultSortDirection(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['default_sort_direction'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "default_sort_direction" with value "bad" is invalid');
+        $this->createCrud($crudConfig);
+    }
+
     public function testDefaultPersonalizedSort(): void
     {
-        $crud = $this->createCrud();
-
-        $this->assertSame([], $crud->getDefaultPersonalizedSort());
-
-        $this->assertInstanceOf(Crud::class, $crud->setDefaultPersonalizedSort(['u.userId']));
+        $crudConfig = $this->createValidCrudConfig()
+            ->setDefaultPersonalizedSort(['u.userId']);
+        $crud = $this->createCrud($crudConfig);
 
         $this->assertSame(['u.userId'], $crud->getDefaultPersonalizedSort());
         $this->assertSame('defaultPersonalizedSort', $crud->getDefaultSort());
-        $this->assertSame(Crud::ASC, $crud->getDefaultSortDirection());
+    }
+
+    public function testAddBadDefaultPersonalizedSort(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['default_personalized_sort'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "default_personalized_sort" with value "bad" is expected to be of type "string[]"');
+        $this->createCrud($crudConfig);
     }
 
     public function testRouting(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig()
+            ->setRoute('user_ajax_crud', ['param1' => 'val1']);
+        $crud = $this->createCrud($crudConfig);
 
-        $this->assertNull($crud->getRouteName());
-        $this->assertSame([], $crud->getRouteParams());
-        $this->assertInstanceOf(Crud::class, $crud->setRoute('user_ajax_crud', ['param1' => 'val1']));
         $this->assertSame('user_ajax_crud', $crud->getRouteName());
-        $this->assertSame(['param1' => 'val1'], $crud->getRouteParams());
+        $this->assertSame(['param1' => 'val1'], $crud->getRouteParameters());
         $this->assertSame('/user/ajax-crud?param1=val1', $crud->getUrl());
         $this->assertSame('/user/ajax-crud?param1=val1&param2=val2', $crud->getUrl(['param2' => 'val2']));
         $this->assertSame('/user/ajax-crud?param1=val1&search=1', $crud->getSearchUrl());
         $this->assertSame('/user/ajax-crud?param1=val1&search=1&param2=val2', $crud->getSearchUrl(['param2' => 'val2']));
     }
 
+    public function testAddBadRouteName(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['route_name'] = 1;
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "route_name" with value 1 is expected to be of type "string"');
+        $this->createCrud($crudConfig);
+    }
+
+    public function testAddBadRouteParameters(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['route_parameters'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "route_parameters" with value "bad" is expected to be of type "array"');
+        $this->createCrud($crudConfig);
+    }
+
     public function testCreateAndGetSearchForm(): void
     {
-        $crud = $this->createValidCrud();
+        $crudConfig = $this->createValidCrudConfig()
+            ->createSearchForm(new UserSearcher());
+        $crud = $this->createCrud($crudConfig);
 
-        $this->assertNull($crud->getSearchForm());
-
-        $crud->createSearchForm(new UserSearcher());
         $this->assertInstanceOf(SearchFormBuilder::class, $crud->getSearchForm());
 
-        $crud->init()
-            ->createView();
+        $crud->createView();
         $this->assertInstanceOf(FormView::class, $crud->getSearchForm());
     }
 
-    public function testSetPersistentSettings(): void
+    public function testCreateAndGetNullSearchForm(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['search_form_data'] = null;
+        $crud = $this->createCrud($crudConfig);
 
-        $this->assertInstanceOf(Crud::class, $crud->setPersistentSettings(true));
+        $this->assertNull($crud->getSearchForm());
+
+        $crud->createView();
+        $this->assertNull($crud->getSearchForm());
+    }
+
+    public function testAddBadSearchFormData(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['search_form_data'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "search_form_data" with value "bad" is expected to be of type "null" or "Ecommit\CrudBundle\Form\Searcher\SearcherInterface"');
+        $this->createCrud($crudConfig);
+    }
+
+    public function testCreateSearchFormWithType(): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->createSearchForm(new UserSearcher(), FormType::class, [
+                'form_options' => [
+                    'data_class' => UserSearcher::class,
+                ],
+            ]);
+        $crud = $this->createCrud($crudConfig);
+
+        $this->assertInstanceOf(FormType::class, $crud->getSearchForm()->getForm()->getConfig()->getType()->getInnerType());
+    }
+
+    public function testCreateSearchFormWithBadType(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['search_form_type'] = 1;
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "search_form_type" with value 1 is expected to be of type "null" or "string"');
+        $this->createCrud($crudConfig);
+    }
+
+    public function testCreateSearchFormWithOptions(): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->createSearchForm(new UserSearcher(), null, [
+                'validation_groups' => ['MyGroup'],
+            ]);
+        $crud = $this->createCrud($crudConfig);
+
+        $this->assertSame(['MyGroup'], $crud->getSearchForm()->getForm()->getConfig()->getOption('validation_groups'));
+    }
+
+    public function testCreateSearchFormWithBadOptions(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['search_form_options'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "search_form_options" with value "bad" is expected to be of type "array"');
+        $this->createCrud($crudConfig);
+    }
+
+    /**
+     * @dataProvider getBoolProvider
+     */
+    public function testSetPersistentSettings(bool $value): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->setPersistentSettings($value);
+        $this->createCrud($crudConfig);
+    }
+
+    public function testSetPersistentSettingsAutoFalse(): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->setPersistentSettings(true);
+        $crud = $this->createCrud($crudConfig);
+
+        $this->assertFalse($crud->getOptions()['persistent_settings']);
+    }
+
+    public function testBadSetPersistentSettings(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['persistent_settings'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "persistent_settings" with value "bad" is expected to be of type "bool"');
+        $this->createCrud($crudConfig);
     }
 
     public function testSetBuildPaginatorTrue(): void
     {
-        $crud = $this->createValidCrud();
-
-        $this->assertInstanceOf(Crud::class, $crud->setBuildPaginator(true));
-        $crud->init()
+        $crudConfig = $this->createValidCrudConfig()
+            ->setBuildPaginator(true);
+        $crud = $this->createCrud($crudConfig)
             ->build();
 
         $this->assertInstanceOf(DoctrineORMPaginator::class, $crud->getPaginator());
@@ -356,10 +520,9 @@ class CrudTest extends KernelTestCase
 
     public function testSetBuildPaginatorFalse(): void
     {
-        $crud = $this->createValidCrud();
-
-        $this->assertInstanceOf(Crud::class, $crud->setBuildPaginator(false));
-        $crud->init()
+        $crudConfig = $this->createValidCrudConfig()
+            ->setBuildPaginator(false);
+        $crud = $this->createCrud($crudConfig)
             ->build();
 
         $this->assertNull($crud->getPaginator());
@@ -367,142 +530,182 @@ class CrudTest extends KernelTestCase
 
     public function testSetBuildPaginatorClosure(): void
     {
-        $crud = $this->createValidCrud();
+        $paginator = $this->createMock(PaginatorInterface::class);
+        $crudConfig = $this->createValidCrudConfig()
+            ->setBuildPaginator(function (QueryBuilder $queryBuilder, int $page, int $resultsPerPage) use ($paginator) {
+                $this->assertInstanceOf(QueryBuilder::class, $queryBuilder);
+                $this->assertSame(1, $page);
+                $this->assertSame(50, $resultsPerPage);
 
-        $this->assertInstanceOf(Crud::class, $crud->setBuildPaginator(function (QueryBuilder $queryBuilder, int $page, int $resultsPerPage) {
-            $this->assertInstanceOf(QueryBuilder::class, $queryBuilder);
-            $this->assertSame(1, $page);
-            $this->assertSame(50, $resultsPerPage);
-
-            return $this->createMock(PaginatorInterface::class);
-        }));
-        $crud->init()
+                return $paginator;
+            });
+        $crud = $this->createCrud($crudConfig)
             ->build();
 
-        $this->assertInstanceOf(PaginatorInterface::class, $crud->getPaginator());
+        $this->assertSame($paginator, $crud->getPaginator());
+    }
+
+    public function testSetBadBuildPaginator(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['build_paginator'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "build_paginator" with value "bad" is expected to be of type "bool" or "Closure" or "array"');
+        $this->createCrud($crudConfig);
     }
 
     public function testBuild(): void
     {
-        $crud = $this->createValidCrud()
-            ->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertInstanceOf(Crud::class, $crud->build());
     }
 
     public function testDivIdList(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig()
+            ->setDivIdList('val');
+        $crud = $this->createCrud($crudConfig);
 
-        $this->assertSame('crud_list', $crud->getDivIdList());
-        $this->assertInstanceOf(Crud::class, $crud->setDivIdList('val'));
         $this->assertSame('val', $crud->getDivIdList());
+    }
+
+    public function testSetBadDivIdList(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['div_id_list'] = 1;
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "div_id_list" with value 1 is expected to be of type "string"');
+        $this->createCrud($crudConfig);
     }
 
     public function testDivIdSearch(): void
     {
-        $crud = $this->createCrud();
+        $crudConfig = $this->createValidCrudConfig()
+            ->setDivIdSearch('val');
+        $crud = $this->createCrud($crudConfig);
 
-        $this->assertSame('crud_search', $crud->getDivIdSearch());
-        $this->assertInstanceOf(Crud::class, $crud->setDivIdSearch('val'));
         $this->assertSame('val', $crud->getDivIdSearch());
+    }
+
+    public function testSetBadDivIdSearch(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['div_id_search'] = 1;
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "div_id_search" with value 1 is expected to be of type "string"');
+        $this->createCrud($crudConfig);
     }
 
     public function testDisplayResultsOnlyIfSearch(): void
     {
-        $crud = $this->createValidCrud(withSearcher: true);
-
-        $this->assertTrue($crud->getDisplayResults());
-        $this->assertFalse($crud->getDisplayResultsOnlyIfSearch());
-        $this->assertInstanceOf(Crud::class, $crud->setDisplayResultsOnlyIfSearch(true));
+        $crudConfig = $this->createValidCrudConfig(withSearcher: true)
+            ->setDisplayResultsOnlyIfSearch(true);
+        $crud = $this->createCrud($crudConfig);
         $this->assertTrue($crud->getDisplayResultsOnlyIfSearch());
 
-        $crud->init()
-            ->build();
+        $crud->build();
+
         $this->assertFalse($crud->getDisplayResults());
         $this->assertNull($crud->getPaginator());
     }
 
     public function testDisplayResultsOnlyIfSearchWithoutSearcher(): void
     {
-        $crud = $this->createValidCrud();
-
-        $this->assertTrue($crud->getDisplayResults());
-        $this->assertFalse($crud->getDisplayResultsOnlyIfSearch());
-        $this->assertInstanceOf(Crud::class, $crud->setDisplayResultsOnlyIfSearch(true));
+        $crudConfig = $this->createValidCrudConfig(withSearcher: false)
+            ->setDisplayResultsOnlyIfSearch(true);
+        $crud = $this->createCrud($crudConfig);
         $this->assertTrue($crud->getDisplayResultsOnlyIfSearch());
 
-        $crud->init()
-            ->build();
+        $crud->build();
+
         $this->assertTrue($crud->getDisplayResults());
         $this->assertNotNull($crud->getPaginator());
     }
 
+    public function testSetBadDisplayResultsOnlyIfSearch(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['display_results_only_if_search'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "display_results_only_if_search" with value "bad" is expected to be of type "bool"');
+        $this->createCrud($crudConfig);
+    }
+
     public function testDisplayResultsTrue(): void
     {
-        $crud = $this->createValidCrud();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertTrue($crud->getDisplayResults());
         $this->assertInstanceOf(Crud::class, $crud->setDisplayResults(true));
 
-        $crud->init()
-            ->build();
+        $crud->build();
+
         $this->assertTrue($crud->getDisplayResults());
         $this->assertNotNull($crud->getPaginator());
     }
 
     public function testDisplayResultsFalse(): void
     {
-        $crud = $this->createValidCrud();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertTrue($crud->getDisplayResults());
         $this->assertInstanceOf(Crud::class, $crud->setDisplayResults(false));
 
-        $crud->init()
-            ->build();
-        $this->assertFalse($crud->getDisplayResults());
-        $this->assertNull($crud->getPaginator());
-    }
+        $crud->build();
 
-    public function testDisplayResultsFalseAfterInit(): void
-    {
-        $crud = $this->createValidCrud()
-            ->init()
-            ->build();
-
-        $this->assertInstanceOf(Crud::class, $crud->setDisplayResults(false));
         $this->assertFalse($crud->getDisplayResults());
         $this->assertNull($crud->getPaginator());
     }
 
     public function testTwigFunctionsConfiguration(): void
     {
-        $crud = $this->createCrud();
-
-        $this->assertSame([], $crud->getTwigFunctionsConfiguration());
         $config = [
             'function1' => ['val'],
         ];
-        $this->assertInstanceOf(Crud::class, $crud->setTwigFunctionsConfiguration($config));
+
+        $crudConfig = $this->createValidCrudConfig()
+            ->setTwigFunctionsConfiguration($config);
+        $crud = $this->createCrud($crudConfig);
+
         $this->assertSame($config, $crud->getTwigFunctionsConfiguration());
         $this->assertSame(['val'], $crud->getTwigFunctionConfiguration('function1'));
     }
 
     public function testGetTwigFunctionConfigurationNotExists(): void
     {
-        $crud = $this->createCrud();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertSame([], $crud->getTwigFunctionConfiguration('function1'));
     }
 
+    public function testSetBadDTwigFunctionsConfiguration(): void
+    {
+        $crudConfig = $this->createValidCrudConfig();
+        $crudConfig['twig_functions_configuration'] = 'bad';
+
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "twig_functions_configuration" with value "bad" is expected to be of type "array"');
+        $this->createCrud($crudConfig);
+    }
+
+    public function testGetOptions(): void
+    {
+        $crud = $this->createCrud($this->createValidCrudConfig());
+
+        $this->assertIsArray($crud->getOptions());
+    }
+
     public function testPaginator(): void
     {
-        $crud = $this->createValidCrud();
-
+        $crud = $this->createCrud($this->createValidCrudConfig());
         $this->assertNull($crud->getPaginator());
 
-        $crud->init()
-            ->build();
+        $crud->build();
         $this->assertInstanceOf(PaginatorInterface::class, $crud->getPaginator());
 
         $this->assertInstanceOf(Crud::class, $crud->setPaginator(null));
@@ -514,10 +717,7 @@ class CrudTest extends KernelTestCase
 
     public function testGetDisplaySettingsForm(): void
     {
-        $crud = $this->createValidCrud();
-        $this->assertNull($crud->getDisplaySettingsForm());
-
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
         $this->assertInstanceOf(Form::class, $crud->getDisplaySettingsForm());
 
         $crud->createView();
@@ -525,207 +725,56 @@ class CrudTest extends KernelTestCase
     }
 
     /**
-     * @dataProvider getTestIncompleteInitProvider
+     * @dataProvider getTestRequiredOptionsProvider
      */
-    public function testIncompleteInit(string $property, string $method, mixed $value): void
+    public function testRequiredOptions(string $option): void
     {
-        $crud = $this->createValidCrud();
-        $reflectionClass = new \ReflectionClass($crud);
-        $reflectionProperty = $reflectionClass->getProperty($property);
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue($crud, $value);
+        $crudConfig = $this->createValidCrudConfig();
+        unset($crudConfig[$option]);
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage($method);
-
-        $crud->init();
+        $this->expectException(MissingOptionsException::class);
+        $this->expectExceptionMessage($option);
+        $this->createCrud($crudConfig);
     }
 
-    public function getTestIncompleteInitProvider(): array
+    public function getTestRequiredOptionsProvider(): array
     {
         return [
-            ['availableColumns', 'addColumn', []],
-            ['availableResultsPerPage', 'setAvailableResultsPerPage', []],
-            ['defaultResultsPerPage', 'setAvailableResultsPerPage', null],
-            ['defaultSort', 'setDefaultSort', null],
-            ['defaultSortDirection', 'setDefaultSort', null],
-            ['queryBuilder', 'setQueryBuilder', null],
-            ['routeName', 'setRoute', null],
+            ['session_name'],
+            ['columns'],
+            ['max_per_page_choices'],
+            ['default_max_per_page'],
+            ['default_sort'],
+            ['query_builder'],
+            ['route_name'],
         ];
-    }
-
-    public function testInitIfNecessary(): void
-    {
-        $crud = $this->createValidCrud();
-        $this->assertFalse($crud->isInitialized());
-
-        $this->assertInstanceOf(Crud::class, $crud->initIfNecessary());
-        $this->assertTrue($crud->isInitialized());
-    }
-
-    public function testInitIfNecessaryAfterInit(): void
-    {
-        $crud = $this->createValidCrud()
-            ->init()
-            ->initIfNecessary();
-
-        $this->assertTrue($crud->isInitialized());
-    }
-
-    public function testInit(): void
-    {
-        $crud = $this->createValidCrud();
-        $this->assertFalse($crud->isInitialized());
-
-        $this->assertInstanceOf(Crud::class, $crud->init());
-        $this->assertTrue($crud->isInitialized());
-    }
-
-    public function testInitAfterInit(): void
-    {
-        $crud = $this->createValidCrud()
-            ->init();
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('CRUD already initialized');
-
-        $crud->init();
     }
 
     public function testReset(): void
     {
-        $crud = $this->createValidCrud()
-            ->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertInstanceOf(Crud::class, $crud->reset());
     }
 
     public function testResetSort(): void
     {
-        $crud = $this->createValidCrud()
-            ->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertInstanceOf(Crud::class, $crud->resetSort());
     }
 
     public function testCreateView(): void
     {
-        $crud = $this->createValidCrud()
-            ->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertInstanceOf(Crud::class, $crud->createView());
-    }
-
-    public function testCallCreateSearchFormBeforeRequiredOptions(): void
-    {
-        $filter = $this->createMock(FilterInterface::class);
-        $filter->expects($this->exactly(4))->method('buildForm')->willReturnCallback(function (SearchFormBuilder $builder, string $property, array $options): void {
-            if (\in_array($property, ['userId', 'lastName'])) { // Virtual columns
-                $this->assertNull($options['label']);
-            } else {
-                $expectedLabel = 'label_'.$property;
-                $this->assertSame($expectedLabel, $options['label']);
-            }
-        });
-        $filter->expects($this->exactly(4))->method('supportsQueryBuilder')->willReturn(true);
-        $filter->expects($this->exactly(4))->method('updateQueryBuilder')->willReturnCallback(function ($queryBuilder, string $property, $value, array $options): void {
-            $this->assertSame('u.'.$property, $options['alias_search']);
-        });
-
-        $searcherData = $this->getMockBuilder(SearcherInterface::class)
-            ->addMethods(['getUsername', 'getFirstName', 'getLastName', 'getUserId'])
-            ->onlyMethods(['buildForm', 'updateQueryBuilder', 'configureOptions'])
-            ->getMock();
-        $searcherData->expects($this->once())->method('buildForm')->willReturnCallback(function (SearchFormBuilder $builder, array $options): void {
-            $builder->addFilter('username', 'my_filter');
-            $builder->addFilter('userId', 'my_filter');
-        });
-        $searcherData->method('getUsername')->willReturn('val');
-        $searcherData->method('getFirstName')->willReturn('val');
-        $searcherData->method('getLastName')->willReturn('val');
-        $searcherData->method('getUserId')->willReturn('val');
-
-        $queryBuilder = self::getContainer()->get(ManagerRegistry::class)->getRepository(TestUser::class)
-            ->createQueryBuilder('u')
-            ->select('u');
-
-        $crud = $this->createCrud(filters: ['my_filter' => $filter])
-            ->createSearchForm($searcherData); // Call createSearchForm before setting options : alias_search and label are not known yet
-        $crud->getSearchForm()->addFilter('firstName', 'my_filter'); // Call addFilter before setting options : alias_search and label are not known yet
-        $crud->getSearchForm()->addFilter('lastName', 'my_filter'); // Call addFilter before setting options : alias_search and label are not known yet
-        $crud->addColumn('username', 'u.username', 'label_username')
-            ->addColumn('firstName', 'u.firstName', 'label_firstName')
-            ->addVirtualColumn('lastName', 'u.lastName')
-            ->addVirtualColumn('userId', 'u.userId')
-            ->setQueryBuilder($queryBuilder)
-            ->setAvailableResultsPerPage([10, 50, 100], 50)
-            ->setDefaultSort('username', Crud::ASC)
-            ->setRoute('user_ajax_crud')
-            ->init()
-            ->build();
-    }
-
-    /**
-     * @dataProvider getTestCallMethodNotAllowedBeforeInitializationProvider
-     */
-    public function testCallMethodNotAllowedBeforeInitialization(string $method, array $arguments = []): void
-    {
-        $crud = $this->createValidCrud(withSearcher: true);
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage(sprintf('The method "%s" cannot be called before CRUD initialization', $method));
-
-        $crud->$method(...$arguments);
-    }
-
-    public function getTestCallMethodNotAllowedBeforeInitializationProvider(): array
-    {
-        return [
-            ['getSessionValues'],
-            ['processSearchForm'],
-            ['build'],
-            ['createView'],
-        ];
-    }
-
-    /**
-     * @dataProvider getTestCallMethodNotAllowedAfterInitializationProvider
-     */
-    public function testCallMethodNotAllowedAfterInitialization(string $method, array $arguments = []): void
-    {
-        $crud = $this->createValidCrud(withSearcher: true)
-            ->init();
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage(sprintf('The method "%s" cannot be called after CRUD initialization', $method));
-
-        $crud->$method(...$arguments);
-    }
-
-    public function getTestCallMethodNotAllowedAfterInitializationProvider(): array
-    {
-        return [
-            ['addColumn', ['column', 'alias', 'label']],
-            ['addVirtualColumn', ['column', 'alias']],
-            ['setQueryBuilder', [$this->createMock(QueryBuilder::class)]],
-            ['setAvailableResultsPerPage', [[5, 10], 10]],
-            ['setDefaultSort', ['column', Crud::ASC]],
-            ['setDefaultPersonalizedSort', [[]]],
-            ['setRoute', ['route']],
-            ['setDisplayResultsOnlyIfSearch', [true]],
-            ['setBuildPaginator', [true]],
-            ['setPersistentSettings', [true]],
-            ['createSearchForm', [$this->createMock(SearcherInterface::class)]],
-            ['setDivIdSearch', ['div']],
-            ['setDivIdList', ['div']],
-        ];
     }
 
     public function testLoadSessionWithSearchForm(): void
     {
         $sessionValue = new CrudSession(10, ['username'], 'firstName', Crud::ASC, new UserSearcher());
-        $crud = $this->createValidCrud(crud: $this->createCrud(sessionValue: clone $sessionValue), withSearcher: true);
-        $crud->init();
+        $crud = $this->createCrud(crudConfig: $this->createValidCrudConfig(withSearcher: true), sessionValue: clone $sessionValue);
 
         $this->assertEquals($sessionValue, $crud->getSessionValues());
     }
@@ -733,16 +782,14 @@ class CrudTest extends KernelTestCase
     public function testLoadSessionWithoutSearchForm(): void
     {
         $sessionValue = new CrudSession(10, ['username'], 'firstName', Crud::ASC);
-        $crud = $this->createValidCrud(crud: $this->createCrud(sessionValue: clone $sessionValue));
-        $crud->init();
+        $crud = $this->createCrud(crudConfig: $this->createValidCrudConfig(), sessionValue: clone $sessionValue);
 
         $this->assertEquals($sessionValue, $crud->getSessionValues());
     }
 
     public function testChangeNumberResultsDisplayed(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeNumberResultsDisplayed');
         $reflectionMethod->setAccessible(true);
@@ -752,8 +799,7 @@ class CrudTest extends KernelTestCase
 
     public function testChangeNumberResultsDisplayedWithBadValue(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeNumberResultsDisplayed');
         $reflectionMethod->setAccessible(true);
@@ -763,8 +809,7 @@ class CrudTest extends KernelTestCase
 
     public function testChangeColumnsDisplayed(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeColumnsDisplayed');
         $reflectionMethod->setAccessible(true);
@@ -777,8 +822,7 @@ class CrudTest extends KernelTestCase
      */
     public function testChangeColumnsDisplayedWithBadValue(array $value): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeColumnsDisplayed');
         $reflectionMethod->setAccessible(true);
@@ -796,8 +840,7 @@ class CrudTest extends KernelTestCase
 
     public function testChangeSort(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
         $reflectionMethod->setAccessible(true);
@@ -810,9 +853,9 @@ class CrudTest extends KernelTestCase
      */
     public function testChangeSortWithBadValue(mixed $value): void
     {
-        $crud = $this->createValidCrud()
-            ->addColumn('column_not_sortable', 'alias', 'label', ['sortable' => false])
-            ->init();
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn('column_not_sortable', 'alias', 'label', ['sortable' => false]);
+        $crud = $this->createCrud($crudConfig);
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
         $reflectionMethod->setAccessible(true);
@@ -833,9 +876,9 @@ class CrudTest extends KernelTestCase
 
     public function testChangeSortPersonalizedSort(): void
     {
-        $crud = $this->createValidCrud()
-            ->setDefaultPersonalizedSort(['criteria'])
-            ->init();
+        $crudConfig = $this->createValidCrudConfig()
+            ->setDefaultPersonalizedSort(['criteria']);
+        $crud = $this->createCrud($crudConfig);
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
         $reflectionMethod->setAccessible(true);
@@ -848,9 +891,9 @@ class CrudTest extends KernelTestCase
      */
     public function testChangeSortPersonalizedSortWithBadValue(mixed $value): void
     {
-        $crud = $this->createValidCrud()
-            ->setDefaultPersonalizedSort(['criteria'])
-            ->init();
+        $crudConfig = $this->createValidCrudConfig()
+            ->setDefaultPersonalizedSort(['criteria']);
+        $crud = $this->createCrud($crudConfig);
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
         $reflectionMethod->setAccessible(true);
@@ -870,8 +913,7 @@ class CrudTest extends KernelTestCase
 
     public function testChangeSortDirection(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSortDirection');
         $reflectionMethod->setAccessible(true);
@@ -884,8 +926,7 @@ class CrudTest extends KernelTestCase
      */
     public function testChangeSortDirectionWithBadValue(mixed $value): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSortDirection');
         $reflectionMethod->setAccessible(true);
@@ -904,8 +945,7 @@ class CrudTest extends KernelTestCase
 
     public function testChangeFilterValues(): void
     {
-        $crud = $this->createValidCrud(withSearcher: true);
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig(withSearcher: true));
 
         $value = new UserSearcher();
         $value->username = 'val';
@@ -921,8 +961,7 @@ class CrudTest extends KernelTestCase
      */
     public function testChangeFilterValuesWithBadValue(?SearcherInterface $value): void
     {
-        $crud = $this->createValidCrud(withSearcher: true);
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig(withSearcher: true));
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
         $reflectionMethod->setAccessible(true);
@@ -941,8 +980,7 @@ class CrudTest extends KernelTestCase
 
     public function testChangeFilterValuesWithoutSearchForm(): void
     {
-        $crud = $this->createValidCrud();
-        $crud->init();
+        $crud = $this->createCrud($this->createValidCrudConfig());
 
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
         $reflectionMethod->setAccessible(true);
@@ -950,69 +988,11 @@ class CrudTest extends KernelTestCase
         $this->assertNull($crud->getSessionValues()->searchFormData);
     }
 
-    protected function createCrud(string $sessionName = 'session_name', array $filters = [], mixed $sessionValue = null): Crud
+    public function getBoolProvider(): array
     {
-        $session = $this->createMock(SessionInterface::class);
-        $session->expects($this->any())
-            ->method('get')
-            ->willReturn($sessionValue);
-        $session->expects($this->any())
-            ->method('set');
-
-        $request = new Request();
-        $request->setSession($session);
-        $requestStack = $this->createMock(RequestStack::class);
-        $requestStack->method('getCurrentRequest')
-            ->willReturn($request);
-
-        $crudFilters = $this->createMock(CrudFilters::class);
-        $crudFilters->method('has')->willReturnCallback(fn (string $name) => \array_key_exists($name, $filters) || static::getContainer()->get('ecommit_crud.filters')->has($name));
-        $crudFilters->method('get')->willReturnCallback(function (string $name) use ($filters): FilterInterface {
-            if (\array_key_exists($name, $filters)) {
-                return $filters[$name];
-            }
-
-            return static::getContainer()->get('ecommit_crud.filters')->get($name);
-        });
-
-        $container = $this->createMock(ContainerInterface::class);
-        $container->method('get')
-            ->willReturnCallback(function ($name) use ($requestStack, $crudFilters) {
-                if ('request_stack' === $name) {
-                    return $requestStack;
-                } elseif ('ecommit_crud.filters' === $name) {
-                    return $crudFilters;
-                }
-
-                return static::getContainer()->get('ecommit_crud.locator')->get($name);
-            });
-
-        $crud = $this->getMockBuilder(Crud::class)
-            ->setConstructorArgs([$sessionName, $container])
-            ->onlyMethods(['save'])
-            ->getMock();
-
-        return $crud;
-    }
-
-    protected function createValidCrud(?Crud $crud = null, bool $withSearcher = false): Crud
-    {
-        $queryBuilder = self::getContainer()->get(ManagerRegistry::class)->getRepository(TestUser::class)
-            ->createQueryBuilder('u')
-            ->select('u');
-
-        $crud = ($crud) ?: $this->createCrud('session_name');
-        $crud->addColumn('username', 'u.username', 'username', ['default_displayed' => false])
-            ->addColumn('firstName', 'u.firstName', 'first_name')
-            ->setQueryBuilder($queryBuilder)
-            ->setAvailableResultsPerPage([10, 50, 100], 50)
-            ->setDefaultSort('username', Crud::DESC)
-            ->setRoute('user_ajax_crud', ['param1' => 'val1'])
-            ;
-        if ($withSearcher) {
-            $crud->createSearchForm(new UserSearcher());
-        }
-
-        return $crud;
+        return [
+            [true],
+            [false],
+        ];
     }
 }

@@ -262,7 +262,7 @@ final class CrudExtension extends AbstractExtension
         $options = $this->buildOptions('crud_paginator_links', $options, $crud);
 
         /** @psalm-suppress PossiblyNullArgument */
-        return $this->paginatorLinks($environment, $crud->getPaginator(), $crud->getRouteName(), $crud->getRouteParams(), $options);
+        return $this->paginatorLinks($environment, $crud->getPaginator(), $crud->getRouteName(), $crud->getRouteParameters(), $options);
     }
 
     /**

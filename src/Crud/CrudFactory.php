@@ -21,8 +21,8 @@ final class CrudFactory
     {
     }
 
-    public function create(string $sessionName): Crud
+    public function create(array $options): Crud
     {
-        return new Crud($sessionName, $this->container);
+        return new Crud($options, $this->container);
     }
 }

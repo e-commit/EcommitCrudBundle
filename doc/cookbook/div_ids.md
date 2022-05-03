@@ -18,19 +18,19 @@ namespace App\Controller;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         //...
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id')
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crudConfig->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id'])
             //...
             ->setRoute('my_crud_ajax')
 +           ->setDivIdList('my_div1')
 +           ->setDivIdSearch('my_div2')
             //...
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 
     //...

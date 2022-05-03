@@ -24,7 +24,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
     {
         $this->expectException(MissingOptionsException::class);
 
-        $crud = $this->createCrud('e.tag');
+        $crud = $this->createCrud($this->createCrudConfig('e.tag'));
         $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class);
     }
 
@@ -33,13 +33,13 @@ class EntityAjaxFilterTest extends AbstractFilterTest
      */
     public function testViewAndQueryBuilder(bool $multiple, $modelData, $expectedViewData, array $expectedIdsFound): void
     {
-        $crud = $this->createCrud('e.tag', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
             'multiple' => $multiple,
         ]);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
@@ -74,14 +74,14 @@ class EntityAjaxFilterTest extends AbstractFilterTest
      */
     public function testSubmit(bool $multiple, $submittedData, $expectedModelData, $expectedViewData): void
     {
-        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
         $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
             'multiple' => $multiple,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -114,7 +114,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
      */
     public function testSubmitInvalid(bool $multiple, $submittedData): void
     {
-        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
         $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
@@ -122,7 +122,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
             'max' => 2,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -165,7 +165,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
                 ->andWhere('t.id > 2');
         }
 
-        $crud = $this->createCrud('e.tag', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
@@ -174,7 +174,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
                 'query_builder' => $queryBuilder,
             ],
         ]);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']); // Twig doesn't display invalid list
 
@@ -224,7 +224,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
                 ->andWhere('t.id > 2');
         }
 
-        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
         $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
@@ -234,7 +234,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
             ],
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);

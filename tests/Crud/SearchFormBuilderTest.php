@@ -16,26 +16,19 @@ namespace Ecommit\CrudBundle\Tests\Crud;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Ecommit\CrudBundle\Crud\Crud;
-use Ecommit\CrudBundle\Crud\CrudColumnReference;
 use Ecommit\CrudBundle\Crud\SearchFormBuilder;
 use Ecommit\CrudBundle\Form\Filter\FilterInterface;
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 use Ecommit\CrudBundle\Form\Type\FormSearchType;
 use Psr\Container\ContainerInterface;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-class SearchFormBuilderTest extends KernelTestCase
+class SearchFormBuilderTest extends AbstractCrudTest
 {
-    protected function setUp(): void
-    {
-        self::bootKernel();
-    }
-
     /**
      * @dataProvider getTestCreateFormBuilderProvider
      */
@@ -142,24 +135,15 @@ class SearchFormBuilderTest extends KernelTestCase
 
     public function testAddFilterAliasSearch(): void
     {
-        $crud = $this->createCrud()
-            ->addColumn('column1', 'alias1', 'label1')
-            ->addColumn('column2', 'alias2', 'label1', [
-                'alias_search' => 'custom_alias2',
-            ])
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn(['id' => 'column1', 'alias' => 'alias1'])
+            ->addColumn(['id' => 'column2', 'alias' => 'alias2', 'alias_search' => 'custom_alias2'])
             ->addVirtualColumn('virtual1', 'virtualalias1');
+        $crud = $this->createCrud($crudConfig);
         $searchFormBuilder = $this->createSearchFormBuilder(crud: $crud)
             ->addFilter('column1', 'my_filter')
             ->addFilter('column2', 'my_filter')
             ->addFilter('virtual1', 'my_filter');
-        $filters = $this->getPrivateValue($searchFormBuilder, 'filters');
-        $this->assertEquals(new CrudColumnReference('column1'), $filters['column1']['options']['alias_search']);
-        $this->assertEquals(new CrudColumnReference('column2'), $filters['column2']['options']['alias_search']);
-        $this->assertEquals(new CrudColumnReference('virtual1'), $filters['virtual1']['options']['alias_search']);
-
-        // Resolve filters
-        $searchFormBuilder->createForm();
-
         $filters = $this->getPrivateValue($searchFormBuilder, 'filters');
         $this->assertSame('alias1', $filters['column1']['options']['alias_search']);
         $this->assertSame('custom_alias2', $filters['column2']['options']['alias_search']);
@@ -168,19 +152,13 @@ class SearchFormBuilderTest extends KernelTestCase
 
     public function testAddFilterLabel(): void
     {
-        $crud = $this->createCrud()
-            ->addColumn('column1', 'alias1', 'label1')
-            ->addVirtualColumn('virtual1', 'virtualalias1');
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn(['id' => 'column1', 'alias' => 'alias1', 'label' => 'label1'])
+            ->addVirtualColumn(['id' => 'virtual1', 'alias' => 'virtualalias1']);
+        $crud = $this->createCrud($crudConfig);
         $searchFormBuilder = $this->createSearchFormBuilder(crud: $crud)
             ->addFilter('column1', 'my_filter')
             ->addFilter('virtual1', 'my_filter');
-        $filters = $this->getPrivateValue($searchFormBuilder, 'filters');
-        $this->assertEquals(new CrudColumnReference('column1'), $filters['column1']['options']['label']);
-        $this->assertEquals(new CrudColumnReference('virtual1'), $filters['virtual1']['options']['label']);
-
-        // Resolve filters
-        $searchFormBuilder->createForm();
-
         $filters = $this->getPrivateValue($searchFormBuilder, 'filters');
         $this->assertSame('label1', $filters['column1']['options']['label']);
         $this->assertNull($filters['virtual1']['options']['label']);
@@ -240,9 +218,10 @@ class SearchFormBuilderTest extends KernelTestCase
             [self::callback(fn ($value): bool => $value instanceof SearchFormBuilder), 'column1', self::callback(fn ($value): bool => \is_array($value))],
             [self::callback(fn ($value): bool => $value instanceof SearchFormBuilder), 'virtual1', self::callback(fn ($value): bool => \is_array($value))],
         );
-        $crud = $this->createCrud()
-            ->addColumn('column1', 'alias1', 'label1')
-            ->addVirtualColumn('virtual1', 'alias2');
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn(['id' => 'column1', 'alias' => 'alias1'])
+            ->addVirtualColumn(['id' => 'virtual1', 'alias' => 'alias1']);
+        $crud = $this->createCrud($crudConfig);
         $this->createSearchFormBuilder(filters: ['my_filter' => $filter], crud: $crud)
             ->addFilter('column1', 'my_filter')
             ->addFilter('virtual1', 'my_filter')
@@ -256,9 +235,10 @@ class SearchFormBuilderTest extends KernelTestCase
             [self::callback(fn ($value): bool => $value instanceof SearchFormBuilder), 'property1', self::callback(fn ($value): bool => \is_array($value))],
             [self::callback(fn ($value): bool => $value instanceof SearchFormBuilder), 'property2', self::callback(fn ($value): bool => \is_array($value))],
         );
-        $crud = $this->createCrud()
-            ->addColumn('column1', 'alias1', 'label1')
-            ->addVirtualColumn('virtual1', 'alias1');
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn(['id' => 'column1', 'alias' => 'alias1'])
+            ->addVirtualColumn(['id' => 'virtual1', 'alias' => 'alias1']);
+        $crud = $this->createCrud($crudConfig);
         $this->createSearchFormBuilder(filters: ['my_filter' => $filter], crud: $crud)
             ->addFilter('property1', 'my_filter', [
                 'column_id' => 'column1',
@@ -273,7 +253,7 @@ class SearchFormBuilderTest extends KernelTestCase
     {
         $searchFormBuilder = $this->createSearchFormBuilder();
         $searchFormBuilder->createForm();
-        $this->assertSame('/user/ajax-crud?search=1', $searchFormBuilder->getForm()->getConfig()->getAction());
+        $this->assertSame('/user/ajax-crud?param1=val1&search=1', $searchFormBuilder->getForm()->getConfig()->getAction());
     }
 
     public function testCreateFormView(): void
@@ -314,8 +294,9 @@ class SearchFormBuilderTest extends KernelTestCase
         );
         $filter->expects($this->once())->method('supportsQueryBuilder')->with($queryBuilder)->willReturn(true);
 
-        $crud = $this->createCrud()
-            ->addColumn('column1', 'alias1', 'label1');
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn(['id' => 'column1', 'alias' => 'alias1']);
+        $crud = $this->createCrud($crudConfig);
         $searchFormBuilder = $this->createSearchFormBuilder(filters: ['my_filter' => $filter], crud: $crud)
             ->addFilter('property', 'my_filter', [
                 'column_id' => 'column1',
@@ -345,8 +326,9 @@ class SearchFormBuilderTest extends KernelTestCase
             self::callback(fn ($value): bool => \is_array($value))
         );
 
-        $crud = $this->createCrud()
-            ->addColumn('column1', 'alias1', 'label1');
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn(['id' => 'column1', 'alias' => 'alias1']);
+        $crud = $this->createCrud($crudConfig);
         $searchFormBuilder = $this->createSearchFormBuilder(filters: ['my_filter' => $filter], crud: $crud)
             ->addFilter('property', 'my_filter', [
                 'column_id' => 'column1',
@@ -371,8 +353,9 @@ class SearchFormBuilderTest extends KernelTestCase
         $filter->expects($this->never())->method('updateQueryBuilder');
         $filter->expects($this->once())->method('supportsQueryBuilder')->with($queryBuilder)->willReturn(false);
 
-        $crud = $this->createCrud()
-            ->addColumn('column1', 'alias1', 'label1');
+        $crudConfig = $this->createValidCrudConfig()
+            ->addColumn(['id' => 'column1', 'alias' => 'alias1']);
+        $crud = $this->createCrud($crudConfig);
         $searchFormBuilder = $this->createSearchFormBuilder(filters: ['my_filter' => $filter], crud: $crud)
             ->addFilter('property', 'my_filter', [
                 'column_id' => 'column1',
@@ -407,21 +390,10 @@ class SearchFormBuilderTest extends KernelTestCase
         return $container;
     }
 
-    protected function createCrud(): Crud
-    {
-        $crud = $this->getMockBuilder(Crud::class)
-            ->setConstructorArgs(['session_name', static::getContainer()->get('ecommit_crud.locator')])
-            ->onlyMethods(['load', 'save'])
-            ->getMock();
-        $crud->setRoute('user_ajax_crud');
-
-        return $crud;
-    }
-
     protected function createSearchFormBuilder(?array $filters = null, ?Crud $crud = null, ?SearcherInterface $defaultData = null, ?string $type = null, array $options = []): SearchFormBuilder
     {
         $filters = (null !== $filters) ? $filters : ['my_filter' => $this->createMock(FilterInterface::class)];
-        $crud = ($crud) ?: $this->createCrud();
+        $crud = ($crud) ?: $this->createCrud($this->createValidCrudConfig());
         $defaultData = ($defaultData) ?: $this->createMock(SearcherInterface::class);
 
         return new SearchFormBuilder($this->createCrudContainer($filters), $crud, $defaultData, $type, $options);

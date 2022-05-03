@@ -23,12 +23,12 @@ class ChoiceFilterTest extends AbstractFilterTest
      */
     public function testViewAndQueryBuilder($modelData, bool $multiple, $expectedViewData, ?string $whereExpected, array $parametersExpected): void
     {
-        $crud = $this->createCrud('e.tag', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'choices' => ['val1' => '1', 'val2' => '2'],
             'multiple' => $multiple,
         ]);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertEquals($expectedViewData, $view->children['propertyName']->vars['value']);
 
@@ -54,26 +54,24 @@ class ChoiceFilterTest extends AbstractFilterTest
 
     public function testInvalidMin(): void
     {
-        $crud = $this->createCrud('e.tag', ['1', '2']);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', ['1', '2']));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'choices' => ['val1' => '1', 'val2' => '2'],
             'multiple' => true,
             'min' => 3,
         ]);
-        $crud->init();
 
         $this->checkQueryBuilder($crud, null, []);
     }
 
     public function testInvalidMax(): void
     {
-        $crud = $this->createCrud('e.tag', ['1', '2']);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', ['1', '2']));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'choices' => ['val1' => '1', 'val2' => '2'],
             'multiple' => true,
             'max' => 1,
         ]);
-        $crud->init();
 
         $this->checkQueryBuilder($crud, null, []);
     }
@@ -83,13 +81,13 @@ class ChoiceFilterTest extends AbstractFilterTest
      */
     public function testSubmit($submittedData, bool $multiple, $expectedModelData, $expectedViewData): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'choices' => ['val1' => '1', 'val2' => '2'],
             'multiple' => $multiple,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -121,13 +119,13 @@ class ChoiceFilterTest extends AbstractFilterTest
      */
     public function testSubmitInvalidFormat($submittedData, bool $multiple): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'choices' => ['val1' => '1', 'val2' => '2'],
             'multiple' => $multiple,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -151,14 +149,14 @@ class ChoiceFilterTest extends AbstractFilterTest
 
     public function testSubmitInvalidMinLength(): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'choices' => ['val1' => '1', 'val2' => '2'],
             'multiple' => true,
             'min' => 3,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => ['1'],
         ]);
@@ -171,14 +169,14 @@ class ChoiceFilterTest extends AbstractFilterTest
 
     public function testSubmitInvalidMaxLength(): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'choices' => ['val1' => '1', 'val2' => '2'],
             'multiple' => true,
             'max' => 1,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => ['1', '2'],
         ]);
@@ -191,7 +189,7 @@ class ChoiceFilterTest extends AbstractFilterTest
 
     public function testSubmitWithoutValidation(): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'choices' => ['val1' => '1', 'val2' => '2'],
             'multiple' => true,
@@ -199,7 +197,7 @@ class ChoiceFilterTest extends AbstractFilterTest
             'autovalidate' => false,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => ['1'],
         ]);
@@ -213,12 +211,12 @@ class ChoiceFilterTest extends AbstractFilterTest
 
     public function testWithType(): void
     {
-        $crud = $this->createCrud('e.name');
+        $crud = $this->createCrud($this->createCrudConfig('e.name'));
         $crud->getSearchForm()->addFilter('propertyName', ChoiceFilter::class, [
             'type' => LanguageType::class,
         ]);
 
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $field = $view['propertyName'];
         $this->assertContains('language', $field->vars['block_prefixes']);

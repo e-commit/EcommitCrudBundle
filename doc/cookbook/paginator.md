@@ -14,12 +14,12 @@ namespace App\Controller;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected getCrudOptions(): array
     {
         //...
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id')
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crudConfig->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id'])
             //...
             ->setRoute('my_crud_ajax')
 +           ->setBuildPaginator([
@@ -32,7 +32,7 @@ class MyCrudController extends AbstractCrudController
 +           ])
             //...
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 
     //...
@@ -52,12 +52,12 @@ namespace App\Controller;
 
 class MyCrudController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected function getCrudOptions(): array
     {
         //...
         
-        $crud = $this->createCrud('my_crud'); //Passé en argument: Nom du CRUD
-        $crud->addColumn('id', 'c1.id', 'Id')
+        $crudConfig = $this->createCrudConfig('my_crud'); //Passé en argument: Nom du CRUD
+        $crudConfig->addColumn(['id' => 'id', 'alias' => 'c1.id', 'label' => 'Id'])
             //...
             ->setRoute('my_crud_ajax')
 +           ->setBuildPaginator(function ($queryBuilder, $page, $resultsPerPage) {
@@ -72,7 +72,7 @@ class MyCrudController extends AbstractCrudController
 +           })
             //...
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 
     //...

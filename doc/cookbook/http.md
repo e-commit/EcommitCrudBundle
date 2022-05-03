@@ -18,7 +18,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MyHttpController extends AbstractCrudController
 {
-    protected function getCrud(): Crud
+    protected getCrudOptions(): array
     {
         /*
          * Demo de l'API : http://public.opendatasoft.com/api/records/1.0/search?dataset=correspondance-code-insee-code-postal&q=annecy
@@ -72,13 +72,13 @@ class MyHttpController extends AbstractCrudController
             }
         });
 
-        $crud = $this->createCrud('my_http_crud');
-        $crud->addColumn('name', 'fields.nom_comm', 'Nom', ['sortable' => false])
-            ->addColumn('postal_code', 'fields.postal_code', 'Postal code', ['sortable' => false])
-            ->addColumn('population', 'fields.population', 'Population', ['alias_sort' => 'population'])
-            ->addColumn('timestamp', 'record_timestamp', 'Timestamp', ['sortable' => false])
+        $crudConfig = $this->createCrudConfig('my_http_crud');
+        $crudConfig->addColumn(['id' => 'name', 'alias' => 'fields.nom_comm', 'label' => 'Nom', 'sortable' => false])
+            ->addColumn(['id' => 'postal_code', 'alias' =>  'fields.postal_code', 'label' =>  'Postal code', 'sortable' => false])
+            ->addColumn(['id' => 'population', 'alias' =>  'fields.population', 'label' =>  'Population', 'alias_sort' => 'population'])
+            ->addColumn(['id' => 'timestamp', 'alias' =>  'record_timestamp', 'label' =>  'Timestamp', 'sortable' => false])
             ->setQueryBuilder($queryBuilder)
-            ->setAvailableResultsPerPage([2, 5, 10], 5)
+            ->setMaxPerPage([2, 5, 10], 5)
             ->setDefaultSort('population', Crud::DESC)
             ->setRoute('my_http_crud_ajax')
             ->setBuildPaginator(function (QueryBuilder $queryBuilder, $page, $resultsPerPage) {
@@ -98,7 +98,7 @@ class MyHttpController extends AbstractCrudController
             ->createSearchForm(new CitySearcher())
             ->setPersistentSettings(true);
 
-        return $crud;
+        return $crudConfig->getOptions();
     }
 
     protected function getTemplateName(string $action): string

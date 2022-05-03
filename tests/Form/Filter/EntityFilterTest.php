@@ -24,7 +24,7 @@ class EntityFilterTest extends AbstractFilterTest
     {
         $this->expectException(MissingOptionsException::class);
 
-        $crud = $this->createCrud('e.tag');
+        $crud = $this->createCrud($this->createCrudConfig('e.tag'));
         $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class);
     }
 
@@ -33,12 +33,12 @@ class EntityFilterTest extends AbstractFilterTest
      */
     public function testViewAndQueryBuilder(bool $multiple, $modelData, $expectedViewData, array $expectedIdsFound): void
     {
-        $crud = $this->createCrud('e.tag', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
         ]);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
@@ -73,13 +73,13 @@ class EntityFilterTest extends AbstractFilterTest
      */
     public function testSubmit(bool $multiple, $submittedData, $expectedModelData, $expectedViewData): void
     {
-        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
         $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -111,13 +111,13 @@ class EntityFilterTest extends AbstractFilterTest
      */
     public function testSubmitInvalid(bool $multiple, $submittedData): void
     {
-        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
         $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);
@@ -142,14 +142,14 @@ class EntityFilterTest extends AbstractFilterTest
 
     public function testSubmitInvalidMaxCount(): void
     {
-        $crud = $this->createCrud('e.tag', []);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', []));
         $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => true,
             'max' => 2,
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => ['1', '2', '3'],
         ]);
@@ -176,7 +176,7 @@ class EntityFilterTest extends AbstractFilterTest
                 ->andWhere('t.id > 2');
         }
 
-        $crud = $this->createCrud('e.tag', $modelData);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
         $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
@@ -184,7 +184,7 @@ class EntityFilterTest extends AbstractFilterTest
                 'query_builder' => $queryBuilder,
             ],
         ]);
-        $view = $this->initCrudAndGetFormView($crud);
+        $view = $this->createFormAndGetFormView($crud);
 
         $this->assertSame($expectedViewData, $view->children['propertyName']->vars['value']);
 
@@ -234,7 +234,7 @@ class EntityFilterTest extends AbstractFilterTest
                 ->andWhere('t.id > 2');
         }
 
-        $crud = $this->createCrud('e.tag', ($multiple) ? [] : null);
+        $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
         $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
@@ -243,7 +243,7 @@ class EntityFilterTest extends AbstractFilterTest
             ],
         ]);
 
-        $form = $this->initCrudAndGetForm($crud);
+        $form = $this->createAndGetForm($crud);
         $form->submit([
             'propertyName' => $submittedData,
         ]);

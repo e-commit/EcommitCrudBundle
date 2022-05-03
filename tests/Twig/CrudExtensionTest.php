@@ -437,12 +437,12 @@ class CrudExtensionTest extends KernelTestCase
 
         $crud = $this->getMockBuilder(Crud::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getDivIdList', 'getPaginator', 'getRouteName', 'getRouteParams'])
+            ->onlyMethods(['getDivIdList', 'getPaginator', 'getRouteName', 'getRouteParameters'])
             ->getMock();
         $crud->expects($this->once())->method('getDivIdList')->willReturn('myId');
         $crud->expects($this->once())->method('getPaginator')->willReturn($paginator);
         $crud->expects($this->once())->method('getRouteName')->willReturn('user_crud');
-        $crud->expects($this->once())->method('getRouteParams')->willReturn([]);
+        $crud->expects($this->once())->method('getRouteParameters')->willReturn([]);
 
         $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">1</a></li><li><a href="/user?page=2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">2</a></li><li class="next"><a href="/user?page=2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">›</a></li><li class="last"><a href="/user?page=20" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">»</a></li></ul></nav>';
         $result = $this->crudExtension->crudPaginatorLinks($this->environment, $crud, [
@@ -752,15 +752,12 @@ class CrudExtensionTest extends KernelTestCase
 
         $crud = $this->getMockBuilder(Crud::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getDivIdList', 'getRouteName', 'getRouteParams', 'getSessionValues', 'getColumn'])
+            ->onlyMethods(['getSessionName', 'getDivIdList', 'getRouteName', 'getRouteParameters', 'getSessionValues', 'getColumn'])
             ->getMock();
-        $reflection = new \ReflectionClass($crud);
-        $reflectionProperty = $reflection->getProperty('sessionName');
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue($crud, 'session_name');
+        $crud->expects($this->any())->method('getSessionName')->willReturn('sessionName');
         $crud->expects($this->any())->method('getDivIdList')->willReturn('myId');
         $crud->expects($this->any())->method('getRouteName')->willReturn('user_crud');
-        $crud->expects($this->any())->method('getRouteParams')->willReturn([]);
+        $crud->expects($this->any())->method('getRouteParameters')->willReturn([]);
         $crud->expects($this->any())->method('getSessionValues')->willReturn($crudSession);
         $crud->expects($this->any())->method('getColumn')->willReturnCallback(fn ($columnId) => $columns[$columnId]);
 
