@@ -819,21 +819,21 @@ class CrudTest extends AbstractCrudTest
         $this->assertEquals($sessionValue, $crud->getSessionValues());
     }
 
-    public function testChangeNumberResultsDisplayed(): void
+    public function testChangeMaxPerPage(): void
     {
         $crud = $this->createCrud($this->createValidCrudConfig());
 
-        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeNumberResultsDisplayed');
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeMaxPerPage');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, 10);
         $this->assertSame(10, $crud->getSessionValues()->getMaxPerPage());
     }
 
-    public function testChangeNumberResultsDisplayedWithBadValue(): void
+    public function testChangeMaxPerPageWithBadValue(): void
     {
         $crud = $this->createCrud($this->createValidCrudConfig());
 
-        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeNumberResultsDisplayed');
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeMaxPerPage');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, 99);
         $this->assertSame(50, $crud->getSessionValues()->getMaxPerPage());
@@ -975,34 +975,34 @@ class CrudTest extends AbstractCrudTest
         ];
     }
 
-    public function testChangeFilterValues(): void
+    public function testChangeSearchFormData(): void
     {
         $crud = $this->createCrud($this->createValidCrudConfig(withSearcher: true));
 
         $value = new UserSearcher();
         $value->username = 'val';
 
-        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSearchFormData');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, $value);
         $this->assertEquals($value, $crud->getSessionValues()->getSearchFormData());
     }
 
     /**
-     * @dataProvider getTestChangeFilterValuesWithBadValueProvider
+     * @dataProvider getTestChangeSearchFormDataWithBadValueProvider
      */
-    public function testChangeFilterValuesWithBadValue(?SearcherInterface $value): void
+    public function testChangeSearchFormDataWithBadValue(?SearcherInterface $value): void
     {
         $crud = $this->createCrud($this->createValidCrudConfig(withSearcher: true));
 
-        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSearchFormData');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, $value);
         $this->assertNotEquals($value, $crud->getSessionValues()->getSearchFormData());
         $this->assertEquals(new UserSearcher(), $crud->getSessionValues()->getSearchFormData());
     }
 
-    public function getTestChangeFilterValuesWithBadValueProvider(): array
+    public function getTestChangeSearchFormDataWithBadValueProvider(): array
     {
         return [
             [null],
@@ -1010,11 +1010,11 @@ class CrudTest extends AbstractCrudTest
         ];
     }
 
-    public function testChangeFilterValuesWithoutSearchForm(): void
+    public function testChangeSearchFormDataWithoutSearchForm(): void
     {
         $crud = $this->createCrud($this->createValidCrudConfig());
 
-        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
+        $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSearchFormData');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, new UserSearcher());
         $this->assertNull($crud->getSessionValues()->getSearchFormData());

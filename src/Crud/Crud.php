@@ -453,7 +453,7 @@ final class Crud
             if ($searchForm->isSubmitted() && $searchForm->isValid() && false !== $this->options['build_paginator']) {
                 $this->displayResults = true;
                 $this->sessionValues = $this->sessionValues->setSearchFormIsSubmittedAndValid(true);
-                $this->changeFilterValues($searchForm->getData());
+                $this->changeSearchFormData($searchForm->getData());
                 $this->changePage(1);
                 $this->save();
             }
@@ -546,7 +546,7 @@ final class Crud
         $searchFormBuilder = $this->getSearchFormBuilder();
         if ($searchFormBuilder) {
             $newValue = clone $searchFormBuilder->getDefaultData();
-            $this->changeFilterValues($newValue);
+            $this->changeSearchFormData($newValue);
             $searchFormBuilder->setData(clone $newValue);
             $this->sessionValues = $this->sessionValues->setSearchFormIsSubmittedAndValid(false);
         }
@@ -632,18 +632,18 @@ final class Crud
     protected function checkCrudSession(): void
     {
         // Forces change => checks
-        $this->changeNumberResultsDisplayed($this->sessionValues->getMaxPerPage());
+        $this->changeMaxPerPage($this->sessionValues->getMaxPerPage());
         $this->changeColumnsDisplayed($this->sessionValues->getDisplayedColumns());
         $this->changeSort($this->sessionValues->getSort());
         $this->changeSortDirection($this->sessionValues->getSortDirection());
-        $this->changeFilterValues($this->sessionValues->getSearchFormData());
+        $this->changeSearchFormData($this->sessionValues->getSearchFormData());
         $this->changePage($this->sessionValues->getPage());
     }
 
     /**
      * User Action: Changes number of displayed results.
      */
-    protected function changeNumberResultsDisplayed(int $value): void
+    protected function changeMaxPerPage(int $value): void
     {
         $oldValue = $this->sessionValues->getMaxPerPage();
         if (\in_array($value, $this->getMaxPerPageChoices())) {
@@ -709,7 +709,7 @@ final class Crud
     /**
      * User action: Changes search form values.
      */
-    protected function changeFilterValues(?SearcherInterface $value): void
+    protected function changeSearchFormData(?SearcherInterface $value): void
     {
         $searchFormBuilder = $this->getSearchFormBuilder();
         if (!$searchFormBuilder) {
@@ -763,7 +763,7 @@ final class Crud
         if ($displaySettingsForm->isSubmitted() && $displaySettingsForm->isValid()) {
             $displaySettingsData = $displaySettingsForm->getData();
             $this->changeColumnsDisplayed($displaySettingsData['displayedColumns']);
-            $this->changeNumberResultsDisplayed($displaySettingsData['resultsPerPage']);
+            $this->changeMaxPerPage($displaySettingsData['resultsPerPage']);
         }
         if ($request->query->has('sort')) {
             $this->changeSort($request->query->get('sort'));
