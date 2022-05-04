@@ -194,7 +194,7 @@ final class SearchFormBuilder
         return $this->defaultData;
     }
 
-    public function setData(SearcherInterface $data): self
+    public function setData(?SearcherInterface $data): self
     {
         if ($this->form instanceof FormView) {
             throw new \Exception('The method "SearchFormBuilder::setData" cannot be called after "SearchFormBuilder::createFormView".');

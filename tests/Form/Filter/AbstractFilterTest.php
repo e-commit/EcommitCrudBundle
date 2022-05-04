@@ -125,7 +125,7 @@ abstract class AbstractFilterTest extends KernelTestCase
     {
         // Replaces "Crud::buildSearchForm" mocked
         $crud->getSearchFormBuilder()->createForm();
-        $crud->getSearchFormBuilder()->getForm()->setData(clone $crud->getSessionValues()->searchFormData);
+        $crud->getSearchFormBuilder()->getForm()->setData(clone $crud->getSessionValues()->getSearchFormData());
     }
 
     protected function createAndGetForm(Crud $crud): FormInterface

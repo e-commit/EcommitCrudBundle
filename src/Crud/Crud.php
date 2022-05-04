@@ -203,7 +203,7 @@ final class Crud
 
         // Display or not results
         if ($this->searchForm && $this->getDisplayResultsOnlyIfSearch()) {
-            $this->displayResults = $this->sessionValues->searchFormIsSubmittedAndValid;
+            $this->displayResults = $this->sessionValues->isSearchFormIsSubmittedAndValid();
         }
 
         $this->createDisplaySettingsForm();
@@ -237,14 +237,8 @@ final class Crud
         if ($this->container->get('request_stack')->getCurrentRequest()->query->has('reset')) {
             return;
         }
-        // IMPORTANT
-        // We have not to allocate directelly the "$this->sessionValues->searchFormData" object
-        // because otherwise it will be linked to form, and will be updated when the "bind" function will
-        // be called (If form is not valid, the session values will still be updated: Undesirable behavior)
-        /** @psalm-suppress PossiblyInvalidClone */
-        $values = clone $this->sessionValues->searchFormData;
         try {
-            $searchFormBuilder->setData($values);
+            $searchFormBuilder->setData($this->sessionValues->getSearchFormData());
         } catch (TransformationFailedException $exception) {
             // Avoid error if data stored in session is invalid
         }
@@ -458,7 +452,7 @@ final class Crud
             $searchForm->handleRequest($request);
             if ($searchForm->isSubmitted() && $searchForm->isValid() && false !== $this->options['build_paginator']) {
                 $this->displayResults = true;
-                $this->sessionValues->searchFormIsSubmittedAndValid = true;
+                $this->sessionValues = $this->sessionValues->setSearchFormIsSubmittedAndValid(true);
                 $this->changeFilterValues($searchForm->getData());
                 $this->changePage(1);
                 $this->save();
@@ -479,7 +473,7 @@ final class Crud
     protected function updateQueryBuilder(): void
     {
         // Builds query
-        $columnSortId = $this->sessionValues->sort;
+        $columnSortId = $this->sessionValues->getSort();
         if ('defaultPersonalizedSort' == $columnSortId) {
             // Default personalised sort is used
             foreach ($this->getDefaultPersonalizedSort() as $key => $value) {
@@ -497,11 +491,11 @@ final class Crud
             if (\is_array($columnSortAlias)) {
                 // Sort alias in many columns
                 foreach ($columnSortAlias as $oneColumnSortAlias) {
-                    $this->getQueryBuilder()->addOrderBy($oneColumnSortAlias, $this->sessionValues->sortDirection);
+                    $this->getQueryBuilder()->addOrderBy($oneColumnSortAlias, $this->sessionValues->getSortDirection());
                 }
             } else {
                 // Sort alias in one column
-                $this->getQueryBuilder()->orderBy($columnSortAlias, $this->sessionValues->sortDirection);
+                $this->getQueryBuilder()->orderBy($columnSortAlias, $this->sessionValues->getSortDirection());
             }
         }
 
@@ -509,7 +503,7 @@ final class Crud
         $searchFormBuilder = $this->getSearchFormBuilder();
         if ($searchFormBuilder) {
             /** @psalm-suppress PossiblyNullArgument */
-            $searchFormBuilder->updateQueryBuilder($this->getQueryBuilder(), $this->sessionValues->searchFormData);
+            $searchFormBuilder->updateQueryBuilder($this->getQueryBuilder(), $this->sessionValues->getSearchFormData());
         }
     }
 
@@ -523,8 +517,8 @@ final class Crud
             // Case: Manual paginator (by closure) is enabled
             $this->paginator = $this->options['build_paginator']->__invoke(
                 $this->getQueryBuilder(),
-                $this->sessionValues->page,
-                $this->sessionValues->resultsPerPage
+                $this->sessionValues->getPage(),
+                $this->sessionValues->getMaxPerPage()
             );
 
             return;
@@ -538,8 +532,8 @@ final class Crud
 
         $this->paginator = DoctrinePaginatorBuilder::createDoctrinePaginator(
             $this->getQueryBuilder(),
-            $this->sessionValues->page,
-            $this->sessionValues->resultsPerPage,
+            $this->sessionValues->getPage(),
+            $this->sessionValues->getMaxPerPage(),
             $paginatorOptions
         );
     }
@@ -554,7 +548,7 @@ final class Crud
             $newValue = clone $searchFormBuilder->getDefaultData();
             $this->changeFilterValues($newValue);
             $searchFormBuilder->setData(clone $newValue);
-            $this->sessionValues->searchFormIsSubmittedAndValid = false;
+            $this->sessionValues = $this->sessionValues->setSearchFormIsSubmittedAndValid(false);
         }
         $this->changePage(1);
         $this->save();
@@ -568,8 +562,8 @@ final class Crud
 
     public function resetSort(): self
     {
-        $this->sessionValues->sortDirection = $this->getDefaultSortDirection();
-        $this->sessionValues->sort = $this->getDefaultSort();
+        $this->sessionValues = $this->sessionValues->setSortDirection($this->getDefaultSortDirection());
+        $this->sessionValues = $this->sessionValues->setSort($this->getDefaultSort());
         $this->save();
 
         return $this;
@@ -577,10 +571,10 @@ final class Crud
 
     protected function resetDisplaySettings(): void
     {
-        $this->sessionValues->displayedColumns = $this->getDefaultDisplayedColumns();
-        $this->sessionValues->resultsPerPage = $this->getDefaultMaxPerPage();
-        $this->sessionValues->sortDirection = $this->getDefaultSortDirection();
-        $this->sessionValues->sort = $this->getDefaultSort();
+        $this->sessionValues = $this->sessionValues->setDisplayedColumns($this->getDefaultDisplayedColumns());
+        $this->sessionValues = $this->sessionValues->setMaxPerPage($this->getDefaultMaxPerPage());
+        $this->sessionValues = $this->sessionValues->setSortDirection($this->getDefaultSortDirection());
+        $this->sessionValues = $this->sessionValues->setSort($this->getDefaultSort());
 
         if ($this->options['persistent_settings']) {
             // Remove settings in database
@@ -638,12 +632,12 @@ final class Crud
     protected function checkCrudSession(): void
     {
         // Forces change => checks
-        $this->changeNumberResultsDisplayed($this->sessionValues->resultsPerPage);
-        $this->changeColumnsDisplayed($this->sessionValues->displayedColumns);
-        $this->changeSort($this->sessionValues->sort);
-        $this->changeSortDirection($this->sessionValues->sortDirection);
-        $this->changeFilterValues($this->sessionValues->searchFormData);
-        $this->changePage($this->sessionValues->page);
+        $this->changeNumberResultsDisplayed($this->sessionValues->getMaxPerPage());
+        $this->changeColumnsDisplayed($this->sessionValues->getDisplayedColumns());
+        $this->changeSort($this->sessionValues->getSort());
+        $this->changeSortDirection($this->sessionValues->getSortDirection());
+        $this->changeFilterValues($this->sessionValues->getSearchFormData());
+        $this->changePage($this->sessionValues->getPage());
     }
 
     /**
@@ -651,11 +645,11 @@ final class Crud
      */
     protected function changeNumberResultsDisplayed(int $value): void
     {
-        $oldValue = $this->sessionValues->resultsPerPage;
+        $oldValue = $this->sessionValues->getMaxPerPage();
         if (\in_array($value, $this->getMaxPerPageChoices())) {
-            $this->sessionValues->resultsPerPage = $value;
+            $this->sessionValues = $this->sessionValues->setMaxPerPage($value);
         } else {
-            $this->sessionValues->resultsPerPage = $this->getDefaultMaxPerPage();
+            $this->sessionValues = $this->sessionValues->setMaxPerPage($this->getDefaultMaxPerPage());
         }
         $this->testIfDatabaseMustMeUpdated($oldValue, $value);
     }
@@ -665,7 +659,7 @@ final class Crud
      */
     protected function changeColumnsDisplayed(array $value): void
     {
-        $oldValue = $this->sessionValues->displayedColumns;
+        $oldValue = $this->sessionValues->getDisplayedColumns();
         $newDisplayedColumns = [];
         $columns = $this->getColumns();
         foreach ($value as $columnName) {
@@ -676,7 +670,7 @@ final class Crud
         if (0 == \count($newDisplayedColumns)) {
             $newDisplayedColumns = $this->getDefaultDisplayedColumns();
         }
-        $this->sessionValues->displayedColumns = $newDisplayedColumns;
+        $this->sessionValues = $this->sessionValues->setDisplayedColumns($newDisplayedColumns);
         $this->testIfDatabaseMustMeUpdated($oldValue, $newDisplayedColumns);
     }
 
@@ -685,14 +679,14 @@ final class Crud
      */
     protected function changeSort(mixed $value): void
     {
-        $oldValue = $this->sessionValues->sort;
+        $oldValue = $this->sessionValues->getSort();
         $columns = $this->getColumns();
         if ((\is_string($value) && \array_key_exists($value, $columns) && $columns[$value]->isSortable())
             || (\is_string($value) && 'defaultPersonalizedSort' === $value && $this->getDefaultPersonalizedSort())) {
-            $this->sessionValues->sort = $value;
+            $this->sessionValues = $this->sessionValues->setSort($value);
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
-            $this->sessionValues->sort = $this->getDefaultSort();
+            $this->sessionValues = $this->sessionValues->setSort($this->getDefaultSort());
             $this->testIfDatabaseMustMeUpdated($oldValue, $this->getDefaultSort());
         }
     }
@@ -702,12 +696,12 @@ final class Crud
      */
     protected function changeSortDirection(mixed $value): void
     {
-        $oldValue = $this->sessionValues->sortDirection;
+        $oldValue = $this->sessionValues->getSortDirection();
         if (\is_string($value) && (self::ASC === $value || self::DESC === $value)) {
-            $this->sessionValues->sortDirection = $value;
+            $this->sessionValues = $this->sessionValues->setSortDirection($value);
             $this->testIfDatabaseMustMeUpdated($oldValue, $value);
         } else {
-            $this->sessionValues->sortDirection = $this->getDefaultSortDirection();
+            $this->sessionValues = $this->sessionValues->setSortDirection($this->getDefaultSortDirection());
             $this->testIfDatabaseMustMeUpdated($oldValue, $this->getDefaultSortDirection());
         }
     }
@@ -719,14 +713,14 @@ final class Crud
     {
         $searchFormBuilder = $this->getSearchFormBuilder();
         if (!$searchFormBuilder) {
-            $this->sessionValues->searchFormData = null;
+            $this->sessionValues = $this->sessionValues->setSearchFormData(null);
 
             return;
         }
         if (null !== $value && $value::class === \get_class($searchFormBuilder->getDefaultData())) {
-            $this->sessionValues->searchFormData = $value;
+            $this->sessionValues = $this->sessionValues->setSearchFormData($value);
         } else {
-            $this->sessionValues->searchFormData = clone $searchFormBuilder->getDefaultData();
+            $this->sessionValues = $this->sessionValues->setSearchFormData($searchFormBuilder->getDefaultData());
         }
     }
 
@@ -742,7 +736,7 @@ final class Crud
         if ($value > 1000000000000) {
             $value = 1;
         }
-        $this->sessionValues->page = $value;
+        $this->sessionValues = $this->sessionValues->setPage($value);
     }
 
     /**
@@ -801,8 +795,8 @@ final class Crud
             $columnsChoices[$column->getId()] = $column->getLabel();
         }
         $data = [
-            'resultsPerPage' => $this->getSessionValues()->resultsPerPage,
-            'displayedColumns' => $this->getSessionValues()->displayedColumns,
+            'resultsPerPage' => $this->getSessionValues()->getMaxPerPage(),
+            'displayedColumns' => $this->getSessionValues()->getDisplayedColumns(),
         ];
         $formName = sprintf('crud_display_settings_%s', $this->getSessionName());
 
@@ -848,7 +842,7 @@ final class Crud
                 ]
             );
             if ($objectDatabase) {
-                $this->sessionValues = $objectDatabase->transformToCrudSession($this->sessionValues);
+                $this->sessionValues = $this->sessionValues->updateFromUserCrudSettings($objectDatabase);
                 $this->checkCrudSession();
 
                 return;
@@ -863,11 +857,7 @@ final class Crud
     {
         // Save in session
         $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
-        $sessionValues = clone $this->sessionValues;
-        if (\is_object($this->sessionValues->searchFormData)) {
-            $sessionValues->searchFormData = clone $this->sessionValues->searchFormData;
-        }
-        $session->set($this->getSessionName(), $sessionValues);
+        $session->set($this->getSessionName(), clone $this->sessionValues);
 
         // Save in database
         if ($this->options['persistent_settings'] && $this->updateDatabase) {
@@ -881,22 +871,22 @@ final class Crud
 
             if ($objectDatabase) {
                 // Update object in database
-                $objectDatabase->updateFromSessionManager($this->sessionValues);
+                $this->sessionValues->updateUserCrudSettings($objectDatabase);
                 $em->flush();
             } else {
                 // Create object in database only if not default values
-                if ($this->sessionValues->displayedColumns != $this->getDefaultDisplayedColumns() ||
-                    $this->sessionValues->resultsPerPage != $this->getDefaultMaxPerPage() ||
-                    $this->sessionValues->sortDirection != $this->getDefaultSortDirection() ||
-                    $this->sessionValues->sort != $this->getDefaultSort()
+                if ($this->sessionValues->getDisplayedColumns() != $this->getDefaultDisplayedColumns() ||
+                    $this->sessionValues->getMaxPerPage() != $this->getDefaultMaxPerPage() ||
+                    $this->sessionValues->getSortDirection() != $this->getDefaultSortDirection() ||
+                    $this->sessionValues->getSort() != $this->getDefaultSort()
                 ) {
                     $objectDatabase = new UserCrudSettings(
                         $this->container->get('security.token_storage')->getToken()->getUser(),
                         $this->getSessionName(),
-                        $this->sessionValues->resultsPerPage,
-                        $this->sessionValues->displayedColumns,
-                        $this->sessionValues->sort,
-                        $this->sessionValues->sortDirection
+                        $this->sessionValues->getMaxPerPage(),
+                        $this->sessionValues->getDisplayedColumns(),
+                        $this->sessionValues->getSort(),
+                        $this->sessionValues->getSortDirection()
                     );
                     $em->persist($objectDatabase);
                     $em->flush();

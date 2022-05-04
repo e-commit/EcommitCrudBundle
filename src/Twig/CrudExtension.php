@@ -333,7 +333,7 @@ final class CrudExtension extends AbstractExtension
 
         // If the column is not to be shown, returns empty
         $sessionValues = $crud->getSessionValues();
-        if (!\in_array($columnId, $sessionValues->displayedColumns)) {
+        if (!\in_array($columnId, $sessionValues->getDisplayedColumns())) {
             return '';
         }
         $column = $crud->getColumn($columnId);
@@ -390,7 +390,7 @@ final class CrudExtension extends AbstractExtension
 
         // If the column is not to be shown, returns empty
         $sessionValues = $crud->getSessionValues();
-        if (!\in_array($columnId, $sessionValues->displayedColumns)) {
+        if (!\in_array($columnId, $sessionValues->getDisplayedColumns())) {
             return '';
         }
         $column = $crud->getColumn($columnId);

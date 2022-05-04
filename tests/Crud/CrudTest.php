@@ -826,7 +826,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeNumberResultsDisplayed');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, 10);
-        $this->assertSame(10, $crud->getSessionValues()->resultsPerPage);
+        $this->assertSame(10, $crud->getSessionValues()->getMaxPerPage());
     }
 
     public function testChangeNumberResultsDisplayedWithBadValue(): void
@@ -836,7 +836,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeNumberResultsDisplayed');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, 99);
-        $this->assertSame(50, $crud->getSessionValues()->resultsPerPage);
+        $this->assertSame(50, $crud->getSessionValues()->getMaxPerPage());
     }
 
     public function testChangeColumnsDisplayed(): void
@@ -846,7 +846,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeColumnsDisplayed');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, ['username']);
-        $this->assertSame(['username'], $crud->getSessionValues()->displayedColumns);
+        $this->assertSame(['username'], $crud->getSessionValues()->getDisplayedColumns());
     }
 
     /**
@@ -859,7 +859,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeColumnsDisplayed');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, $value);
-        $this->assertSame(['firstName'], $crud->getSessionValues()->displayedColumns);
+        $this->assertSame(['firstName'], $crud->getSessionValues()->getDisplayedColumns());
     }
 
     public function getTestChangeColumnsDisplayedWithBadValueProvider(): array
@@ -877,7 +877,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, 'firstName');
-        $this->assertSame('firstName', $crud->getSessionValues()->sort);
+        $this->assertSame('firstName', $crud->getSessionValues()->getSort());
     }
 
     /**
@@ -892,7 +892,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, $value);
-        $this->assertSame('username', $crud->getSessionValues()->sort);
+        $this->assertSame('username', $crud->getSessionValues()->getSort());
     }
 
     public function getTestChangeSortWithBadValueProvider(): array
@@ -915,7 +915,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, 'defaultPersonalizedSort');
-        $this->assertSame('defaultPersonalizedSort', $crud->getSessionValues()->sort);
+        $this->assertSame('defaultPersonalizedSort', $crud->getSessionValues()->getSort());
     }
 
     /**
@@ -930,7 +930,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSort');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, $value);
-        $this->assertSame('defaultPersonalizedSort', $crud->getSessionValues()->sort);
+        $this->assertSame('defaultPersonalizedSort', $crud->getSessionValues()->getSort());
     }
 
     public function getTestChangeSortPersonalizedSortWithBadValueProvider(): array
@@ -950,7 +950,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSortDirection');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, Crud::ASC);
-        $this->assertSame(Crud::ASC, $crud->getSessionValues()->sortDirection);
+        $this->assertSame(Crud::ASC, $crud->getSessionValues()->getSortDirection());
     }
 
     /**
@@ -963,7 +963,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeSortDirection');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, $value);
-        $this->assertSame(Crud::DESC, $crud->getSessionValues()->sortDirection);
+        $this->assertSame(Crud::DESC, $crud->getSessionValues()->getSortDirection());
     }
 
     public function getTestChangeSortDirectionWithBadValueProvider(): array
@@ -985,7 +985,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, $value);
-        $this->assertEquals($value, $crud->getSessionValues()->searchFormData);
+        $this->assertEquals($value, $crud->getSessionValues()->getSearchFormData());
     }
 
     /**
@@ -998,8 +998,8 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, $value);
-        $this->assertNotEquals($value, $crud->getSessionValues()->searchFormData);
-        $this->assertEquals(new UserSearcher(), $crud->getSessionValues()->searchFormData);
+        $this->assertNotEquals($value, $crud->getSessionValues()->getSearchFormData());
+        $this->assertEquals(new UserSearcher(), $crud->getSessionValues()->getSearchFormData());
     }
 
     public function getTestChangeFilterValuesWithBadValueProvider(): array
@@ -1017,7 +1017,7 @@ class CrudTest extends AbstractCrudTest
         $reflectionMethod = (new \ReflectionClass($crud))->getMethod('changeFilterValues');
         $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($crud, new UserSearcher());
-        $this->assertNull($crud->getSessionValues()->searchFormData);
+        $this->assertNull($crud->getSessionValues()->getSearchFormData());
     }
 
     public function getBoolProvider(): array

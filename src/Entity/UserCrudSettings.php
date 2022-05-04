@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Ecommit\CrudBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Ecommit\CrudBundle\Crud\CrudSession;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'user_crud_settings')]
@@ -120,29 +119,5 @@ class UserCrudSettings
     public function getUser(): \Ecommit\CrudBundle\Entity\UserCrudInterface
     {
         return $this->user;
-    }
-
-    /**
-     * Create CrudSession from this object.
-     */
-    public function transformToCrudSession(CrudSession $crudSessionManager): CrudSession
-    {
-        $crudSessionManager->displayedColumns = $this->displayedColumns;
-        $crudSessionManager->resultsPerPage = $this->resultsDisplayed;
-        $crudSessionManager->sortDirection = $this->sortDirection;
-        $crudSessionManager->sort = $this->sort;
-
-        return $crudSessionManager;
-    }
-
-    /**
-     * Update this object from CrudSession.
-     */
-    public function updateFromSessionManager(CrudSession $crudSessionManager): void
-    {
-        $this->displayedColumns = $crudSessionManager->displayedColumns;
-        $this->resultsDisplayed = $crudSessionManager->resultsPerPage;
-        $this->sortDirection = $crudSessionManager->sortDirection;
-        $this->sort = $crudSessionManager->sort;
     }
 }
