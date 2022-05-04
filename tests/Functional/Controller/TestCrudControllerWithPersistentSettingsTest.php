@@ -41,7 +41,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 50,
+            maxPerPage: 50,
             displayedColumns: ['username', 'firstName'],
             sort: 'firstName',
             sortDirection: Crud::DESC
@@ -67,7 +67,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 50,
+            maxPerPage: 50,
             displayedColumns: ['username', 'firstName'],
             sort: 'firstName',
             sortDirection: Crud::DESC
@@ -85,7 +85,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 50,
+            maxPerPage: 50,
             displayedColumns: ['username', 'firstName'],
             sort: 'firstName',
             sortDirection: Crud::DESC
@@ -110,7 +110,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 50,
+            maxPerPage: 50,
             displayedColumns: ['username', 'firstName'],
             sort: 'firstName',
             sortDirection: Crud::DESC
@@ -136,7 +136,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 10,
+            maxPerPage: 10,
             displayedColumns: ['username', 'firstName', 'lastName'],
             sort: 'username',
             sortDirection: Crud::ASC
@@ -178,7 +178,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 10,
+            maxPerPage: 10,
             displayedColumns: ['firstName', 'lastName', 'username'],
             sort: 'lastName',
             sortDirection: Crud::DESC
@@ -202,7 +202,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 10,
+            maxPerPage: 10,
             displayedColumns: ['firstName', 'lastName', 'username'],
             sort: 'lastName',
             sortDirection: Crud::DESC
@@ -228,7 +228,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 10,
+            maxPerPage: 10,
             displayedColumns: ['firstName', 'lastName', 'username'],
             sort: 'lastName',
             sortDirection: Crud::DESC
@@ -246,7 +246,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
 
         $this->checkUserCrudSettingsDatabase(
             username: 'EveReste',
-            resultsDisplayed: 10,
+            maxPerPage: 10,
             displayedColumns: ['firstName', 'lastName', 'username'],
             sort: 'lastName',
             sortDirection: Crud::DESC
@@ -306,10 +306,10 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
         $this->waitForAjax($client);
     }
 
-    protected function checkUserCrudSettingsDatabase(string $username, int $resultsDisplayed, array $displayedColumns, string $sort, string $sortDirection): void
+    protected function checkUserCrudSettingsDatabase(string $username, int $maxPerPage, array $displayedColumns, string $sort, string $sortDirection): void
     {
         $userCrudSettings = $this->getUserCrudSettings($username);
-        $this->assertSame($resultsDisplayed, $userCrudSettings->getResultsDisplayed());
+        $this->assertSame($maxPerPage, $userCrudSettings->getMaxPerPage());
         $this->assertSame($displayedColumns, $userCrudSettings->getDisplayedColumns());
         $this->assertSame($sort, $userCrudSettings->getSort());
         $this->assertSame($sortDirection, $userCrudSettings->getSortDirection());

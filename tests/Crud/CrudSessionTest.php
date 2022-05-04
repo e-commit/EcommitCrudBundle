@@ -132,7 +132,7 @@ class CrudSessionTest extends TestCase
         );
         $crudSession->updateUserCrudSettings($userCrudSettings);
 
-        $this->assertSame(100, $userCrudSettings->getResultsDisplayed());
+        $this->assertSame(100, $userCrudSettings->getMaxPerPage());
         $this->assertSame(['col1'], $userCrudSettings->getDisplayedColumns());
         $this->assertSame('sort1', $userCrudSettings->getSort());
         $this->assertSame(Crud::ASC, $userCrudSettings->getSortDirection());

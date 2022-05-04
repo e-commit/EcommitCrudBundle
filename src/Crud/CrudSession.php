@@ -47,7 +47,7 @@ final class CrudSession
     public function updateFromUserCrudSettings(UserCrudSettings $crudSettings): self
     {
         $instance = clone $this; // Avoid modification by reference (by the user or an invalid form)
-        $instance->maxPerPage = $crudSettings->getResultsDisplayed();
+        $instance->maxPerPage = $crudSettings->getMaxPerPage();
         $instance->displayedColumns = $crudSettings->getDisplayedColumns();
         $instance->sort = $crudSettings->getSort();
         $instance->sortDirection = $crudSettings->getSortDirection();
@@ -60,7 +60,7 @@ final class CrudSession
      */
     public function updateUserCrudSettings(UserCrudSettings $crudSettings): void
     {
-        $crudSettings->setResultsDisplayed($this->maxPerPage);
+        $crudSettings->setMaxPerPage($this->maxPerPage);
         $crudSettings->setDisplayedColumns($this->displayedColumns);
         $crudSettings->setSort($this->sort);
         $crudSettings->setSortDirection($this->sortDirection);

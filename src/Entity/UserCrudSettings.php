@@ -27,8 +27,8 @@ class UserCrudSettings
     #[ORM\Column(type: 'string', length: 255, name: 'crud_name')]
     protected string $crudName;
 
-    #[ORM\Column(type: 'integer', name: 'results_displayed')]
-    protected int $resultsDisplayed;
+    #[ORM\Column(type: 'integer', name: 'max_per_page')]
+    protected int $maxPerPage;
 
     #[ORM\Column(type: 'json', name: 'displayed_columns')]
     protected array $displayedColumns = [];
@@ -39,11 +39,11 @@ class UserCrudSettings
     #[ORM\Column(type: 'string', length: 4)]
     protected string $sortDirection;
 
-    public function __construct(UserCrudInterface $user, string $crudName, int $resultsDisplayed, array $displayedColumns, string $sort, string $sortDirection)
+    public function __construct(UserCrudInterface $user, string $crudName, int $maxPerPage, array $displayedColumns, string $sort, string $sortDirection)
     {
         $this->user = $user;
         $this->crudName = $crudName;
-        $this->resultsDisplayed = $resultsDisplayed;
+        $this->maxPerPage = $maxPerPage;
         $this->displayedColumns = $displayedColumns;
         $this->sort = $sort;
         $this->sortDirection = $sortDirection;
@@ -61,16 +61,16 @@ class UserCrudSettings
         return $this->crudName;
     }
 
-    public function setResultsDisplayed(int $resultsDisplayed): self
+    public function setMaxPerPage(int $maxPerPage): self
     {
-        $this->resultsDisplayed = $resultsDisplayed;
+        $this->maxPerPage = $maxPerPage;
 
         return $this;
     }
 
-    public function getResultsDisplayed(): int
+    public function getMaxPerPage(): int
     {
-        return $this->resultsDisplayed;
+        return $this->maxPerPage;
     }
 
     public function setDisplayedColumns(array $displayedColumns): self
