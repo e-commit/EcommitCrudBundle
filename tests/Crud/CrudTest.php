@@ -401,28 +401,51 @@ class CrudTest extends AbstractCrudTest
         $this->createCrud($crudConfig);
     }
 
-    public function testCreateAndGetSearchForm(): void
+    public function testCreateAndGetSearchFormMethods(): void
     {
         $crudConfig = $this->createValidCrudConfig()
             ->createSearchForm(new UserSearcher());
         $crud = $this->createCrud($crudConfig);
 
-        $this->assertInstanceOf(SearchFormBuilder::class, $crud->getSearchForm());
+        $this->assertInstanceOf(SearchFormBuilder::class, $crud->getSearchFormBuilder());
 
         $crud->createView();
         $this->assertInstanceOf(FormView::class, $crud->getSearchForm());
     }
 
-    public function testCreateAndGetNullSearchForm(): void
+    public function testCreateAndGetNullSearchFormMethods(): void
     {
         $crudConfig = $this->createValidCrudConfig();
         $crudConfig['search_form_data'] = null;
         $crud = $this->createCrud($crudConfig);
 
-        $this->assertNull($crud->getSearchForm());
+        $this->assertNull($crud->getSearchFormBuilder());
 
         $crud->createView();
         $this->assertNull($crud->getSearchForm());
+    }
+
+    public function testGetSearchFormBuilderAfterCreateView(): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->createSearchForm(new UserSearcher());
+        $crud = $this->createCrud($crudConfig);
+        $crud->createView();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The object "SearchFormBuilder" no longer exists since the call of the method "Crud::createView"');
+        $crud->getSearchFormBuilder();
+    }
+
+    public function testGetSearchFormBeforeCreateView(): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->createSearchForm(new UserSearcher());
+        $crud = $this->createCrud($crudConfig);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The object "FormView" exists only after the call of the method "Crud::createView"');
+        $crud->getSearchForm();
     }
 
     public function testAddBadSearchFormData(): void
@@ -445,7 +468,7 @@ class CrudTest extends AbstractCrudTest
             ]);
         $crud = $this->createCrud($crudConfig);
 
-        $this->assertInstanceOf(FormType::class, $crud->getSearchForm()->getForm()->getConfig()->getType()->getInnerType());
+        $this->assertInstanceOf(FormType::class, $crud->getSearchFormBuilder()->getForm()->getConfig()->getType()->getInnerType());
     }
 
     public function testCreateSearchFormWithBadType(): void
@@ -466,7 +489,7 @@ class CrudTest extends AbstractCrudTest
             ]);
         $crud = $this->createCrud($crudConfig);
 
-        $this->assertSame(['MyGroup'], $crud->getSearchForm()->getForm()->getConfig()->getOption('validation_groups'));
+        $this->assertSame(['MyGroup'], $crud->getSearchFormBuilder()->getForm()->getConfig()->getOption('validation_groups'));
     }
 
     public function testCreateSearchFormWithBadOptions(): void
@@ -769,6 +792,15 @@ class CrudTest extends AbstractCrudTest
         $crud = $this->createCrud($this->createValidCrudConfig());
 
         $this->assertInstanceOf(Crud::class, $crud->createView());
+    }
+
+    public function testCreateViewAlreadyDone(): void
+    {
+        $crud = $this->createCrud($this->createValidCrudConfig())->createView();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Crud::createView has already been called');
+        $crud->createView();
     }
 
     public function testLoadSessionWithSearchForm(): void

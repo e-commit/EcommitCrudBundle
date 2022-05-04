@@ -24,7 +24,7 @@ class TextFilterTest extends AbstractFilterTest
     public function testViewAndQueryBuilder($modelData, bool $mustBegin, bool $mustEnd, $expectedViewData, ?string $whereExpected, array $parametersExpected): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.name', $modelData));
-        $crud->getSearchForm()->addFilter('propertyName', TextFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', TextFilter::class, [
             'must_begin' => $mustBegin,
             'must_end' => $mustEnd,
         ]);
@@ -64,7 +64,7 @@ class TextFilterTest extends AbstractFilterTest
     public function testInvalidInput(): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.name', ['not-scalar']));
-        $crud->getSearchForm()->addFilter('propertyName', TextFilter::class);
+        $crud->getSearchFormBuilder()->addFilter('propertyName', TextFilter::class);
 
         $this->checkQueryBuilder($crud, null, []);
     }
@@ -75,7 +75,7 @@ class TextFilterTest extends AbstractFilterTest
     public function testSubmit($submittedData, $expectedModelData, $expectedViewData): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.name'));
-        $crud->getSearchForm()->addFilter('propertyName', TextFilter::class);
+        $crud->getSearchFormBuilder()->addFilter('propertyName', TextFilter::class);
 
         $form = $this->createAndGetForm($crud);
         $form->submit([
@@ -101,7 +101,7 @@ class TextFilterTest extends AbstractFilterTest
     public function testSubmitInvalidFormat(): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.name'));
-        $crud->getSearchForm()->addFilter('propertyName', TextFilter::class);
+        $crud->getSearchFormBuilder()->addFilter('propertyName', TextFilter::class);
 
         $form = $this->createAndGetForm($crud);
         $form->submit([
@@ -117,7 +117,7 @@ class TextFilterTest extends AbstractFilterTest
     public function testSubmitInvalidMinLength(): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.name'));
-        $crud->getSearchForm()->addFilter('propertyName', TextFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', TextFilter::class, [
             'min_length' => 5,
         ]);
 
@@ -135,7 +135,7 @@ class TextFilterTest extends AbstractFilterTest
     public function testSubmitInvalidMaxLength(): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.name'));
-        $crud->getSearchForm()->addFilter('propertyName', TextFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', TextFilter::class, [
             'max_length' => 2,
         ]);
 
@@ -153,7 +153,7 @@ class TextFilterTest extends AbstractFilterTest
     public function testSubmitWithoutValidation(): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.name'));
-        $crud->getSearchForm()->addFilter('propertyName', TextFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', TextFilter::class, [
             'max_length' => 2,
             'autovalidate' => false,
         ]);
@@ -173,7 +173,7 @@ class TextFilterTest extends AbstractFilterTest
     public function testWithType(): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.name'));
-        $crud->getSearchForm()->addFilter('propertyName', TextFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', TextFilter::class, [
             'type' => TextareaType::class,
         ]);
 

@@ -30,7 +30,6 @@
 
         <PossiblyUndefinedMethod>
             <errorLevel type="suppress">
-                <file name="src/Crud/Crud.php" />
                 <file name="src/DependencyInjection/Configuration.php" />
                 <directory name="src/Form/Filter" />
             </errorLevel>

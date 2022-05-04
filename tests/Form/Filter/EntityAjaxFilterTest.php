@@ -25,7 +25,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
         $this->expectException(MissingOptionsException::class);
 
         $crud = $this->createCrud($this->createCrudConfig('e.tag'));
-        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class);
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityAjaxFilter::class);
     }
 
     /**
@@ -34,7 +34,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
     public function testViewAndQueryBuilder(bool $multiple, $modelData, $expectedViewData, array $expectedIdsFound): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
-        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
             'multiple' => $multiple,
@@ -75,7 +75,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
     public function testSubmit(bool $multiple, $submittedData, $expectedModelData, $expectedViewData): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
-        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
             'multiple' => $multiple,
@@ -115,7 +115,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
     public function testSubmitInvalid(bool $multiple, $submittedData): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
-        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
             'multiple' => $multiple,
@@ -166,7 +166,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
         }
 
         $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
-        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
             'multiple' => $multiple,
@@ -225,7 +225,7 @@ class EntityAjaxFilterTest extends AbstractFilterTest
         }
 
         $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
-        $crud->getSearchForm()->addFilter('propertyName', EntityAjaxFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityAjaxFilter::class, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
             'multiple' => $multiple,

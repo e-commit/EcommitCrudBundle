@@ -116,8 +116,7 @@ final class SearchFormBuilder
 
     public function addField(string $property, string $type, array $options = []): self
     {
-        /** @psalm-suppress PossiblyUndefinedMethod */
-        $this->form->add($property, $type, $options);
+        $this->getFormBuilder()->add($property, $type, $options);
 
         return $this;
     }
@@ -148,30 +147,62 @@ final class SearchFormBuilder
             $filterService->buildForm($this, $property, $filter['options']);
         }
 
-        /** @psalm-suppress PossiblyUndefinedMethod */
-        $this->form->setAction($this->crud->getSearchUrl());
-        /** @psalm-suppress PossiblyUndefinedMethod */
-        $this->form = $this->form->getForm();
+        $this->getFormBuilder()->setAction($this->crud->getSearchUrl());
+        $this->form = $this->getFormBuilder()->getForm();
 
         return $this;
     }
 
     public function createFormView(): self
     {
-        /** @psalm-suppress PossiblyUndefinedMethod */
-        $this->form = $this->form->createView();
+        $this->form = $this->getForm()->createView();
 
         return $this;
     }
 
-    public function getForm(): FormBuilderInterface|FormInterface|FormView
+    public function getFormBuilder(): FormBuilderInterface
     {
+        if (!$this->form instanceof FormBuilderInterface) {
+            throw new \Exception('The object "FormBuilderInterface" no longer exists since the call of the method "SearchFormBuilder::createForm".');
+        }
+
+        return $this->form;
+    }
+
+    public function getForm(): FormInterface
+    {
+        if ($this->form instanceof FormBuilderInterface) {
+            throw new \Exception('The object "FormInterface" exists only after the call of the method "SearchFormBuilder::createForm".');
+        } elseif (!$this->form instanceof FormInterface) {
+            throw new \Exception('The object "FormInterface" no longer exists since the call of the method "SearchFormBuilder::createFormView"');
+        }
+
+        return $this->form;
+    }
+
+    public function getFormView(): FormView
+    {
+        if (!$this->form instanceof FormView) {
+            throw new \Exception('The object "FormView" exists only after the call of the method "SearchFormBuilder::createFormView".');
+        }
+
         return $this->form;
     }
 
     public function getDefaultData(): SearcherInterface
     {
         return $this->defaultData;
+    }
+
+    public function setData(SearcherInterface $data): self
+    {
+        if ($this->form instanceof FormView) {
+            throw new \Exception('The method "SearchFormBuilder::setData" cannot be called after "SearchFormBuilder::createFormView".');
+        }
+
+        $this->form->setData($data);
+
+        return $this;
     }
 
     public function updateQueryBuilder(\Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder|QueryBuilderInterface $queryBuilder, SearcherInterface $searcher): self

@@ -447,6 +447,9 @@ final class CrudExtension extends AbstractExtension
         $options = $resolver->resolve($this->buildOptions('crud_display_settings', $options, $crud));
 
         $form = $crud->getDisplaySettingsForm();
+        if (!$form instanceof FormView) {
+            throw new \Exception('Method "Crud::createView" must be called before using Twig function "crud_display_settings"');
+        }
 
         if ($options['render']) {
             return $environment->render($options['render'], [

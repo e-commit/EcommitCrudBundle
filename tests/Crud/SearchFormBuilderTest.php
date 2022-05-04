@@ -35,8 +35,8 @@ class SearchFormBuilderTest extends AbstractCrudTest
     public function testCreateFormBuilder(?string $type, string $expectedName, string $expectedType): void
     {
         $searchFormBuilder = $this->createSearchFormBuilder(type: $type);
-        $this->assertSame($expectedName, $searchFormBuilder->getForm()->getFormConfig()->getName());
-        $this->assertInstanceOf($expectedType, $searchFormBuilder->getForm()->getFormConfig()->getType()->getInnerType());
+        $this->assertSame($expectedName, $searchFormBuilder->getFormBuilder()->getFormConfig()->getName());
+        $this->assertInstanceOf($expectedType, $searchFormBuilder->getFormBuilder()->getFormConfig()->getType()->getInnerType());
     }
 
     public function getTestCreateFormBuilderProvider(): array
@@ -57,7 +57,7 @@ class SearchFormBuilderTest extends AbstractCrudTest
                 'attr' => ['class' => 'myclass'],
             ],
         ]);
-        $this->assertSame(['class' => 'myclass'], $searchFormBuilder->getForm()->getFormConfig()->getOption('attr'));
+        $this->assertSame(['class' => 'myclass'], $searchFormBuilder->getFormBuilder()->getFormConfig()->getOption('attr'));
     }
 
     /**
@@ -68,7 +68,7 @@ class SearchFormBuilderTest extends AbstractCrudTest
         $searchFormBuilder = $this->createSearchFormBuilder(type: $type, options: [
             'validation_groups' => ['my_group'],
         ]);
-        $this->assertSame(['my_group'], $searchFormBuilder->getForm()->getFormConfig()->getOption('validation_groups'));
+        $this->assertSame(['my_group'], $searchFormBuilder->getFormBuilder()->getFormConfig()->getOption('validation_groups'));
     }
 
     /**
@@ -82,7 +82,7 @@ class SearchFormBuilderTest extends AbstractCrudTest
                 'validation_groups' => ['my_group2'],
             ],
         ]);
-        $this->assertSame(['my_group2'], $searchFormBuilder->getForm()->getFormConfig()->getOption('validation_groups'));
+        $this->assertSame(['my_group2'], $searchFormBuilder->getFormBuilder()->getFormConfig()->getOption('validation_groups'));
     }
 
     public function testAddFilterFormAlreadyCreated(): void
@@ -262,16 +262,65 @@ class SearchFormBuilderTest extends AbstractCrudTest
         $this->assertSame($searchFormBuilder, $searchFormBuilder->createFormView());
     }
 
-    public function testGetForm(): void
+    public function testGetFormMethods(): void
     {
         $searchFormBuilder = $this->createSearchFormBuilder();
-        $this->assertInstanceOf(FormBuilderInterface::class, $searchFormBuilder->getForm());
+        $this->assertInstanceOf(FormBuilderInterface::class, $searchFormBuilder->getFormBuilder());
 
         $searchFormBuilder->createForm();
         $this->assertInstanceOf(FormInterface::class, $searchFormBuilder->getForm());
 
         $searchFormBuilder->createFormView();
-        $this->assertInstanceOf(FormView::class, $searchFormBuilder->getForm());
+        $this->assertInstanceOf(FormView::class, $searchFormBuilder->getFormView());
+    }
+
+    public function testGetFormBuilderAfterCreateForm(): void
+    {
+        $searchFormBuilder = $this->createSearchFormBuilder();
+        $searchFormBuilder->createForm();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The object "FormBuilderInterface" no longer exists since the call of the method "SearchFormBuilder::createForm"');
+        $searchFormBuilder->getFormBuilder();
+    }
+
+    public function testGetFormBeforeCreateForm(): void
+    {
+        $searchFormBuilder = $this->createSearchFormBuilder();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The object "FormInterface" exists only after the call of the method "SearchFormBuilder::createForm"');
+        $searchFormBuilder->getForm();
+    }
+
+    public function testGetFormAfterCreateFormView(): void
+    {
+        $searchFormBuilder = $this->createSearchFormBuilder();
+        $searchFormBuilder->createForm();
+        $searchFormBuilder->createFormView();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The object "FormInterface" no longer exists since the call of the method "SearchFormBuilder::createFormView"');
+        $searchFormBuilder->getForm();
+    }
+
+    public function testGetFormViewBeforeCreateForm(): void
+    {
+        $searchFormBuilder = $this->createSearchFormBuilder();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The object "FormView" exists only after the call of the method "SearchFormBuilder::createFormView".');
+        $searchFormBuilder->getFormView();
+    }
+
+    public function testGetFormViewBeforeCreateFormView(): void
+    {
+        $searchFormBuilder = $this->createSearchFormBuilder();
+        $searchFormBuilder->createForm();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The object "FormView" exists only after the call of the method "SearchFormBuilder::createFormView".');
+        $searchFormBuilder->getFormView();
     }
 
     public function testGetDefaultData(): void
@@ -279,6 +328,37 @@ class SearchFormBuilderTest extends AbstractCrudTest
         $defaultData = $this->createMock(SearcherInterface::class);
         $searchFormBuilder = $this->createSearchFormBuilder(defaultData: $defaultData);
         $this->assertSame($defaultData, $searchFormBuilder->getDefaultData());
+    }
+
+    public function testSetDataWithFormBuilder(): void
+    {
+        $data = $this->createMock(SearcherInterface::class);
+        $searchFormBuilder = $this->createSearchFormBuilder();
+        $searchFormBuilder->setData($data);
+
+        $this->assertSame($data, $searchFormBuilder->getFormBuilder()->getData());
+    }
+
+    public function testSetDataWithForm(): void
+    {
+        $data = $this->createMock(SearcherInterface::class);
+        $searchFormBuilder = $this->createSearchFormBuilder();
+        $searchFormBuilder->createForm();
+        $searchFormBuilder->setData($data);
+
+        $this->assertSame($data, $searchFormBuilder->getForm()->getData());
+    }
+
+    public function testSetDataWithFormView(): void
+    {
+        $data = $this->createMock(SearcherInterface::class);
+        $searchFormBuilder = $this->createSearchFormBuilder();
+        $searchFormBuilder->createForm();
+        $searchFormBuilder->createFormView();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The method "SearchFormBuilder::setData" cannot be called after "SearchFormBuilder::createFormView"');
+        $searchFormBuilder->setData($data);
     }
 
     public function testUpdateQueryBuilder(): void

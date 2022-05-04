@@ -67,6 +67,7 @@ final class Crud
     protected bool $updateDatabase = false;
     protected ?PaginatorInterface $paginator = null;
     protected bool $displayResults = true;
+    protected bool $viewCreated = false;
 
     public function __construct(array $options, protected ContainerInterface $container)
     {
@@ -225,11 +226,12 @@ final class Crud
 
     protected function buildSearchForm(): void
     {
-        if (!$this->searchForm) {
+        $searchFormBuilder = $this->getSearchFormBuilder();
+        if (!$searchFormBuilder) {
             return;
         }
 
-        $this->searchForm->createForm();
+        $searchFormBuilder->createForm();
 
         // Allocates object
         if ($this->container->get('request_stack')->getCurrentRequest()->query->has('reset')) {
@@ -242,7 +244,7 @@ final class Crud
         /** @psalm-suppress PossiblyInvalidClone */
         $values = clone $this->sessionValues->searchFormData;
         try {
-            $this->searchForm->getForm()->setData($values);
+            $searchFormBuilder->setData($values);
         } catch (TransformationFailedException $exception) {
             // Avoid error if data stored in session is invalid
         }
@@ -405,12 +407,26 @@ final class Crud
         return $this->sessionValues;
     }
 
-    /**
-     * Returns the search form (SearchFormBuilder object before createView or FormView object after createView).
-     */
-    public function getSearchForm(): SearchFormBuilder|FormView|null
+    public function getSearchFormBuilder(): ?SearchFormBuilder
     {
-        return $this->searchForm;
+        if (null === $this->searchForm) {
+            return null;
+        } elseif ($this->searchForm instanceof SearchFormBuilder) {
+            return $this->searchForm;
+        }
+
+        throw new \Exception('The object "SearchFormBuilder" no longer exists since the call of the method "Crud::createView".');
+    }
+
+    public function getSearchForm(): ?FormView
+    {
+        if (null === $this->searchForm) {
+            return null;
+        } elseif ($this->searchForm instanceof FormView) {
+            return $this->searchForm;
+        }
+
+        throw new \Exception('The object "FormView" exists only after the call of the method "Crud::createView".');
     }
 
     public function getDivIdSearch(): string
@@ -425,7 +441,8 @@ final class Crud
 
     public function processSearchForm(): self
     {
-        if (!$this->searchForm) {
+        $searchFormBuilder = $this->getSearchFormBuilder();
+        if (!$searchFormBuilder) {
             throw new NotFoundHttpException('Crud: Search form does not exist.');
         }
 
@@ -437,7 +454,7 @@ final class Crud
             if ($this->getDisplayResultsOnlyIfSearch()) {
                 $this->displayResults = false;
             }
-            $searchForm = $this->searchForm->getForm();
+            $searchForm = $searchFormBuilder->getForm();
             $searchForm->handleRequest($request);
             if ($searchForm->isSubmitted() && $searchForm->isValid() && false !== $this->options['build_paginator']) {
                 $this->displayResults = true;
@@ -489,9 +506,10 @@ final class Crud
         }
 
         // Adds form searcher filters
-        if ($this->searchForm) {
+        $searchFormBuilder = $this->getSearchFormBuilder();
+        if ($searchFormBuilder) {
             /** @psalm-suppress PossiblyNullArgument */
-            $this->searchForm->updateQueryBuilder($this->getQueryBuilder(), $this->sessionValues->searchFormData);
+            $searchFormBuilder->updateQueryBuilder($this->getQueryBuilder(), $this->sessionValues->searchFormData);
         }
     }
 
@@ -531,10 +549,11 @@ final class Crud
      */
     public function reset(): self
     {
-        if ($this->searchForm) {
-            $newValue = clone $this->searchForm->getDefaultData();
+        $searchFormBuilder = $this->getSearchFormBuilder();
+        if ($searchFormBuilder) {
+            $newValue = clone $searchFormBuilder->getDefaultData();
             $this->changeFilterValues($newValue);
-            $this->searchForm->getForm()->setData(clone $newValue);
+            $searchFormBuilder->setData(clone $newValue);
             $this->sessionValues->searchFormIsSubmittedAndValid = false;
         }
         $this->changePage(1);
@@ -576,11 +595,18 @@ final class Crud
 
     public function createView(): self
     {
-        if ($this->searchForm) {
-            $this->searchForm->createFormView();
-            $this->searchForm = $this->searchForm->getForm();
+        if ($this->viewCreated) {
+            throw new \Exception('Crud::createView has already been called.');
         }
-        $this->displaySettingsForm = $this->displaySettingsForm->createView();
+        $searchFormBuilder = $this->getSearchFormBuilder();
+        if ($searchFormBuilder) {
+            $searchFormBuilder->createFormView();
+            $this->searchForm = $searchFormBuilder->getFormView();
+        }
+        /** @var FormInterface $displaySettingsForm */
+        $displaySettingsForm = $this->displaySettingsForm;
+        $this->displaySettingsForm = $displaySettingsForm->createView();
+        $this->viewCreated = true;
 
         return $this;
     }
@@ -691,15 +717,16 @@ final class Crud
      */
     protected function changeFilterValues(?SearcherInterface $value): void
     {
-        if (!$this->searchForm) {
+        $searchFormBuilder = $this->getSearchFormBuilder();
+        if (!$searchFormBuilder) {
             $this->sessionValues->searchFormData = null;
 
             return;
         }
-        if (null !== $value && $value::class === \get_class($this->searchForm->getDefaultData())) {
+        if (null !== $value && $value::class === \get_class($searchFormBuilder->getDefaultData())) {
             $this->sessionValues->searchFormData = $value;
         } else {
-            $this->sessionValues->searchFormData = clone $this->searchForm->getDefaultData();
+            $this->sessionValues->searchFormData = clone $searchFormBuilder->getDefaultData();
         }
     }
 
@@ -736,9 +763,11 @@ final class Crud
             return;
         }
 
-        $this->displaySettingsForm->handleRequest($request);
-        if ($this->displaySettingsForm->isSubmitted() && $this->displaySettingsForm->isValid()) {
-            $displaySettingsData = $this->displaySettingsForm->getData();
+        /** @var FormInterface $displaySettingsForm */
+        $displaySettingsForm = $this->displaySettingsForm;
+        $displaySettingsForm->handleRequest($request);
+        if ($displaySettingsForm->isSubmitted() && $displaySettingsForm->isValid()) {
+            $displaySettingsData = $displaySettingsForm->getData();
             $this->changeColumnsDisplayed($displaySettingsData['displayedColumns']);
             $this->changeNumberResultsDisplayed($displaySettingsData['resultsPerPage']);
         }
@@ -801,12 +830,13 @@ final class Crud
         }
 
         // If session is null => Assign default value
+        $searchFormBuilder = $this->getSearchFormBuilder();
         $this->sessionValues = new CrudSession(
             $this->getDefaultMaxPerPage(),
             $this->getDefaultDisplayedColumns(),
             $this->getDefaultSort(),
             $this->getDefaultSortDirection(),
-            ($this->searchForm) ? $this->searchForm->getDefaultData() : null,
+            ($searchFormBuilder) ? $searchFormBuilder->getDefaultData() : null,
         );
 
         // If persistent settings is enabled -> Retrieve from database

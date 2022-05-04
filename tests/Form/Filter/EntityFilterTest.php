@@ -25,7 +25,7 @@ class EntityFilterTest extends AbstractFilterTest
         $this->expectException(MissingOptionsException::class);
 
         $crud = $this->createCrud($this->createCrudConfig('e.tag'));
-        $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class);
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityFilter::class);
     }
 
     /**
@@ -34,7 +34,7 @@ class EntityFilterTest extends AbstractFilterTest
     public function testViewAndQueryBuilder(bool $multiple, $modelData, $expectedViewData, array $expectedIdsFound): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
-        $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
         ]);
@@ -74,7 +74,7 @@ class EntityFilterTest extends AbstractFilterTest
     public function testSubmit(bool $multiple, $submittedData, $expectedModelData, $expectedViewData): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
-        $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
         ]);
@@ -112,7 +112,7 @@ class EntityFilterTest extends AbstractFilterTest
     public function testSubmitInvalid(bool $multiple, $submittedData): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
-        $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
         ]);
@@ -143,7 +143,7 @@ class EntityFilterTest extends AbstractFilterTest
     public function testSubmitInvalidMaxCount(): void
     {
         $crud = $this->createCrud($this->createCrudConfig('e.tag', []));
-        $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => true,
             'max' => 2,
@@ -177,7 +177,7 @@ class EntityFilterTest extends AbstractFilterTest
         }
 
         $crud = $this->createCrud($this->createCrudConfig('e.tag', $modelData));
-        $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
             'type_options' => [
@@ -235,7 +235,7 @@ class EntityFilterTest extends AbstractFilterTest
         }
 
         $crud = $this->createCrud($this->createCrudConfig('e.tag', ($multiple) ? [] : null));
-        $crud->getSearchForm()->addFilter('propertyName', EntityFilter::class, [
+        $crud->getSearchFormBuilder()->addFilter('propertyName', EntityFilter::class, [
             'class' => Tag::class,
             'multiple' => $multiple,
             'type_options' => [
