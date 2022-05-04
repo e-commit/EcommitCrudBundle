@@ -440,7 +440,7 @@ class CrudExtensionTest extends KernelTestCase
             ->onlyMethods(['getDivIdList', 'getPaginator', 'getRouteName', 'getRouteParameters'])
             ->getMock();
         $crud->expects($this->once())->method('getDivIdList')->willReturn('myId');
-        $crud->expects($this->once())->method('getPaginator')->willReturn($paginator);
+        $crud->expects($this->exactly(2))->method('getPaginator')->willReturn($paginator);
         $crud->expects($this->once())->method('getRouteName')->willReturn('user_crud');
         $crud->expects($this->once())->method('getRouteParameters')->willReturn([]);
 
@@ -451,6 +451,17 @@ class CrudExtensionTest extends KernelTestCase
         ]);
 
         $this->assertSame($expected, $result);
+    }
+
+    public function testCrudPaginatorLinksWithoutPaginator(): void
+    {
+        $crud = $this->getMockBuilder(Crud::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The paginator is not defined');
+        $this->crudExtension->crudPaginatorLinks($this->environment, $crud);
     }
 
     public function testThColumnNotDisplayed(): void

@@ -255,13 +255,15 @@ final class CrudExtension extends AbstractExtension
      */
     public function crudPaginatorLinks(Environment $environment, Crud $crud, array $options = []): string
     {
+        if (!$crud->getPaginator()) {
+            throw new \Exception('The paginator is not defined');
+        }
         if (!isset($options['ajax_options']['update'])) {
             $options['ajax_options']['update'] = '#'.$crud->getDivIdList();
         }
 
         $options = $this->buildOptions('crud_paginator_links', $options, $crud);
 
-        /** @psalm-suppress PossiblyNullArgument */
         return $this->paginatorLinks($environment, $crud->getPaginator(), $crud->getRouteName(), $crud->getRouteParameters(), $options);
     }
 

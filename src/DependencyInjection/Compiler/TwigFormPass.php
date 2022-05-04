@@ -18,13 +18,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class TwigFormPass implements CompilerPassInterface
 {
-    /**
-     * @psalm-suppress PossiblyInvalidArgument
-     */
     public function process(ContainerBuilder $container): void
     {
         $container->setParameter('twig.form.resources', array_merge(
-            $container->getParameter('twig.form.resources'),
+            (array) $container->getParameter('twig.form.resources'),
             [
                 '@EcommitCrud/Form/entity_ajax.html.twig',
             ]

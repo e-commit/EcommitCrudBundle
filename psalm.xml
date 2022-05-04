@@ -13,26 +13,4 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
-
-    <issueHandlers>
-        <ArgumentTypeCoercion>
-            <errorLevel type="suppress">
-                <file name="src/Entity/UserCrudSettings.php" />
-                <file name="src/EventListener/MappingEntities.php" />
-            </errorLevel>
-        </ArgumentTypeCoercion>
-
-        <PossiblyNullReference>
-            <errorLevel type="suppress">
-                <file name="src/DependencyInjection/Configuration.php" />
-            </errorLevel>
-        </PossiblyNullReference>
-
-        <PossiblyUndefinedMethod>
-            <errorLevel type="suppress">
-                <file name="src/DependencyInjection/Configuration.php" />
-                <directory name="src/Form/Filter" />
-            </errorLevel>
-        </PossiblyUndefinedMethod>
-    </issueHandlers>
 </psalm>

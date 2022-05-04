@@ -17,6 +17,7 @@ use Ecommit\CrudBundle\Crud\SearchFormBuilder;
 use Ecommit\CrudBundle\Form\DataTransformer\Entity\EntitiesToIdsTransformer;
 use Ecommit\CrudBundle\Form\DataTransformer\Entity\EntityToIdTransformer;
 use Ecommit\CrudBundle\Form\Type\EntityAjaxType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\ReversedTransformer;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -35,15 +36,17 @@ class EntityAjaxFilter extends AbstractFilter
 
         $builder->addField($property, EntityAjaxType::class, $typeOptions);
 
-        $typeOptions = $builder->getField($property)->getOptions();
+        /** @var FormBuilderInterface $field */
+        $field = $builder->getField($property);
+        $typeOptions = $field->getOptions();
         if ($options['multiple']) {
-            $builder->getField($property)->addModelTransformer(
+            $field->addModelTransformer(
                 new ReversedTransformer(
                     new EntitiesToIdsTransformer($typeOptions['query_builder'], $typeOptions['identifier'], $typeOptions['choice_label'], false, $typeOptions['max_elements'])
                 )
             );
         } else {
-            $builder->getField($property)->addModelTransformer(
+            $field->addModelTransformer(
                 new ReversedTransformer(
                     new EntityToIdTransformer($typeOptions['query_builder'], $typeOptions['identifier'], $typeOptions['choice_label'], false)
                 )

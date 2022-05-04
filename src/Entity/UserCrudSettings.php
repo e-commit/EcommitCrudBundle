@@ -15,6 +15,9 @@ namespace Ecommit\CrudBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @psalm-suppress ArgumentTypeCoercion
+ */
 #[ORM\Entity]
 #[ORM\Table(name: 'user_crud_settings')]
 class UserCrudSettings

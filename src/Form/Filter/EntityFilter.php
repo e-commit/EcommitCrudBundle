@@ -19,6 +19,7 @@ use Ecommit\CrudBundle\Form\DataTransformer\Entity\EntitiesToIdsTransformer;
 use Ecommit\CrudBundle\Form\DataTransformer\Entity\EntityToIdTransformer;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Exception\InvalidConfigurationException;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\ReversedTransformer;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -39,7 +40,9 @@ class EntityFilter extends AbstractFilter
 
         $builder->addField($property, EntityType::class, $typeOptions);
 
-        $typeOptions = $builder->getField($property)->getOptions();
+        /** @var FormBuilderInterface $field */
+        $field = $builder->getField($property);
+        $typeOptions = $field->getOptions();
 
         $em = $typeOptions['em'];
         $identifiers = $em->getClassMetadata($options['class'])->getIdentifierFieldNames();
@@ -49,13 +52,13 @@ class EntityFilter extends AbstractFilter
         $identifier = $identifiers[0];
 
         if ($options['multiple']) {
-            $builder->getField($property)->addModelTransformer(
+            $field->addModelTransformer(
                 new ReversedTransformer(
                     new EntitiesToIdsTransformer($typeOptions['query_builder'], $identifier, $typeOptions['choice_label'], false, $options['max'])
                 )
             );
         } else {
-            $builder->getField($property)->addModelTransformer(
+            $field->addModelTransformer(
                 new ReversedTransformer(
                     new EntityToIdTransformer($typeOptions['query_builder'], $identifier, $typeOptions['choice_label'], false)
                 )

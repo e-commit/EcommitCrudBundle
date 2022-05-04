@@ -20,6 +20,9 @@ final class MappingEntities
 {
     protected bool $isLoad = false;
 
+    /**
+     * @psalm-suppress ArgumentTypeCoercion
+     */
     public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs): void
     {
         $metadata = $eventArgs->getClassMetadata();
