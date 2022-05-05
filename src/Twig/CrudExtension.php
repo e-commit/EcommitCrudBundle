@@ -130,23 +130,23 @@ final class CrudExtension extends AbstractExtension
     /**
      * Displays links paginator.
      *
-     * @param string $routeName   Route name
-     * @param array  $routeParams Route parameters
-     * @param array  $options     Options:
-     *                            * ajax_options: Ajax Options. If null, Ajax is not used. Default: null
-     *                            * attribute_page: Attribute inside url. Default: page
-     *                            * type: Type of links paginator: elastic (all links) or sliding. Default: sliding
-     *                            * max_pages_before: Max links before current page (only if sliding type is used). Default: 3
-     *                            * max_pages_after: Max links after current page (only if sliding type is used). Default: 3
-     *                            * nav_attr: "nav" attributes
-     *                            * ul_attr: "ul" attributes
-     *                            * li_attr: "li" attributes for each page type (sub arrays: first_page, previous_page, current_page, next_page, last_page, other_page)
-     *                            * a_attr: "a" CSS attributes for each page type (sub arrays: first_page, previous_page, current_page, next_page, last_page, other_page)
-     *                            * render: Template used for generation without the default process. If null, default process is used
-     *                            * theme: Theme used. If null, default theme is used
-     *                            * block: Twig block used. Default: paginator_links
+     * @param string $routeName       Route name
+     * @param array  $routeParameters Route parameters
+     * @param array  $options         Options:
+     *                                * ajax_options: Ajax Options. If null, Ajax is not used. Default: null
+     *                                * attribute_page: Attribute inside url. Default: page
+     *                                * type: Type of links paginator: elastic (all links) or sliding. Default: sliding
+     *                                * max_pages_before: Max links before current page (only if sliding type is used). Default: 3
+     *                                * max_pages_after: Max links after current page (only if sliding type is used). Default: 3
+     *                                * nav_attr: "nav" attributes
+     *                                * ul_attr: "ul" attributes
+     *                                * li_attr: "li" attributes for each page type (sub arrays: first_page, previous_page, current_page, next_page, last_page, other_page)
+     *                                * a_attr: "a" CSS attributes for each page type (sub arrays: first_page, previous_page, current_page, next_page, last_page, other_page)
+     *                                * render: Template used for generation without the default process. If null, default process is used
+     *                                * theme: Theme used. If null, default theme is used
+     *                                * block: Twig block used. Default: paginator_links
      */
-    public function paginatorLinks(Environment $environment, PaginatorInterface $paginator, string $routeName, array $routeParams = [], array $options = []): string
+    public function paginatorLinks(Environment $environment, PaginatorInterface $paginator, string $routeName, array $routeParameters = [], array $options = []): string
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
@@ -207,8 +207,8 @@ final class CrudExtension extends AbstractExtension
         if ($options['render']) {
             return $environment->render($options['render'], [
                 'paginator' => $paginator,
-                'routeName' => $routeName,
-                'routeParams' => $routeParams,
+                'route_name' => $routeName,
+                'route_parameters' => $routeParameters,
                 'options' => $options,
             ]);
         }
@@ -243,7 +243,7 @@ final class CrudExtension extends AbstractExtension
             'paginator' => $paginator,
             'pages' => $pages,
             'route_name' => $routeName,
-            'route_params' => $routeParams,
+            'route_parameters' => $routeParameters,
             'options' => $options,
         ]));
     }

@@ -74,7 +74,7 @@
         {% set li_attr_child = li_attr_child|default([]) %}
         {% set a_attr_child = a_attr_child|default([]) %}
         <li{% with { attr: li_attr_child } %}{{ block('attributes', template_name) }}{% endwith %}>
-            <a href="{{ path(route_name, route_params|merge({(attribute_page): page})) }}"{% with { attr: a_attr_child } %}{{ block('attributes', template_name) }}{% endwith %}>{{ page_label }}</a>
+            <a href="{{ path(route_name, route_parameters|merge({(attribute_page): page})) }}"{% with { attr: a_attr_child } %}{{ block('attributes', template_name) }}{% endwith %}>{{ page_label }}</a>
         </li>
     {% endif %}
 {% endblock %}
