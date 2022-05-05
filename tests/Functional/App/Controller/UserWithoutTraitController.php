@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class UserWithoutTraitController extends AbstractController
 {
-    protected function getCrud(string $sessionName, array $routeParams = []): Crud
+    protected function getCrud(string $sessionName, array $routeParameters = []): Crud
     {
         $em = $this->container->get('doctrine')->getManager();
 
@@ -41,7 +41,7 @@ class UserWithoutTraitController extends AbstractController
             ->setMaxPerPage([5, 5, 10, 50], 5)
             ->setDefaultSort('firstName', Crud::ASC)
             ->createSearchForm(new UserSearcher())
-            ->setRoute('user_without_trait_ajax_crud', $routeParams)
+            ->setRoute('user_without_trait_ajax_crud', $routeParameters)
             ->setPersistentSettings(true);
         $crud = $this->container->get(CrudFactory::class)->create($crudConfig->getOptions());
 

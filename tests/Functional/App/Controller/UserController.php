@@ -36,7 +36,7 @@ class UserController extends AbstractCrudController
             ->setMaxPerPage([5, 10, 50], 5)
             ->setDefaultSort('firstName', Crud::ASC)
             ->createSearchForm(new UserSearcher())
-            ->setRoute(static::getCrudRouteName(), static::getCrudRouteParams())
+            ->setRoute(static::getCrudRouteName(), static::getCrudRouteParameters())
             ->setPersistentSettings(static::getPersistentSettings());
 
         return $crudConfig->getOptions();
@@ -65,7 +65,7 @@ class UserController extends AbstractCrudController
         return 'user_ajax_crud';
     }
 
-    public function getCrudRouteParams(): array
+    public function getCrudRouteParameters(): array
     {
         return [];
     }

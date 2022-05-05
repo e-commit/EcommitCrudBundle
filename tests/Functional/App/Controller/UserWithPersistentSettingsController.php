@@ -27,7 +27,7 @@ class UserWithPersistentSettingsController extends UserController
         return 'user_with_persistent_settings_ajax_crud';
     }
 
-    public function getCrudRouteParams(): array
+    public function getCrudRouteParameters(): array
     {
         return [
             'scope' => $this->container->get('request_stack')->getCurrentRequest()->attributes->get('scope'),
