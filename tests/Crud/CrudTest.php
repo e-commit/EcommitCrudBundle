@@ -18,6 +18,7 @@ use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Crud\CrudColumn;
 use Ecommit\CrudBundle\Crud\CrudConfig;
 use Ecommit\CrudBundle\Crud\CrudSession;
+use Ecommit\CrudBundle\Crud\QueryBuilderInterface;
 use Ecommit\CrudBundle\Crud\SearchFormBuilder;
 use Ecommit\CrudBundle\Form\Searcher\SearcherInterface;
 use Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher\UserSearcher;
@@ -736,6 +737,17 @@ class CrudTest extends AbstractCrudTest
 
         $this->assertInstanceOf(Crud::class, $crud->setPaginator($this->createMock(PaginatorInterface::class)));
         $this->assertInstanceOf(PaginatorInterface::class, $crud->getPaginator());
+    }
+
+    public function testPaginatorWithoutDoctrineAndPaginatorNotDefined(): void
+    {
+        $crudConfig = $this->createValidCrudConfig()
+            ->setQueryBuilder($this->createMock(QueryBuilderInterface::class));
+        $crud = $this->createCrud($crudConfig);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Doctrine paginator is not compatible with Ecommit\CrudBundle\Crud\QueryBuilderInterface query builder');
+        $crud->build();
     }
 
     public function testGetDisplaySettingsForm(): void

@@ -524,6 +524,11 @@ final class Crud
             return;
         }
 
+        $queryBuilder = $this->getQueryBuilder();
+        if ($queryBuilder instanceof QueryBuilderInterface) {
+            throw new \Exception('Doctrine paginator is not compatible with Ecommit\CrudBundle\Crud\QueryBuilderInterface query builder');
+        }
+
         // Case: Auto paginator is enabled
         $paginatorOptions = [];
         if (\is_array($this->options['build_paginator'])) {
@@ -531,7 +536,7 @@ final class Crud
         }
 
         $this->paginator = DoctrinePaginatorBuilder::createDoctrinePaginator(
-            $this->getQueryBuilder(),
+            $queryBuilder,
             $this->sessionValues->getPage(),
             $this->sessionValues->getMaxPerPage(),
             $paginatorOptions
