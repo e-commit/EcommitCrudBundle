@@ -37,7 +37,7 @@ return $config->setRiskyAllowed(true)
         'phpdoc_order' => true,
         'protected_to_private' => false,
         'fully_qualified_strict_types' => false,
-        'phpdoc_to_comment' => false, // PSALM comments
+        'phpdoc_to_comment' => ['ignored_tags' => ['psalm-suppress']],
     ])
     ->setFinder($finder)
 ;
