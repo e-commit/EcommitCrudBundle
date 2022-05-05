@@ -104,7 +104,7 @@ Voir aussi les [options générales](#options-générales-pour-tous-les-filtres)
 | max | Nombre mini d'éléments sélectionnables | Non | 1000 |
 | class | Classe de l'entité Doctrine | Oui | |
 | route_name | Route à utiliser pour la recherche Ajax | Oui | |
-| route_params | Paramètres à utiliser pour la recherche Ajax | Non | [ ] |
+| route_parameters | Paramètres à utiliser pour la recherche Ajax | Non | [ ] |
 
 Voir aussi les [options générales](#options-générales-pour-tous-les-filtres) 
 

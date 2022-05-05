@@ -30,7 +30,7 @@ class EntityAjaxFilter extends AbstractFilter
         $typeOptions = $this->getTypeOptions($options, array_merge($this->getCollectionTypeOptions($options), [
             'class' => $options['class'],
             'route_name' => $options['route_name'],
-            'route_params' => $options['route_params'],
+            'route_parameters' => $options['route_parameters'],
             'max_elements' => $options['max'],
         ]));
 
@@ -63,7 +63,7 @@ class EntityAjaxFilter extends AbstractFilter
     {
         $this->configureCollectionOptions($resolver);
         $resolver->setDefaults([
-            'route_params' => [],
+            'route_parameters' => [],
         ]);
         $resolver->setRequired([
             'class',

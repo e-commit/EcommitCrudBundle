@@ -18,5 +18,5 @@ Peut être par exemple utilisé avec [Select2](https://select2.org/)
 | em | Entity Manager Doctrine à utiliser | Non | Entity Manager par défaut en fonction de l'option `class` |
 | query_builder | Query Builder à utiliser | Non | |
 | choice_label | Rendu des labels | Non | |
-| route_params | Paramètres de la route Symfony pour la requête Ajax | Non | [ ] |
+| route_parameters | Paramètres de la route Symfony pour la requête Ajax | Non | [ ] |
 | max_elements | Nombre d'éléments maxi pouvant être sélectionnés | Non | 10000 |

@@ -251,14 +251,14 @@ class EntityAjaxTypeTest extends KernelTestCase
         ];
     }
 
-    public function testViewWithRouteParams(): void
+    public function testViewWithRouteParameters(): void
     {
         $tag = $this->em->getRepository(Tag::class)->find(2);
 
         $field = $this->factory->create(EntityAjaxType::class, $tag, [
             'class' => Tag::class,
             'route_name' => 'fake_route',
-            'route_params' => ['param1' => 'value1'],
+            'route_parameters' => ['param1' => 'value1'],
             'data_class' => null,
         ]);
         $view = $field->createView();
@@ -266,7 +266,7 @@ class EntityAjaxTypeTest extends KernelTestCase
         $this->assertSame('/fake?param1=value1', $view->vars['url']);
     }
 
-    public function testViewWithEmParams(): void
+    public function testViewWithEmParameter(): void
     {
         $tag = $this->em->getRepository(Tag::class)->find(2);
 

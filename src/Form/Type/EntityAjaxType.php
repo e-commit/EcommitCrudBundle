@@ -61,7 +61,7 @@ class EntityAjaxType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
-        $view->vars['url'] = $this->router->generate($options['route_name'], $options['route_params']);
+        $view->vars['url'] = $this->router->generate($options['route_name'], $options['route_parameters']);
         $view->vars['multiple'] = $options['multiple'];
 
         if ($options['multiple']) {
@@ -81,7 +81,7 @@ class EntityAjaxType extends AbstractType
             'em' => null,
             'query_builder' => null,
             'choice_label' => null,
-            'route_params' => [],
+            'route_parameters' => [],
             'max_elements' => 10000,
             'identifier' => null, // Internal
         ]);
