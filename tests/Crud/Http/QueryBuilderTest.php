@@ -209,7 +209,9 @@ class QueryBuilderTest extends TestCase
             'method' => 'POST',
             'url' => 'http://test/url?queryparam1=queryparamval1&page=10&per_page=100&sort=col1&sort-direction=ASC',
             'body' => 'bodyparam1=bodyparamval1',
-            'headers' => ['headerparam1: headerparamval1'],
+            'headers' => [
+                'headerparam1: headerparamval1',
+            ],
         ]);
     }
 
@@ -260,9 +262,9 @@ class QueryBuilderTest extends TestCase
         ksort($expectedOptions);
         ksort($options);
 
-        // Remove Content-Length header
+        // Remove Content-Length and Content-Type headers
         foreach ($options['headers'] as $index => $header) {
-            if (preg_match('/^Content-Length/', $header)) {
+            if (preg_match('/^Content-(Length|Type)/', $header)) {
                 unset($options['headers'][$index]);
             }
         }

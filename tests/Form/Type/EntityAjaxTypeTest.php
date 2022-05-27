@@ -151,7 +151,6 @@ class EntityAjaxTypeTest extends KernelTestCase
         $this->assertFalse($field->isSynchronized());
         $this->assertFalse($field->isValid());
         $this->assertNull($field->getData());
-        $this->assertSame($submittedData, $field->getViewData()); // Twig doesn't display invalid list
     }
 
     public function getTestSubmitInvalidProvider(): array
