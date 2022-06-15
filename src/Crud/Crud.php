@@ -516,7 +516,7 @@ final class Crud
         if ($this->options['build_paginator'] instanceof \Closure) {
             // Case: Manual paginator (by closure) is enabled
             $this->paginator = $this->options['build_paginator']->__invoke(
-                $this->getQueryBuilder(),
+                $this,
                 $this->sessionValues->getPage(),
                 $this->sessionValues->getMaxPerPage()
             );

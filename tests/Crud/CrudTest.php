@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Ecommit\CrudBundle\Tests\Crud;
 
-use Doctrine\ORM\QueryBuilder;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Crud\CrudColumn;
 use Ecommit\CrudBundle\Crud\CrudConfig;
@@ -556,8 +555,8 @@ class CrudTest extends AbstractCrudTest
     {
         $paginator = $this->createMock(PaginatorInterface::class);
         $crudConfig = $this->createValidCrudConfig()
-            ->setBuildPaginator(function (QueryBuilder $queryBuilder, int $page, int $resultsPerPage) use ($paginator) {
-                $this->assertInstanceOf(QueryBuilder::class, $queryBuilder);
+            ->setBuildPaginator(function (Crud $crud, int $page, int $resultsPerPage) use ($paginator) {
+                $this->assertInstanceOf(Crud::class, $crud);
                 $this->assertSame(1, $page);
                 $this->assertSame(50, $resultsPerPage);
 
