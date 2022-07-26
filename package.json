@@ -4,7 +4,7 @@
   },
   "devDependencies": {
     "@ecommit/crud-bundle": "link:assets",
-    "@symfony/webpack-encore": "^1.8",
+    "@symfony/webpack-encore": "^3.0",
     "core-js": "^3.0.0",
     "eslint": "^8.0",
     "eslint-config-standard": "^16.0.3",
