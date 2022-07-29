@@ -269,6 +269,8 @@ class TestCrudControllerTest extends PantherTestCase
      */
     public function testResetSettings(Client $client): Client
     {
+        $this->assertSame(['username', 'firstName', 'lastName'], $this->getCheckedColumns($client->getCrawler()));
+
         $button = $client->getCrawler()->filterXPath('//button[contains(., "Display Settings")]');
         $button->first()->click();
 
@@ -281,6 +283,7 @@ class TestCrudControllerTest extends PantherTestCase
         $this->assertSame(['first_name', Crud::ASC], $this->getSort($client->getCrawler()));
         $this->assertSame('AudeJavel', $this->getFirstUsername($client->getCrawler()));
         $this->checkBeforeAndAfterBuild($client->getCrawler());
+        $this->assertSame(['firstName', 'lastName'], $this->getCheckedColumns($client->getCrawler()));
 
         return $client;
     }
@@ -292,6 +295,7 @@ class TestCrudControllerTest extends PantherTestCase
     {
         $client->request('GET', static::URL);
 
+        $this->assertSame(['firstName', 'lastName'], $this->getCheckedColumns($client->getCrawler()));
         $this->assertSame([5, 2], $this->countRowsAndColumns($client->getCrawler()));
         $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
         $this->assertSame(['first_name', Crud::ASC], $this->getSort($client->getCrawler()));
@@ -380,5 +384,10 @@ class TestCrudControllerTest extends PantherTestCase
         }
 
         $this->assertCount(1, $crawler->filterXPath('//div[contains(text(), "TEST BEFORE AFTER BUILD '.static::SEARCH_IN_LIST.'")]'));
+    }
+
+    protected function getCheckedColumns(Crawler $crawler): array
+    {
+        return $crawler->filterXPath('//form[@name="crud_display_settings_'.static::SESSION_NAME.'"]/descendant::input[@type="checkbox" and @checked]')->extract(['value']);
     }
 }

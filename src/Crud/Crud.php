@@ -590,6 +590,8 @@ final class Crud
                 ->getQuery()
                 ->execute();
         }
+
+        $this->createDisplaySettingsForm();
     }
 
     public function createView(): self
