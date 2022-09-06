@@ -39,6 +39,7 @@ final class CrudConfig implements \ArrayAccess
      *  Called with an array of options.
      *
      * @see CrudColumn for available options
+     *
      * @psalm-suppress MissingParamType
      */
     public function addColumn(...$args): self
@@ -78,6 +79,7 @@ final class CrudConfig implements \ArrayAccess
      *  Called with an array of options.
      *
      * @see CrudColumn for available options
+     *
      * @psalm-suppress MissingParamType
      */
     public function addVirtualColumn(...$args): self
