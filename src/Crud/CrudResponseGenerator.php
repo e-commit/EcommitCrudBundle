@@ -18,7 +18,6 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Twig\Environment;
@@ -40,9 +39,6 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
     public function getAjaxResponse(Crud $crud, array $options = []): Response
     {
         $masterRequest = $this->container->get('request_stack')->getMainRequest();
-        if (!$masterRequest->isXmlHttpRequest()) {
-            throw new NotFoundHttpException('Ajax is required');
-        }
 
         $options = $this->getOptions($options);
         $data = $this->processCrud($crud, $options);

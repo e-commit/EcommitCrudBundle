@@ -20,7 +20,7 @@ $(function () {
       return
     }
 
-    click(this)
+    click(this).catch((error) => console.error(error))
   })
 
   $(document).on('click', 'a.ec-crud-ajax-link-auto', function (event) {
@@ -31,7 +31,7 @@ $(function () {
       return
     }
 
-    link(this)
+    link(this).catch((error) => console.error(error))
   })
 
   $(document).on('submit', 'form.ec-crud-ajax-form-auto', function (event) {
@@ -42,11 +42,24 @@ $(function () {
       return
     }
 
-    sendForm(this)
+    sendForm(this).catch((error) => console.error(error))
   })
 })
 
 export function sendRequest (options) {
+  const eventBeginning = new CustomEvent('ec-crud-ajax', {
+    cancelable: true,
+    detail: {
+      options: options
+    }
+  })
+  document.dispatchEvent(eventBeginning)
+  if (eventBeginning.defaultPrevented) {
+    return new Promise((resolve, reject) => {
+      resolve(null)
+    })
+  }
+
   options = optionsResolver.resolve(
     {
       url: null,
@@ -56,59 +69,138 @@ export function sendRequest (options) {
       onSuccess: null,
       onError: null,
       onComplete: null,
-      dataType: 'html',
+      responseDataType: 'text',
       method: 'POST',
-      data: null,
+      query: {},
+      body: null,
+      successfulResponseRequired: false,
       cache: false,
       options: {}
     },
     options
   )
 
-  options = $.extend({}, options, options.options)
-
   if (optionsResolver.isNotBlank(options.url) === false) {
-    console.error('Value required: url')
-
-    return
+    return new Promise((resolve, reject) => {
+      reject(new TypeError('Value required: url'))
+    })
   }
 
-  if (optionsResolver.isNotBlank(options.onBeforeSend)) {
-    runCallback(options.onBeforeSend, options)
-  }
-  if (options.stop !== undefined && options.stop === true) {
-    return
-  }
+  options.urlResolved = resolveUrl(options)
 
   const callbacksSuccess = []
   if (optionsResolver.isNotBlank(options.update)) {
     callbacksSuccess.push({
       priority: 10,
-      callback: function (data, textStatus, jqXHR) {
-        updateDom(options.update, options.updateMode, data)
-      }
+      callback: (data, response) => updateDom(options.update, options.updateMode, data)
     })
   }
   if (optionsResolver.isNotBlank(options.onSuccess)) {
     callbacksSuccess.push(options.onSuccess)
   }
 
-  $.ajax({
-    url: options.url,
-    type: options.method,
-    dataType: options.dataType,
-    cache: options.cache,
-    data: options.data,
-    success: function (data, textStatus, jqXHR) {
-      runCallback(callbacksSuccess, data, textStatus, jqXHR)
-    },
-    error: function (jqXHR, textStatus, errorThrown) {
-      runCallback(options.onError, jqXHR, textStatus, errorThrown)
-    },
-    complete: function (jqXHR, textStatus) {
-      runCallback(options.onComplete, jqXHR, textStatus)
+  let fetchOptions = {
+    method: options.method
+  }
+  if (options.body) {
+    if (typeof options.body === 'string' || options.body instanceof String || options.body instanceof FormData) {
+      fetchOptions.body = options.body
+    } else if (options.body instanceof Object) {
+      const formData = new FormData()
+      Object.entries(options.body).forEach(entry => {
+        if (Array.isArray(entry[1])) {
+          entry[1].forEach(subEntry => {
+            formData.append(entry[0], subEntry)
+          })
+        } else {
+          formData.append(entry[0], entry[1])
+        }
+      })
+      fetchOptions.body = formData
+    } else if (options.body !== null) {
+      return new Promise((resolve, reject) => {
+        reject(new TypeError('Bad type for option "body"'))
+      })
+    }
+  }
+
+  const eventBeforeSend = new CustomEvent('ec-crud-ajax-before-send', {
+    cancelable: true,
+    detail: {
+      options: options
     }
   })
+  document.dispatchEvent(eventBeforeSend)
+  if (eventBeforeSend.defaultPrevented) {
+    return new Promise((resolve, reject) => {
+      resolve(null)
+    })
+  }
+  if (optionsResolver.isNotBlank(options.onBeforeSend)) {
+    runCallback(options.onBeforeSend, options)
+  }
+  if (options.stop !== undefined && options.stop === true) {
+    return new Promise((resolve, reject) => {
+      resolve(null)
+    })
+  }
+
+  fetchOptions = $.extend(fetchOptions, options.options)
+
+  const fetchPromise = fetch(options.urlResolved, fetchOptions)
+  const ajaxPromise = new Promise((resolve, reject) => {
+    fetchPromise.then(response => {
+      if (response.ok) {
+        // Response OK (status in the range 200 – 299)
+
+        let dataPromise
+        if (options.responseDataType === 'text' || options.responseDataType === 'json') {
+          // Using a clone avoids "TypeError: Already read" when response read is read a 2nd time later
+          const responseCloned = response.clone()
+
+          try {
+            if (options.responseDataType === 'text') {
+              dataPromise = responseCloned.text()
+            } else if (options.responseDataType === 'json') {
+              dataPromise = responseCloned.json()
+            }
+          } catch (e) {
+          }
+        } else {
+          dataPromise = new Promise((resolve, reject) => {
+            resolve(null)
+          })
+        }
+
+        dataPromise.then(data => {
+          executeEventsAndCallbacksSuccess(callbacksSuccess, options, data, response)
+          resolve(response)
+        })
+
+        dataPromise.catch(error => {
+          error = 'Error during fetching response body: ' + error
+          executeEventsAndCallbacksError(options, error, response)
+          reject(error)
+        })
+      } else {
+        // Response not OK (status not in the range 200 – 299)
+        executeEventsAndCallbacksError(options, response.statusText, response)
+        if (options.successfulResponseRequired) {
+          reject(new Error('The response is not successful: ' + response.statusText))
+        } else {
+          resolve(response)
+        }
+      }
+    })
+
+    fetchPromise.catch(error => {
+      error = 'Error during query execution: ' + error
+      executeEventsAndCallbacksError(options, error, null)
+      reject(error)
+    })
+  })
+
+  return ajaxPromise
 }
 
 export function click (element, options) {
@@ -118,7 +210,7 @@ export function click (element, options) {
     optionsResolver.getDataAttributes(element, 'ecCrudAjax')
   )
 
-  sendRequest(options)
+  return sendRequest(options)
 }
 
 export function link (link, options) {
@@ -134,7 +226,7 @@ export function link (link, options) {
     )
   )
 
-  sendRequest(options)
+  return sendRequest(options)
 }
 
 export function sendForm (form, options) {
@@ -144,7 +236,7 @@ export function sendForm (form, options) {
     {
       url: $(form).attr('action'),
       method: $(form).attr('method'),
-      data: $(form).serialize()
+      body: new FormData($(form).get(0))
     },
     optionsResolver.resolve(
       options,
@@ -152,7 +244,7 @@ export function sendForm (form, options) {
     )
   )
 
-  sendRequest(options)
+  return sendRequest(options)
 }
 
 export function updateDom (element, updateMode, content) {
@@ -190,4 +282,68 @@ export function updateDom (element, updateMode, content) {
     content: content
   })
   $(element).trigger(eventAfter)
+}
+
+function resolveUrl (options) {
+  const url = new URL(options.url, window.location.origin)
+  const searchParams = url.searchParams
+
+  Object.entries(options.query).forEach(entry => {
+    if (Array.isArray(entry[1])) {
+      if (searchParams.has(entry[0])) {
+        searchParams.delete(entry[0])
+      }
+      entry[1].forEach(subEntry => {
+        searchParams.append(entry[0], subEntry)
+      })
+    } else {
+      searchParams.set(entry[0], entry[1])
+    }
+  })
+
+  if (!options.cache && !searchParams.has('_')) {
+    searchParams.set('_', Date.now())
+  }
+
+  return url.toString()
+}
+
+function executeEventsAndCallbacksSuccess (callbacksSuccess, options, data, response) {
+  const eventOnSuccess = new CustomEvent('ec-crud-ajax-on-success', {
+    detail: {
+      data: data,
+      response: response
+    }
+  })
+  document.dispatchEvent(eventOnSuccess)
+  runCallback(callbacksSuccess, data, response)
+
+  const eventOnComplete = new CustomEvent('ec-crud-ajax-on-complete', {
+    detail: {
+      statusText: response.statusText,
+      response: response
+    }
+  })
+  document.dispatchEvent(eventOnComplete)
+  runCallback(options.onComplete, response.statusText, response)
+}
+
+function executeEventsAndCallbacksError (options, statusText, response) {
+  const eventOnError = new CustomEvent('ec-crud-ajax-on-error', {
+    detail: {
+      statusText: statusText,
+      response: response
+    }
+  })
+  document.dispatchEvent(eventOnError)
+  runCallback(options.onError, statusText, response)
+
+  const eventOnComplete = new CustomEvent('ec-crud-ajax-on-complete', {
+    detail: {
+      statusText: statusText,
+      response: response
+    }
+  })
+  document.dispatchEvent(eventOnComplete)
+  runCallback(options.onComplete, statusText, response)
 }

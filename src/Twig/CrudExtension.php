@@ -651,9 +651,9 @@ final class CrudExtension extends AbstractExtension
      *                           * on_success: Callback
      *                           * on_error: Callback
      *                           * on_complete: Callback
-     *                           * data_type: Request type. Default: html
      *                           * method: Resquest method: Default: POST
-     *                           * data: Data sent
+     *                           * query: Query string parameters (GET)
+     *                           * body: Request body
      *                           * cache: Use cache. Default: false
      *                           * options: Array of options
      */
@@ -681,9 +681,9 @@ final class CrudExtension extends AbstractExtension
             'on_success' => null,
             'on_error' => null,
             'on_complete' => null,
-            'data_type' => null,
             'method' => null,
-            'data' => null,
+            'query' => null,
+            'body' => null,
             'cache' => null,
             'options' => null,
         ]);

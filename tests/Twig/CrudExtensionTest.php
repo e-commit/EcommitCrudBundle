@@ -165,10 +165,10 @@ class CrudExtensionTest extends KernelTestCase
             [[], ''],
             [['url' => '/url?id=a'], ' data-ec-crud-ajax-url="/url?id=a"'],
             [['url' => '/url?id=a', 'method' => 'GET'], ' data-ec-crud-ajax-url="/url?id=a" data-ec-crud-ajax-method="GET"'],
-            [['data' => '<script>ValueToEscape</script>'], ' data-ec-crud-ajax-data="&lt;script&gt;ValueToEscape&lt;/script&gt;"'],
+            [['body' => '<script>ValueToEscape</script>'], ' data-ec-crud-ajax-body="&lt;script&gt;ValueToEscape&lt;/script&gt;"'],
             [['cache' => true], ' data-ec-crud-ajax-cache="true"'],
             [['cache' => false], ' data-ec-crud-ajax-cache="false"'],
-            [['data' => ['var1' => 'value1']], ' data-ec-crud-ajax-data="{&quot;var1&quot;:&quot;value1&quot;}"'],
+            [['body' => ['var1' => 'value1']], ' data-ec-crud-ajax-body="{&quot;var1&quot;:&quot;value1&quot;}"'],
         ];
     }
 

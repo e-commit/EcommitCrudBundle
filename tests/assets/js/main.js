@@ -7,5 +7,9 @@
  * file that was distributed with this source code.
  */
 
+// Use fetch with jasmine-ajax
+window.fetch = undefined
+require('whatwg-fetch')
+
 const testsContext = require.context('.', true, /\.spec\.js$/)
 testsContext.keys().forEach(testsContext)

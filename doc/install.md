@@ -6,6 +6,10 @@ Prérequis :
 * Yarn
 * Webpack Encore
 * jQuery
+* Pour une compatibilité avec un maximum de navigateurs Internet, il est conseillé :
+  * De configurer Webpack Encore pour activer Babel et core-js
+  * D'utiliser un [polyfill pour Fetch](https://github.com/github/fetch)
+  * D'utiliser un [polyfill pour FormData](https://github.com/jimmywarting/FormData)
 * Un gestionnaire de thème chargé par Webpack Encore parmi :
     * Bootstrap 3
     * Votre thème personnalisé (créer un thème Twig qui hérite `@EcommitCrud/Theme/base.html.twig`)

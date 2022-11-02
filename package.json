@@ -19,7 +19,8 @@
     "karma-jasmine-ajax": "^0.1.13",
     "karma-spec-reporter": "^0.0.32",
     "karma-webpack": "^5.0",
-    "webpack-notifier": "^1.6.0"
+    "webpack-notifier": "^1.6.0",
+    "whatwg-fetch": "^3.6.2"
   },
   "private": true
 }
