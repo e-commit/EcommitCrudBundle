@@ -494,7 +494,7 @@ final class CrudExtension extends AbstractExtension
             /** @var FormView $searchForm */
             $searchForm = $crud->getSearchForm();
 
-            return array_merge(
+            $attr = array_merge(
                 [
                     'data-crud-search-id' => $crud->getDivIdSearch(),
                     'data-crud-list-id' => $crud->getDivIdList(),
@@ -502,8 +502,10 @@ final class CrudExtension extends AbstractExtension
                 $searchForm->vars['attr'],
                 $value,
                 $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options'])),
-                ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-search-form' : 'ec-crud-search-form'],
             );
+            $attr['class'] = (isset($attr['class'])) ? $attr['class'].' ec-crud-search-form' : 'ec-crud-search-form';
+
+            return $attr;
         });
         $options = $resolver->resolve($this->buildOptions('crud_search_form_start', $options, $crud));
 
@@ -620,6 +622,8 @@ final class CrudExtension extends AbstractExtension
         }
         if (isset($options['attr']['class']) && null !== $options['attr']['class']) {
             $options['attr']['class'] = sprintf('%s %s', $autoClass, $options['attr']['class']);
+        } elseif (isset($formView->vars['attr']['class']) && null !== $formView->vars['attr']['class']) {
+            $options['attr']['class'] = sprintf('%s %s', $autoClass, $formView->vars['attr']['class']);
         } else {
             $options['attr']['class'] = $autoClass;
         }

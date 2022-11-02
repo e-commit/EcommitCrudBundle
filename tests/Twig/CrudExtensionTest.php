@@ -83,6 +83,22 @@ class CrudExtensionTest extends KernelTestCase
         $this->assertMatchesXpath($html, $xpath);
     }
 
+    public function testFormStartAjaxWithClassAttrInFormView(): void
+    {
+        $builder = $this->formFactory->createBuilder(FormType::class, null, [
+            'action' => '/url',
+            'method' => 'POST',
+            'csrf_protection' => false,
+            'attr' => [
+                'class' => 'my-class',
+            ],
+        ]);
+        $html = $this->crudExtension->formStartAjax($builder->getForm()->createView());
+
+        $xpath = '//form[(contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")) and contains(concat(" ", normalize-space(@class), " "), " my-class ")]';
+        $this->assertMatchesXpath($html, $xpath);
+    }
+
     public function testFormStartAjaxWithAjaxOptions(): void
     {
         $html = $this->crudExtension->formStartAjax($this->createFormView(), [
