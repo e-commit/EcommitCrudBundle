@@ -12,6 +12,8 @@ Prérequis :
   * D'utiliser un [polyfill pour FormData](https://github.com/jimmywarting/FormData)
 * Un gestionnaire de thème chargé par Webpack Encore parmi :
     * Bootstrap 3
+    * Bootstrap 4
+    * Bootstrap 5
     * Votre thème personnalisé (créer un thème Twig qui hérite `@EcommitCrud/Theme/base.html.twig`)
 * Un gestionnaire d'icones chargé par Webpack Encore parmi :
     * Fontawesome 4
