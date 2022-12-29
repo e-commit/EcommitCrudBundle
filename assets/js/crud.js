@@ -7,117 +7,162 @@
  * file that was distributed with this source code.
  */
 
-import $ from 'jquery'
 import { click, sendForm, sendRequest, updateDom } from './ajax'
 import { closeModal, openModal } from './modal/modal-manager'
+import { getElement } from './options-resolver'
 
-$(document).on('submit', 'form.ec-crud-search-form', function (event) {
+const ready = (callback) => {
+  if (document.readyState !== 'loading') callback()
+  else document.addEventListener('DOMContentLoaded', callback)
+}
+
+ready(function () {
+  document.addEventListener('submit', function (event) {
+    if (event.target.matches('form.ec-crud-search-form')) {
+      onSubmitCrudSearchForm(event)
+    }
+
+    if (event.target.matches('.ec-crud-display-settings form')) {
+      onCrudDisplaySettingsSubmit(event)
+    }
+  })
+
+  document.addEventListener('click', function (event) {
+    if (event.target.matches('button.ec-crud-search-reset')) {
+      onResetCrudSearchForm(event)
+    }
+
+    if (event.target.matches('button.ec-crud-display-settings-button')) {
+      onCrudDisplaySettingsOpen(event)
+    }
+
+    if (event.target.matches('button.ec-crud-display-settings-check-all-columns')) {
+      onCrudDisplaySettingsCheckAllColumns(event)
+    }
+
+    if (event.target.matches('button.ec-crud-display-settings-uncheck-all-columns')) {
+      onCrudDisplaySettingsUncheckAllColumns(event)
+    }
+
+    if (event.target.matches('button.ec-crud-display-settings-reset')) {
+      onCrudDisplaySettingsReset(event)
+    }
+  })
+})
+
+function onSubmitCrudSearchForm (event) {
   event.preventDefault()
 
-  const searchId = $(this).attr('data-crud-search-id')
-  const listId = $(this).attr('data-crud-list-id')
+  const form = event.target
+  const searchContainer = getElement('#' + form.getAttribute('data-crud-search-id'))
+  const listContainer = getElement('#' + form.getAttribute('data-crud-list-id'))
 
-  sendForm(this, {
+  sendForm(form, {
     responseDataType: 'json',
     onSuccess: function (json, response) {
-      updateDom($('#' + searchId), 'update', json.render_search)
-      updateDom($('#' + listId), 'update', json.render_list)
+      updateDom(searchContainer, 'update', json.render_search)
+      updateDom(listContainer, 'update', json.render_list)
     }
   })
-})
+}
 
-$(document).on('click', 'button.ec-crud-search-reset', function (event) {
-  const searchId = $(this).attr('data-crud-search-id')
-  const listId = $(this).attr('data-crud-list-id')
+function onResetCrudSearchForm (event) {
+  const button = event.target
+  const searchContainer = getElement('#' + button.getAttribute('data-crud-search-id'))
+  const listContainer = getElement('#' + button.getAttribute('data-crud-list-id'))
 
-  click(this, {
+  click(button, {
     responseDataType: 'json',
     onSuccess: function (json, response) {
-      updateDom($('#' + searchId), 'update', json.render_search)
-      updateDom($('#' + listId), 'update', json.render_list)
+      updateDom(searchContainer, 'update', json.render_search)
+      updateDom(listContainer, 'update', json.render_list)
     }
   })
-})
+}
 
-$(document).on('click', 'button.ec-crud-display-settings-button', function (event) {
-  const displaySettingsContainerId = $(this).attr('data-display-settings')
-  const isModal = $('#' + displaySettingsContainerId).attr('data-modal') === '1'
+function onCrudDisplaySettingsOpen (event) {
+  const button = event.target
+  const displaySettingsContainer = getElement('#' + button.getAttribute('data-display-settings'))
+  const isModal = displaySettingsContainer.getAttribute('data-modal') === '1'
 
   if (isModal) {
-    openDisplaySettings($('#' + displaySettingsContainerId))
+    openDisplaySettings(displaySettingsContainer)
 
     return
   }
 
-  if ($('#' + displaySettingsContainerId).is(':visible')) {
-    closeDisplaySettings($('#' + displaySettingsContainerId))
+  if (displaySettingsContainer.offsetWidth > 0 && displaySettingsContainer.offsetHeight > 0) { // is visible ?
+    closeDisplaySettings(displaySettingsContainer)
   } else {
-    openDisplaySettings($('#' + displaySettingsContainerId))
+    openDisplaySettings(displaySettingsContainer)
   }
-})
+}
 
-$(document).on('click', 'button.ec-crud-display-settings-check-all-columns', function (event) {
-  $(this).parents('div.ec-crud-display-settings').find('input[type=checkbox]').each(function () {
-    $(this).prop('checked', true)
+function onCrudDisplaySettingsCheckAllColumns (event) {
+  const button = event.target
+  button.parentNode.closest('div.ec-crud-display-settings').querySelectorAll('input[type=checkbox]').forEach(checkbox => {
+    checkbox.checked = true
   })
-})
+}
 
-$(document).on('click', 'button.ec-crud-display-settings-uncheck-all-columns', function (event) {
-  $(this).parents('div.ec-crud-display-settings').find('input[type=checkbox]').each(function () {
-    $(this).prop('checked', false)
+function onCrudDisplaySettingsUncheckAllColumns (event) {
+  const button = event.target
+  button.parentNode.closest('div.ec-crud-display-settings').querySelectorAll('input[type=checkbox]').forEach(checkbox => {
+    checkbox.checked = false
   })
-})
+}
 
-$(document).on('click', 'button.ec-crud-display-settings-reset', function (event) {
-  const displaySettingsContainer = $(this).parents('div.ec-crud-display-settings')
-  const displaySettingsContainerId = $(displaySettingsContainer).attr('id')
-  const listId = $(displaySettingsContainer).attr('data-crud-list-id')
+function onCrudDisplaySettingsReset (event) {
+  const button = event.target
+  const displaySettingsContainer = button.parentNode.closest('div.ec-crud-display-settings')
+  const listContainer = getElement('#' + displaySettingsContainer.getAttribute('data-crud-list-id'))
 
-  closeDisplaySettings($('#' + displaySettingsContainerId))
+  closeDisplaySettings(displaySettingsContainer)
 
   sendRequest({
-    url: $(this).attr('data-reset-url'),
-    update: $('#' + listId)
+    url: button.getAttribute('data-reset-url'),
+    update: listContainer
   })
-})
+}
 
-$(document).on('submit', '.ec-crud-display-settings form', function (event) {
+function onCrudDisplaySettingsSubmit (event) {
   event.preventDefault()
+  const form = event.target
 
-  const displaySettingsContainer = $(this).parents('div.ec-crud-display-settings')
-  const displaySettingsContainerId = $(displaySettingsContainer).attr('id')
-  const listId = $(displaySettingsContainer).attr('data-crud-list-id')
+  const displaySettingsContainer = form.parentNode.closest('div.ec-crud-display-settings')
+  const listContainer = getElement('#' + displaySettingsContainer.getAttribute('data-crud-list-id'))
 
-  closeDisplaySettings($('#' + displaySettingsContainerId))
+  closeDisplaySettings(displaySettingsContainer)
 
-  sendForm(this, {
+  sendForm(form, {
     responseDataType: 'json',
     onSuccess: function (json, response) {
-      updateDom($('#' + listId), 'update', json.render_list)
+      const displaySettingsContainerId = displaySettingsContainer.getAttribute('id') // Backup before deletion (by updateDom)
+      updateDom(listContainer, 'update', json.render_list)
       if (!json.form_is_valid) {
-        openDisplaySettings($('#' + displaySettingsContainerId))
+        openDisplaySettings(getElement('#' + displaySettingsContainerId))
       }
     }
   })
-})
+}
 
 function openDisplaySettings (displaySettingsContainer) {
-  const isModal = $(displaySettingsContainer).attr('data-modal') === '1'
+  const isModal = displaySettingsContainer.getAttribute('data-modal') === '1'
   if (isModal) {
     openModal({
       element: displaySettingsContainer
     })
   } else {
-    $(displaySettingsContainer).show()
+    displaySettingsContainer.style.display = 'block'
   }
 }
 
 function closeDisplaySettings (displaySettingsContainer) {
-  const isModal = $(displaySettingsContainer).attr('data-modal') === '1'
+  const isModal = displaySettingsContainer.getAttribute('data-modal') === '1'
 
   if (isModal) {
     closeModal(displaySettingsContainer)
   } else {
-    $(displaySettingsContainer).hide()
+    displaySettingsContainer.style.display = 'none'
   }
 }

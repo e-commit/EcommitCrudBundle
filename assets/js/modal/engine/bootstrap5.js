@@ -7,30 +7,28 @@
  * file that was distributed with this source code.
  */
 
-import $ from 'jquery'
 import { Modal } from 'bootstrap'
 import runCallback from '../../callback'
+import { getElement } from '../../options-resolver'
 
 export function openModal (options) {
-  // Suppression des événements
-  $(options.element).off('shown.bs.modal')
-  $(options.element).off('hide.bs.modal')
+  const element = getElement(options.element)
 
-  $(options.element).on('shown.bs.modal', function (e) {
-    runCallback(options.onOpen, $(options.element))
-  })
+  element.addEventListener('shown.bs.modal', e => {
+    runCallback(options.onOpen, element)
+  }, { once: true })
 
-  $(options.element).on('hide.bs.modal', function (e) {
-    runCallback(options.onClose, $(options.element))
-  })
+  element.addEventListener('hide.bs.modal', e => {
+    runCallback(options.onClose, element)
+  }, { once: true })
 
-  const modal = new Modal($(options.element), {
+  const modal = new Modal(element, {
     focus: true
   })
   modal.show()
 }
 
 export function closeModal (element) {
-  const modal = Modal.getInstance($(element))
+  const modal = Modal.getInstance(getElement(element))
   modal.hide()
 }

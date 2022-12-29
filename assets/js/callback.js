@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
  */
 
-import $ from 'jquery'
 import * as callbackManager from './callback-manager'
 
 export default function (callbacks, ...args) {
@@ -24,7 +23,7 @@ export default function (callbacks, ...args) {
   }
 
   const newCallbacks = []
-  $.each(callbacks, function (key, value) {
+  callbacks.forEach((value) => {
     addCallbacksToStack(value, newCallbacks)
   })
 
@@ -36,7 +35,7 @@ export default function (callbacks, ...args) {
     return 1
   })
 
-  $.each(newCallbacks, function (key, value) {
+  newCallbacks.forEach((value) => {
     processCallback(value.callback, args)
   })
 }
@@ -48,7 +47,7 @@ function addCallbacksToStack (value, stack) {
       priority: 0
     })
   } else if (Array === value.constructor) {
-    $.each(value, function (key, subValue) {
+    value.forEach((subValue) => {
       addCallbacksToStack(subValue, stack)
     })
   } else if (undefined !== value.callback) {

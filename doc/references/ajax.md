@@ -200,10 +200,14 @@ ajax.updateDom($('#myDiv'), 'update', 'Hello world');
 
 Méthodes disponibles pour la mise à jour :
 
-| Méthode | Description |
-| ------- | ----------- |
-| update | Utilise le fonction  [`html` de jQuery](https://api.jquery.com/html/) |
-| before | Utilise le fonction  [`before` de jQuery](https://api.jquery.com/before/) |
-| after | Utilise le fonction  [`after` de jQuery](https://api.jquery.com/after/) |
-| prepend | Utilise le fonction  [`prepend` de jQuery](https://api.jquery.com/prepend/) |
-| append | Utilise le fonction  [`append` de jQuery](https://api.jquery.com/append/) |
+| Méthode | Description                                                             |
+|---------|-------------------------------------------------------------------------|
+| update  | Modifie le contenu de l'élément par le nouveau contenu                  |
+| before  | Ajoute le nouveau contenu avant l'élément                               |
+| after   | Ajoute le nouveau contenu après l'élément                               |
+| prepend | Modifie le contenu de l'élément en ajoutant le nouveau contenu au début |
+| append  | Modifie le contenu de l'élément en ajoutant le nouveau contenu à la fin |
+
+La mise à jour du DOM utilise la fonction [innerHTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
+Si le nouveau contenu contient des balises `<script>`, celles-ci ne seront pas exécutées. Cependant, cele ne protège pas
+contre les failles XSS. [En savoir plus](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML#security_considerations)

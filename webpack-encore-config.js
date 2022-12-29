@@ -19,7 +19,6 @@ module.exports = function (outputPath) {
             config.useBuiltIns = 'usage';
             config.corejs = 3;
         })
-        .autoProvidejQuery()
     ;
 
     return Encore;

@@ -8,7 +8,6 @@
  */
 
 import * as optionsResolver from '../options-resolver'
-import $ from 'jquery'
 import * as ajax from '../ajax'
 
 const ENGINE_KEY = Symbol.for('ecommit.crudbundle.modalengine')
@@ -17,48 +16,76 @@ if (globalSymbols.indexOf(ENGINE_KEY) === -1) {
   global[ENGINE_KEY] = null
 }
 
-$(function () {
-  $(document).on('click', '.ec-crud-modal-auto', function (event) {
-    event.preventDefault()
-    const eventBefore = $.Event('ec-crud-modal-auto-before')
-    $(this).trigger(eventBefore)
-    if (eventBefore.isDefaultPrevented()) {
-      return
+const ready = (callback) => {
+  if (document.readyState !== 'loading') callback()
+  else document.addEventListener('DOMContentLoaded', callback)
+}
+
+ready(function () {
+  document.addEventListener('click', function (event) {
+    if (event.target.matches('.ec-crud-modal-auto')) {
+      onClickModalAuto(event)
     }
 
-    openModal(optionsResolver.getDataAttributes(this, 'ecCrudModal'))
-  })
-
-  $(document).on('click', 'button.ec-crud-remote-modal-auto', function (event) {
-    event.preventDefault()
-    const eventBefore = $.Event('ec-crud-remote-modal-auto-before')
-    $(this).trigger(eventBefore)
-    if (eventBefore.isDefaultPrevented()) {
-      return
+    if (event.target.matches('button.ec-crud-remote-modal-auto')) {
+      onClickButtonRemoteModalAuto(event)
     }
 
-    openRemoteModal(optionsResolver.getDataAttributes(this, 'ecCrudModal'))
-  })
-
-  $(document).on('click', 'a.ec-crud-remote-modal-auto', function (event) {
-    event.preventDefault()
-    const eventBefore = $.Event('ec-crud-remote-modal-auto-before')
-    $(this).trigger(eventBefore)
-    if (eventBefore.isDefaultPrevented()) {
-      return
+    if (event.target.matches('a.ec-crud-remote-modal-auto')) {
+      onClickLinkRemoteModalAuto(event)
     }
-
-    // Options in data-* override href
-    const options = optionsResolver.resolve(
-      {
-        url: $(this).attr('href')
-      },
-      optionsResolver.getDataAttributes(this, 'ecCrudModal')
-    )
-
-    openRemoteModal(options)
   })
 })
+
+function onClickModalAuto (event) {
+  event.preventDefault()
+  const eventBefore = new CustomEvent('ec-crud-modal-auto-before', {
+    bubbles: true,
+    cancelable: true
+  })
+  event.target.dispatchEvent(eventBefore)
+  if (eventBefore.defaultPrevented) {
+    return
+  }
+
+  openModal(optionsResolver.getDataAttributes(event.target, 'ecCrudModal'))
+}
+
+function onClickButtonRemoteModalAuto (event) {
+  event.preventDefault()
+  const eventBefore = new CustomEvent('ec-crud-remote-modal-auto-before', {
+    bubbles: true,
+    cancelable: true
+  })
+  event.target.dispatchEvent(eventBefore)
+  if (eventBefore.defaultPrevented) {
+    return
+  }
+
+  openRemoteModal(optionsResolver.getDataAttributes(event.target, 'ecCrudModal'))
+}
+
+function onClickLinkRemoteModalAuto (event) {
+  event.preventDefault()
+  const eventBefore = new CustomEvent('ec-crud-remote-modal-auto-before', {
+    bubbles: true,
+    cancelable: true
+  })
+  event.target.dispatchEvent(eventBefore)
+  if (eventBefore.defaultPrevented) {
+    return
+  }
+
+  // Options in data-* override href
+  const options = optionsResolver.resolve(
+    {
+      url: event.target.getAttribute('href')
+    },
+    optionsResolver.getDataAttributes(event.target, 'ecCrudModal')
+  )
+
+  openRemoteModal(options)
+}
 
 export function defineEngine (newEngine) {
   global[ENGINE_KEY] = newEngine
@@ -107,8 +134,8 @@ export function openRemoteModal (options) {
     options
   )
 
-  let hasError = false
-  $.each(['url', 'element', 'elementContent', 'method'], function (index, value) {
+  let hasError = false;
+  ['url', 'element', 'elementContent', 'method'].forEach((value) => {
     if (optionsResolver.isNotBlank(options[value]) === false) {
       console.error('Value required: ' + value)
       hasError = true

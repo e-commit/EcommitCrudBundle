@@ -1,7 +1,4 @@
 {
-  "dependencies": {
-    "jquery": "^3"
-  },
   "devDependencies": {
     "@ecommit/crud-bundle": "link:assets",
     "@symfony/webpack-encore": "^3.0",
@@ -13,6 +10,7 @@
     "eslint-plugin-promise": "^6.0",
     "install": "^0.13.0",
     "jasmine": "^4.0",
+    "jquery": "^3",
     "karma": "^6.0",
     "karma-firefox-launcher": "^2.0",
     "karma-jasmine": "^4.0",

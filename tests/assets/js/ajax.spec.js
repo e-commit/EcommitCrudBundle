@@ -899,7 +899,7 @@ describe('Test Ajax.sendRequest', function () {
     expect(callbackSuccess).toHaveBeenCalled()
   })
 
-  it('Send request with JS in response', async function () {
+  it('Send request with SCRIPT tag in response', async function () {
     $('body').append('<div id="ajax-result" class="html-test"><div class="content">X</div></div>')
     const callbackSuccess = jasmine.createSpy('success')
 
@@ -914,7 +914,7 @@ describe('Test Ajax.sendRequest', function () {
       update: '#ajax-result .content'
     })
 
-    expect(callbackSuccess).toHaveBeenCalledWith('<div class="content"><div id="subcontent">AFTER</div><script>document.getElementById("subcontent").innerHTML="AFTER"</script></div>')
+    expect(callbackSuccess).toHaveBeenCalledWith('<div class="content"><div id="subcontent">BEFORE</div><script>document.getElementById("subcontent").innerHTML="AFTER"</script></div>')
   })
 
   async function testUpdate (updateMode, expectedContent) {
@@ -959,6 +959,46 @@ describe('Test Ajax.click', function () {
 
     const callbackSuccess = jasmine.createSpy('success')
 
+    const promise = ajax.click('#buttonToTest', {
+      url: '/goodRequest',
+      onSuccess: function (data, response) {
+        callbackSuccess()
+      }
+    })
+    expect(promise).toBeInstanceOf(Promise)
+
+    const response = await promise
+
+    expect(response).toBeInstanceOf(Response)
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+    expect(callbackSuccess).toHaveBeenCalled()
+  })
+
+  it('Send request with button and Element', async function () {
+    $('body').append('<button class="html-test" id="buttonToTest">Go !</button>')
+
+    const callbackSuccess = jasmine.createSpy('success')
+
+    const promise = ajax.click(document.querySelector('#buttonToTest'), {
+      url: '/goodRequest',
+      onSuccess: function (data, response) {
+        callbackSuccess()
+      }
+    })
+    expect(promise).toBeInstanceOf(Promise)
+
+    const response = await promise
+
+    expect(response).toBeInstanceOf(Response)
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+    expect(callbackSuccess).toHaveBeenCalled()
+  })
+
+  it('Send request with button and jQuery', async function () {
+    $('body').append('<button class="html-test" id="buttonToTest">Go !</button>')
+
+    const callbackSuccess = jasmine.createSpy('success')
+
     const promise = ajax.click($('#buttonToTest'), {
       url: '/goodRequest',
       onSuccess: function (data, response) {
@@ -983,7 +1023,7 @@ describe('Test Ajax.click', function () {
       callbackSuccess()
     })
 
-    await ajax.click($('#buttonToTest'))
+    await ajax.click('#buttonToTest')
 
     expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
     expect(callbackSuccess).toHaveBeenCalled()
@@ -1000,7 +1040,7 @@ describe('Test Ajax.click', function () {
       callbackSuccess1()
     })
 
-    await ajax.click($('#buttonToTest'), {
+    await ajax.click('#buttonToTest', {
       url: '/badRequest', // overridden by data-ec-crud-ajax-url
       method: 'GET', // overridden by data-ec-crud-ajax-method
       onSuccess: function (data, response) { // overridden by data-ec-crud-ajax-on-success
@@ -1021,7 +1061,7 @@ describe('Test Ajax.click', function () {
   it('Send auto-request with button', async function () {
     $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="buttonToTest" data-ec-crud-ajax-url="/goodRequest">Go !</a>')
 
-    $('#buttonToTest').click()
+    $('#buttonToTest').get(0).click()
 
     await wait(() => {
       return false
@@ -1036,7 +1076,7 @@ describe('Test Ajax.click', function () {
     })
     $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="clickToTest" data-ec-crud-ajax-url="/goodRequest">Go !</button>')
 
-    $('#clickToTest').click()
+    $('#clickToTest').get(0).click()
 
     await wait(() => {
       return false
@@ -1054,7 +1094,7 @@ describe('Test Ajax.click', function () {
       options.stop = true
     })
 
-    $('#clickToTest').click()
+    $('#clickToTest').get(0).click()
 
     await wait(() => {
       return false
@@ -1069,7 +1109,7 @@ describe('Test Ajax.click', function () {
     $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="buttonToTest">Go !</a>')
     spyOn(window.console, 'error')
 
-    $('#buttonToTest').click()
+    $('#buttonToTest').get(0).click()
 
     await wait(() => {
       return false
@@ -1102,6 +1142,44 @@ describe('Test Ajax.link', function () {
 
     const callbackSuccess = jasmine.createSpy('success')
 
+    const promise = ajax.link('#linkToTest', {
+      onSuccess: function (data, response) {
+        callbackSuccess()
+      }
+    })
+    expect(promise).toBeInstanceOf(Promise)
+
+    const response = await promise
+
+    expect(response).toBeInstanceOf(Response)
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+    expect(callbackSuccess).toHaveBeenCalled()
+  })
+
+  it('Send request with link and Element', async function () {
+    $('body').append('<a href="/goodRequest" class="html-test" id="linkToTest">Go !</a>')
+
+    const callbackSuccess = jasmine.createSpy('success')
+
+    const promise = ajax.link(document.querySelector('#linkToTest'), {
+      onSuccess: function (data, response) {
+        callbackSuccess()
+      }
+    })
+    expect(promise).toBeInstanceOf(Promise)
+
+    const response = await promise
+
+    expect(response).toBeInstanceOf(Response)
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+    expect(callbackSuccess).toHaveBeenCalled()
+  })
+
+  it('Send request with link and jQuery', async function () {
+    $('body').append('<a href="/goodRequest" class="html-test" id="linkToTest">Go !</a>')
+
+    const callbackSuccess = jasmine.createSpy('success')
+
     const promise = ajax.link($('#linkToTest'), {
       onSuccess: function (data, response) {
         callbackSuccess()
@@ -1125,7 +1203,7 @@ describe('Test Ajax.link', function () {
       callbackSuccess()
     })
 
-    await ajax.link($('#linkToTest'))
+    await ajax.link('#linkToTest')
 
     expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
     expect(callbackSuccess).toHaveBeenCalled()
@@ -1143,7 +1221,7 @@ describe('Test Ajax.link', function () {
       callbackSuccess1()
     })
 
-    await ajax.link($('#linkToTest'), {
+    await ajax.link('#linkToTest', {
       url: '/badRequest', // overridden by data-ec-crud-ajax-url
       method: 'GET', // overridden by data-ec-crud-ajax-method
       onSuccess: function (data, response) { // overridden by data-ec-crud-ajax-on-success
@@ -1164,7 +1242,7 @@ describe('Test Ajax.link', function () {
   it('Send auto-request with link', async function () {
     $('body').append('<a href="/goodRequest" class="html-test ec-crud-ajax-link-auto" id="linkToTest">Go !</a>')
 
-    $('#linkToTest').click()
+    $('#linkToTest').get(0).click()
 
     await wait(() => {
       return false
@@ -1179,7 +1257,7 @@ describe('Test Ajax.link', function () {
     })
     $('body').append('<a href="/goodRequest" class="html-test ec-crud-ajax-link-auto" id="linkToTest">Go !</a>')
 
-    $('#linkToTest').click()
+    $('#linkToTest').get(0).click()
 
     await wait(() => {
       return false
@@ -1194,7 +1272,7 @@ describe('Test Ajax.link', function () {
     $('body').append('<a class="html-test ec-crud-ajax-link-auto" id="linkToTest">Go !</a>')
     spyOn(window.console, 'error')
 
-    $('#linkToTest').click()
+    $('#linkToTest').get(0).click()
 
     await wait(() => {
       return false
@@ -1229,6 +1307,52 @@ describe('Test Ajax.form', function () {
 
     const callbackSuccess = jasmine.createSpy('success')
 
+    const promise = ajax.sendForm('#formToTest', {
+      onSuccess: function (data, response) {
+        callbackSuccess()
+      }
+    })
+    expect(promise).toBeInstanceOf(Promise)
+
+    const response = await promise
+
+    expect(response).toBeInstanceOf(Response)
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+    expect(jasmine.Ajax.requests.mostRecent().method).toBe('POST')
+    expect(jasmine.Ajax.requests.mostRecent().data()).toEqual([['var1', 'My value 1'], ['var2', 'My value 2']]) // Parsed by addJasmineAjaxFormDataSupport
+    expect(callbackSuccess).toHaveBeenCalled()
+  })
+
+  it('Send request with form with Element', async function () {
+    $('body').append('<form action="/goodRequest" method="POST" class="html-test" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /></form>')
+    $('#formToTest input[name=var1]').val('My value 1')
+    $('#formToTest input[name=var2]').val('My value 2')
+
+    const callbackSuccess = jasmine.createSpy('success')
+
+    const promise = ajax.sendForm(document.querySelector('#formToTest'), {
+      onSuccess: function (data, response) {
+        callbackSuccess()
+      }
+    })
+    expect(promise).toBeInstanceOf(Promise)
+
+    const response = await promise
+
+    expect(response).toBeInstanceOf(Response)
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+    expect(jasmine.Ajax.requests.mostRecent().method).toBe('POST')
+    expect(jasmine.Ajax.requests.mostRecent().data()).toEqual([['var1', 'My value 1'], ['var2', 'My value 2']]) // Parsed by addJasmineAjaxFormDataSupport
+    expect(callbackSuccess).toHaveBeenCalled()
+  })
+
+  it('Send request with form with jQuery', async function () {
+    $('body').append('<form action="/goodRequest" method="POST" class="html-test" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /></form>')
+    $('#formToTest input[name=var1]').val('My value 1')
+    $('#formToTest input[name=var2]').val('My value 2')
+
+    const callbackSuccess = jasmine.createSpy('success')
+
     const promise = ajax.sendForm($('#formToTest'), {
       onSuccess: function (data, response) {
         callbackSuccess()
@@ -1253,7 +1377,7 @@ describe('Test Ajax.form', function () {
 
     const callbackSuccess = jasmine.createSpy('success')
 
-    await ajax.sendForm($('#formToTest'), {
+    await ajax.sendForm('#formToTest', {
       onSuccess: function (data, response) {
         callbackSuccess()
       }
@@ -1272,7 +1396,7 @@ describe('Test Ajax.form', function () {
 
     const callbackSuccess = jasmine.createSpy('success')
 
-    await ajax.sendForm($('#formToTest'), {
+    await ajax.sendForm('#formToTest', {
       onSuccess: function (data, response) {
         callbackSuccess()
       }
@@ -1294,7 +1418,7 @@ describe('Test Ajax.form', function () {
       callbackSuccess()
     })
 
-    await ajax.sendForm($('#formToTest'))
+    await ajax.sendForm('#formToTest')
 
     expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
     expect(jasmine.Ajax.requests.mostRecent().method).toBe('POST')
@@ -1316,7 +1440,7 @@ describe('Test Ajax.form', function () {
       callbackSuccess1()
     })
 
-    await ajax.sendForm($('#formToTest'), {
+    await ajax.sendForm('#formToTest', {
       url: '/badRequest', // overridden by data-ec-crud-ajax-url
       method: 'GET', // overridden by data-ec-crud-ajax-method
       onSuccess: function (data, response) { // overridden by data-ec-crud-ajax-on-success
@@ -1336,11 +1460,11 @@ describe('Test Ajax.form', function () {
   })
 
   it('Send auto-request with form', async function () {
-    $('body').append('<form action="/goodRequest" method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /></form>')
+    $('body').append('<form action="/goodRequest" method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /><button type="submit"></button></form>')
     $('#formToTest input[name=var1]').val('My value 1')
     $('#formToTest input[name=var2]').val('My value 2')
 
-    $('#formToTest').submit()
+    $('#formToTest button[type="submit"]').get(0).click()
 
     await wait(() => {
       return false
@@ -1355,11 +1479,11 @@ describe('Test Ajax.form', function () {
     $(document).on('ec-crud-ajax-form-auto-before', '#formToTest', function (event) {
       event.preventDefault()
     })
-    $('body').append('<form action="/goodRequest" method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /></form>')
+    $('body').append('<form action="/goodRequest" method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /><button type="submit"></button></form>')
     $('#formToTest input[name=var1]').val('My value 1')
     $('#formToTest input[name=var2]').val('My value 2')
 
-    $('#formToTest').submit()
+    $('#formToTest button[type="submit"]').get(0).click()
 
     await wait(() => {
       return false
@@ -1371,10 +1495,10 @@ describe('Test Ajax.form', function () {
   })
 
   it('Send auto-request with form and error', async function () {
-    $('body').append('<form  method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /></form>')
+    $('body').append('<form  method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /><button type="submit"></button></form>')
     spyOn(window.console, 'error')
 
-    $('#formToTest').submit()
+    $('#formToTest button[type="submit"]').get(0).click()
 
     await wait(() => {
       return false
@@ -1419,7 +1543,7 @@ describe('Test Ajax.updateDom', function () {
 
   it('Update with "update" mode and ec-crud-ajax-update-dom-before event - change updateMode', function () {
     $(document).on('ec-crud-ajax-update-dom-before', function (event) {
-      event.updateMode = 'append'
+      event.detail.updateMode = 'append'
     })
 
     testUpdateDom('update', '<div class="content">XOK</div>')
@@ -1427,7 +1551,7 @@ describe('Test Ajax.updateDom', function () {
 
   it('Update with "update" mode and ec-crud-ajax-update-dom-before event - change content', function () {
     $(document).on('ec-crud-ajax-update-dom-before', function (event) {
-      event.content = 'NEW OK'
+      event.detail.content = 'NEW OK'
     })
 
     testUpdateDom('update', '<div class="content">NEW OK</div>')
@@ -1443,7 +1567,7 @@ describe('Test Ajax.updateDom', function () {
 
   it('Update with "update" mode and ec-crud-ajax-update-dom-after event', function () {
     $(document).on('ec-crud-ajax-update-dom-after', function (event) {
-      $(event.element).find('.content').html('OK')
+      $(event.detail.element).find('.content').html('OK')
     })
 
     ajax.updateDom('#container .content', 'update', '<div><span class="content"></span></div>')
@@ -1481,6 +1605,16 @@ describe('Test Ajax.updateDom', function () {
     ajax.updateDom('#container .content', 'badMode', 'OK')
     expect(window.console.error).toHaveBeenCalledWith('Bad updateMode: badMode')
     expect($('#container').html()).toEqual('<div class="content">X</div>')
+  })
+
+  it('Update with "update" mode and Element', function () {
+    ajax.updateDom(document.querySelector('#container .content'), 'update', 'OK')
+    expect($('#container').html()).toEqual('<div class="content">OK</div>')
+  })
+
+  it('Update with "update" mode and jQuery', function () {
+    ajax.updateDom($('#container .content'), 'update', 'OK')
+    expect($('#container').html()).toEqual('<div class="content">OK</div>')
   })
 })
 

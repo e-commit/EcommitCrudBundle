@@ -7,44 +7,73 @@
  * file that was distributed with this source code.
  */
 
-import $ from 'jquery'
 import * as optionsResolver from './options-resolver'
 import runCallback from './callback'
 
-$(function () {
-  $(document).on('click', '.ec-crud-ajax-click-auto', function (event) {
-    event.preventDefault()
-    const eventBefore = $.Event('ec-crud-ajax-click-auto-before')
-    $(this).trigger(eventBefore)
-    if (eventBefore.isDefaultPrevented()) {
-      return
+const ready = (callback) => {
+  if (document.readyState !== 'loading') callback()
+  else document.addEventListener('DOMContentLoaded', callback)
+}
+
+ready(function () {
+  document.addEventListener('click', function (event) {
+    if (event.target.matches('.ec-crud-ajax-click-auto')) {
+      onClickAuto(event)
     }
 
-    click(this).catch((error) => console.error(error))
+    if (event.target.matches('a.ec-crud-ajax-link-auto')) {
+      onClickLinkAuto(event)
+    }
   })
 
-  $(document).on('click', 'a.ec-crud-ajax-link-auto', function (event) {
-    event.preventDefault()
-    const eventBefore = $.Event('ec-crud-ajax-link-auto-before')
-    $(this).trigger(eventBefore)
-    if (eventBefore.isDefaultPrevented()) {
-      return
+  document.addEventListener('submit', function (event) {
+    if (event.target.matches('form.ec-crud-ajax-form-auto')) {
+      onSubmitFormAuto(event)
     }
-
-    link(this).catch((error) => console.error(error))
-  })
-
-  $(document).on('submit', 'form.ec-crud-ajax-form-auto', function (event) {
-    event.preventDefault()
-    const eventBefore = $.Event('ec-crud-ajax-form-auto-before')
-    $(this).trigger(eventBefore)
-    if (eventBefore.isDefaultPrevented()) {
-      return
-    }
-
-    sendForm(this).catch((error) => console.error(error))
   })
 })
+
+function onClickAuto (event) {
+  event.preventDefault()
+  const eventBefore = new CustomEvent('ec-crud-ajax-click-auto-before', {
+    bubbles: true,
+    cancelable: true
+  })
+  event.target.dispatchEvent(eventBefore)
+  if (eventBefore.defaultPrevented) {
+    return
+  }
+
+  click(event.target).catch((error) => console.error(error))
+}
+
+function onClickLinkAuto (event) {
+  event.preventDefault()
+  const eventBefore = new CustomEvent('ec-crud-ajax-link-auto-before', {
+    bubbles: true,
+    cancelable: true
+  })
+  event.target.dispatchEvent(eventBefore)
+  if (eventBefore.defaultPrevented) {
+    return
+  }
+
+  link(event.target).catch((error) => console.error(error))
+}
+
+function onSubmitFormAuto (event) {
+  event.preventDefault()
+  const eventBefore = new CustomEvent('ec-crud-ajax-form-auto-before', {
+    bubbles: true,
+    cancelable: true
+  })
+  event.target.dispatchEvent(eventBefore)
+  if (eventBefore.defaultPrevented) {
+    return
+  }
+
+  sendForm(event.target).catch((error) => console.error(error))
+}
 
 export function sendRequest (options) {
   const eventBeginning = new CustomEvent('ec-crud-ajax', {
@@ -145,7 +174,7 @@ export function sendRequest (options) {
     })
   }
 
-  fetchOptions = $.extend(fetchOptions, options.options)
+  fetchOptions = optionsResolver.extend(fetchOptions, options.options)
 
   const fetchPromise = fetch(options.urlResolved, fetchOptions)
   const ajaxPromise = new Promise((resolve, reject) => {
@@ -214,11 +243,12 @@ export function click (element, options) {
 }
 
 export function link (link, options) {
+  link = optionsResolver.getElement(link)
   // Options in data-* override options argument
   // Option argument override href
   options = optionsResolver.resolve(
     {
-      url: $(link).attr('href')
+      url: link.getAttribute('href')
     },
     optionsResolver.resolve(
       options,
@@ -230,13 +260,14 @@ export function link (link, options) {
 }
 
 export function sendForm (form, options) {
+  form = optionsResolver.getElement(form)
   // Options in data-* override options argument
   // Option argument override action, method and data form
   options = optionsResolver.resolve(
     {
-      url: $(form).attr('action'),
-      method: $(form).attr('method'),
-      body: new FormData($(form).get(0))
+      url: form.getAttribute('action'),
+      method: form.getAttribute('method'),
+      body: new FormData(form)
     },
     optionsResolver.resolve(
       options,
@@ -248,40 +279,49 @@ export function sendForm (form, options) {
 }
 
 export function updateDom (element, updateMode, content) {
-  const eventBefore = $.Event('ec-crud-ajax-update-dom-before', {
-    element: element,
-    updateMode: updateMode,
-    content: content
+  const originElement = element
+  element = optionsResolver.getElement(element)
+  const eventBefore = new CustomEvent('ec-crud-ajax-update-dom-before', {
+    bubbles: true,
+    cancelable: true,
+    detail: {
+      element: originElement,
+      updateMode: updateMode,
+      content: content
+    }
   })
-  $(element).trigger(eventBefore)
-  if (eventBefore.isDefaultPrevented()) {
+  element.dispatchEvent(eventBefore)
+  if (eventBefore.defaultPrevented) {
     return
   }
-  updateMode = eventBefore.updateMode
-  content = eventBefore.content
+  updateMode = eventBefore.detail.updateMode
+  content = eventBefore.detail.content
 
   if (updateMode === 'update') {
-    $(element).html(content)
+    element.innerHTML = content
   } else if (updateMode === 'before') {
-    $(element).before(content)
+    element.outerHTML = content + element.outerHTML
   } else if (updateMode === 'after') {
-    $(element).after(content)
+    element.outerHTML = element.outerHTML + content
   } else if (updateMode === 'prepend') {
-    $(element).prepend(content)
+    element.innerHTML = content + element.innerHTML
   } else if (updateMode === 'append') {
-    $(element).append(content)
+    element.innerHTML = element.innerHTML + content
   } else {
     console.error('Bad updateMode: ' + updateMode)
 
     return
   }
 
-  const eventAfter = $.Event('ec-crud-ajax-update-dom-after', {
-    element: element,
-    updateMode: updateMode,
-    content: content
+  const eventAfter = new CustomEvent('ec-crud-ajax-update-dom-after', {
+    bubbles: true,
+    detail: {
+      element: originElement,
+      updateMode: updateMode,
+      content: content
+    }
   })
-  $(element).trigger(eventAfter)
+  element.dispatchEvent(eventAfter)
 }
 
 function resolveUrl (options) {
