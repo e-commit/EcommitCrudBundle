@@ -23,15 +23,15 @@ const ready = (callback) => {
 
 ready(function () {
   document.addEventListener('click', function (event) {
-    if (event.target.matches('.ec-crud-modal-auto')) {
+    if (event.target.matches('[data-ec-crud-toggle="modal"]')) {
       onClickModalAuto(event)
     }
 
-    if (event.target.matches('button.ec-crud-remote-modal-auto')) {
+    if (event.target.matches('button[data-ec-crud-toggle="remote-modal"]')) {
       onClickButtonRemoteModalAuto(event)
     }
 
-    if (event.target.matches('a.ec-crud-remote-modal-auto')) {
+    if (event.target.matches('a[data-ec-crud-toggle="remote-modal"]')) {
       onClickLinkRemoteModalAuto(event)
     }
   })

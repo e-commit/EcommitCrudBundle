@@ -17,17 +17,17 @@ const ready = (callback) => {
 
 ready(function () {
   document.addEventListener('click', function (event) {
-    if (event.target.matches('.ec-crud-ajax-click-auto')) {
+    if (event.target.matches('[data-ec-crud-toggle="ajax-click"]')) {
       onClickAuto(event)
     }
 
-    if (event.target.matches('a.ec-crud-ajax-link-auto')) {
+    if (event.target.matches('a[data-ec-crud-toggle="ajax-link"]')) {
       onClickLinkAuto(event)
     }
   })
 
   document.addEventListener('submit', function (event) {
-    if (event.target.matches('form.ec-crud-ajax-form-auto')) {
+    if (event.target.matches('form[data-ec-crud-toggle="ajax-form"]')) {
       onSubmitFormAuto(event)
     }
   })

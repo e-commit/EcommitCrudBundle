@@ -154,7 +154,7 @@
 {% block display_settings %}
 {% apply spaceless %}
     {% if crud.displayResults %}
-        {% set display_settings_container_attributes = {'class': 'ec-crud-display-settings', 'id': 'ec-crud-display-settings-'~crud.sessionName, 'data-crud-list-id': crud.divIdList} %}
+        {% set display_settings_container_attributes = {'data-ec-crud-toggle': 'display-settings', 'id': 'ec-crud-display-settings-'~crud.sessionName, 'data-crud-list-id': crud.divIdList} %}
         {% if modal %}
             {{ block('display_settings_button_modal', template_name) }}
             {{ block('display_settings_container_modal', template_name) }}
@@ -178,7 +178,7 @@
 
 {% block display_settings_button %}
     {% set display_settings_text = display_settings_text|default('display_settings.title'|trans({}, 'EcommitCrudBundle')) %}
-    {% set button_attr = button_attr|default([])|merge({class: (button_attr.class|default('') ~ ' ec-crud-display-settings-button')|trim, 'data-display-settings': 'ec-crud-display-settings-'~crud.sessionName}) %}
+    {% set button_attr = button_attr|default([])|merge({'data-ec-crud-toggle': 'display-settings-button', 'data-display-settings': 'ec-crud-display-settings-'~crud.sessionName}) %}
     <button{% with { attr: button_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
         {{ crud_icon('display_settings') }} {{ display_settings_text }}
     </button>
@@ -212,9 +212,9 @@
             {{ form_row(form.resultsPerPage) }}
             {{ form_row(form.displayedColumns) }}
             <div>
-                <button type="button" class="ec-crud-display-settings-check-all-columns">{{ display_settings_check_all_text }}</button>
+                <button type="button" data-ec-crud-toggle="display-settings-check-all-columns">{{ display_settings_check_all_text }}</button>
                 &nbsp;
-                <button type="button" class="ec-crud-display-settings-uncheck-all-columns">{{ display_settings_uncheck_all_text }}</button>
+                <button type="button" data-ec-crud-toggle="display-settings-uncheck-all-columns">{{ display_settings_uncheck_all_text }}</button>
             </div>
             <div style="text-align: center;">
                 {{ form_row(form.reset) }}

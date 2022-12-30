@@ -40,7 +40,7 @@ Options disponibles :
 ### Ouverture automatique
 
 Ouverture de la fenêtre modale lors d'un clic sur un élément du DOM. 
-L'élément du DOM doit avoir comme classe CSS `ec-crud-modal-auto`.
+L'élément du DOM doit avoir comme l'attribut HTML `data-ec-crud-toggle="modal"`.
 
 Toutes les options de la fonction `openModal` peuvent être utilisées en les passant par les attributs `data-`. Pour cela:
 * Préfixer chaque option par `data-ec-crud-modal-`
@@ -50,7 +50,7 @@ Toutes les options de la fonction `openModal` peuvent être utilisées en les pa
 Exemple :
 
 ```html
-<a href="#" class="ec-crud-modal-auto" data-ec-crud-modal-element="#main_modal">Go !</a>
+<a href="#" data-ec-crud-toggle="modal" data-ec-crud-modal-element="#main_modal">Go !</a>
 ```
 
 ## Ouverture fenêtre modale avec Ajax
@@ -84,7 +84,7 @@ Options disponibles :
 ### Ouverture automatique
 
 Ouverture de la fenêtre modale lors d'un clic sur un bouton ou un lien.
-Le bouton ou le lien doit avoir comme classe CSS `ec-crud-remote-modal-auto`.
+Le bouton ou le lien doit avoir l'attribut HTML `data-ec-crud-toggle="remote-modal"`.
 
 Toutes les options de la fonction `openRemoteModal` peuvent être utilisées en les passant par les attributs `data-`. Pour cela:
 * Préfixer chaque option par `data-ec-crud-modal-`
@@ -94,13 +94,13 @@ Toutes les options de la fonction `openRemoteModal` peuvent être utilisées en 
 Exemple avec un bouton :
 
 ```html
-<button class="ec-crud-remote-modal-auto" data-ec-crud-modal-element="#main_modal" data-ec-crud-modal-element-content="#main_modal .modal-content" data-ec-crud-modal-url="/goodRequest">Go !</button>
+<button data-ec-crud-toggle="remote-modal" data-ec-crud-modal-element="#main_modal" data-ec-crud-modal-element-content="#main_modal .modal-content" data-ec-crud-modal-url="/goodRequest">Go !</button>
 ```
 
 Exemple avec un lien :
 
 ```html
-<a href="/goodRequest" class="ec-crud-remote-modal-auto" data-ec-crud-modal-element="#main_modal" data-ec-crud-modal-element-content="#main_modal .modal-content">Go !</a>
+<a href="/goodRequest" data-ec-crud-toggle="remote-modal" data-ec-crud-modal-element="#main_modal" data-ec-crud-modal-element-content="#main_modal .modal-content">Go !</a>
 ```
 
 Avec un lien, l'URL utilisée pour la requête Ajax est:

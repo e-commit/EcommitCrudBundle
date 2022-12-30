@@ -1059,7 +1059,7 @@ describe('Test Ajax.click', function () {
   })
 
   it('Send auto-request with button', async function () {
-    $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="buttonToTest" data-ec-crud-ajax-url="/goodRequest">Go !</a>')
+    $('body').append('<button class="html-test" data-ec-crud-toggle="ajax-click" id="buttonToTest" data-ec-crud-ajax-url="/goodRequest">Go !</a>')
 
     $('#buttonToTest').get(0).click()
 
@@ -1074,7 +1074,7 @@ describe('Test Ajax.click', function () {
     $(document).on('ec-crud-ajax-click-auto-before', '#clickToTest', function (event) {
       event.preventDefault()
     })
-    $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="clickToTest" data-ec-crud-ajax-url="/goodRequest">Go !</button>')
+    $('body').append('<button class="html-test" data-ec-crud-toggle="ajax-click" id="clickToTest" data-ec-crud-ajax-url="/goodRequest">Go !</button>')
 
     $('#clickToTest').get(0).click()
 
@@ -1088,7 +1088,7 @@ describe('Test Ajax.click', function () {
   })
 
   it('Send auto-request canceled by onBeforeSend option', async function () {
-    $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="clickToTest" data-ec-crud-ajax-url="/goodRequest" data-ec-crud-ajax-on-before-send="my_callback_on_before_send">Go !</button>')
+    $('body').append('<button class="html-test" data-ec-crud-toggle="ajax-click" id="clickToTest" data-ec-crud-ajax-url="/goodRequest" data-ec-crud-ajax-on-before-send="my_callback_on_before_send">Go !</button>')
 
     callbackManager.registerCallback('my_callback_on_before_send', function (options) {
       options.stop = true
@@ -1106,7 +1106,7 @@ describe('Test Ajax.click', function () {
   })
 
   it('Send auto-request with button and error', async function () {
-    $('body').append('<button class="html-test ec-crud-ajax-click-auto" id="buttonToTest">Go !</a>')
+    $('body').append('<button class="html-test" data-ec-crud-toggle="ajax-click" id="buttonToTest">Go !</a>')
     spyOn(window.console, 'error')
 
     $('#buttonToTest').get(0).click()
@@ -1240,7 +1240,7 @@ describe('Test Ajax.link', function () {
   })
 
   it('Send auto-request with link', async function () {
-    $('body').append('<a href="/goodRequest" class="html-test ec-crud-ajax-link-auto" id="linkToTest">Go !</a>')
+    $('body').append('<a href="/goodRequest" class="html-test" data-ec-crud-toggle="ajax-link" id="linkToTest">Go !</a>')
 
     $('#linkToTest').get(0).click()
 
@@ -1255,7 +1255,7 @@ describe('Test Ajax.link', function () {
     $(document).on('ec-crud-ajax-link-auto-before', '#linkToTest', function (event) {
       event.preventDefault()
     })
-    $('body').append('<a href="/goodRequest" class="html-test ec-crud-ajax-link-auto" id="linkToTest">Go !</a>')
+    $('body').append('<a href="/goodRequest" class="html-test" data-ec-crud-toggle="ajax-link" id="linkToTest">Go !</a>')
 
     $('#linkToTest').get(0).click()
 
@@ -1269,7 +1269,7 @@ describe('Test Ajax.link', function () {
   })
 
   it('Send auto-request with link and error', async function () {
-    $('body').append('<a class="html-test ec-crud-ajax-link-auto" id="linkToTest">Go !</a>')
+    $('body').append('<a class="html-test" data-ec-crud-toggle="ajax-link" id="linkToTest">Go !</a>')
     spyOn(window.console, 'error')
 
     $('#linkToTest').get(0).click()
@@ -1460,7 +1460,7 @@ describe('Test Ajax.form', function () {
   })
 
   it('Send auto-request with form', async function () {
-    $('body').append('<form action="/goodRequest" method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /><button type="submit"></button></form>')
+    $('body').append('<form action="/goodRequest" method="POST" class="html-test" data-ec-crud-toggle="ajax-form" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /><button type="submit"></button></form>')
     $('#formToTest input[name=var1]').val('My value 1')
     $('#formToTest input[name=var2]').val('My value 2')
 
@@ -1479,7 +1479,7 @@ describe('Test Ajax.form', function () {
     $(document).on('ec-crud-ajax-form-auto-before', '#formToTest', function (event) {
       event.preventDefault()
     })
-    $('body').append('<form action="/goodRequest" method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /><button type="submit"></button></form>')
+    $('body').append('<form action="/goodRequest" method="POST" class="html-test" data-ec-crud-toggle="ajax-form" id="formToTest"><input type="text" name="var1" /><input type="text" name="var2" /><button type="submit"></button></form>')
     $('#formToTest input[name=var1]').val('My value 1')
     $('#formToTest input[name=var2]').val('My value 2')
 
@@ -1495,7 +1495,7 @@ describe('Test Ajax.form', function () {
   })
 
   it('Send auto-request with form and error', async function () {
-    $('body').append('<form  method="POST" class="html-test ec-crud-ajax-form-auto" id="formToTest"><input type="text" name="var1" /><button type="submit"></button></form>')
+    $('body').append('<form  method="POST" class="html-test" data-ec-crud-toggle="ajax-form" id="formToTest"><input type="text" name="var1" /><button type="submit"></button></form>')
     spyOn(window.console, 'error')
 
     $('#formToTest button[type="submit"]').get(0).click()

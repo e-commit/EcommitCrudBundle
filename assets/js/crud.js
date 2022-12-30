@@ -18,33 +18,33 @@ const ready = (callback) => {
 
 ready(function () {
   document.addEventListener('submit', function (event) {
-    if (event.target.matches('form.ec-crud-search-form')) {
+    if (event.target.matches('form[data-ec-crud-toggle="search-form"]')) {
       onSubmitCrudSearchForm(event)
     }
 
-    if (event.target.matches('.ec-crud-display-settings form')) {
+    if (event.target.matches('[data-ec-crud-toggle="display-settings"] form')) {
       onCrudDisplaySettingsSubmit(event)
     }
   })
 
   document.addEventListener('click', function (event) {
-    if (event.target.matches('button.ec-crud-search-reset')) {
+    if (event.target.matches('button[data-ec-crud-toggle="search-reset"]')) {
       onResetCrudSearchForm(event)
     }
 
-    if (event.target.matches('button.ec-crud-display-settings-button')) {
+    if (event.target.matches('button[data-ec-crud-toggle="display-settings-button"]')) {
       onCrudDisplaySettingsOpen(event)
     }
 
-    if (event.target.matches('button.ec-crud-display-settings-check-all-columns')) {
+    if (event.target.matches('button[data-ec-crud-toggle="display-settings-check-all-columns"]')) {
       onCrudDisplaySettingsCheckAllColumns(event)
     }
 
-    if (event.target.matches('button.ec-crud-display-settings-uncheck-all-columns')) {
+    if (event.target.matches('button[data-ec-crud-toggle="display-settings-uncheck-all-columns"]')) {
       onCrudDisplaySettingsUncheckAllColumns(event)
     }
 
-    if (event.target.matches('button.ec-crud-display-settings-reset')) {
+    if (event.target.matches('button[data-ec-crud-toggle="display-settings-reset"]')) {
       onCrudDisplaySettingsReset(event)
     }
   })
@@ -100,21 +100,21 @@ function onCrudDisplaySettingsOpen (event) {
 
 function onCrudDisplaySettingsCheckAllColumns (event) {
   const button = event.target
-  button.parentNode.closest('div.ec-crud-display-settings').querySelectorAll('input[type=checkbox]').forEach(checkbox => {
+  button.parentNode.closest('div[data-ec-crud-toggle="display-settings"]').querySelectorAll('input[type=checkbox]').forEach(checkbox => {
     checkbox.checked = true
   })
 }
 
 function onCrudDisplaySettingsUncheckAllColumns (event) {
   const button = event.target
-  button.parentNode.closest('div.ec-crud-display-settings').querySelectorAll('input[type=checkbox]').forEach(checkbox => {
+  button.parentNode.closest('div[data-ec-crud-toggle="display-settings"]').querySelectorAll('input[type=checkbox]').forEach(checkbox => {
     checkbox.checked = false
   })
 }
 
 function onCrudDisplaySettingsReset (event) {
   const button = event.target
-  const displaySettingsContainer = button.parentNode.closest('div.ec-crud-display-settings')
+  const displaySettingsContainer = button.parentNode.closest('div[data-ec-crud-toggle="display-settings"]')
   const listContainer = getElement('#' + displaySettingsContainer.getAttribute('data-crud-list-id'))
 
   closeDisplaySettings(displaySettingsContainer)
@@ -129,7 +129,7 @@ function onCrudDisplaySettingsSubmit (event) {
   event.preventDefault()
   const form = event.target
 
-  const displaySettingsContainer = form.parentNode.closest('div.ec-crud-display-settings')
+  const displaySettingsContainer = form.parentNode.closest('div[data-ec-crud-toggle="display-settings"]')
   const listContainer = getElement('#' + displaySettingsContainer.getAttribute('data-crud-list-id'))
 
   closeDisplaySettings(displaySettingsContainer)

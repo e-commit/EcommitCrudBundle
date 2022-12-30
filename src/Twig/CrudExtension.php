@@ -185,7 +185,7 @@ final class CrudExtension extends AbstractExtension
                         if (null !== $parent['ajax_options']) {
                             return array_merge(
                                 $value,
-                                ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-ajax-link-auto' : 'ec-crud-ajax-link-auto'],
+                                ['data-ec-crud-toggle' => 'ajax-link'],
                                 $this->getAjaxAttributes($this->validateAjaxOptions($parent['ajax_options'])),
                             );
                         }
@@ -309,7 +309,7 @@ final class CrudExtension extends AbstractExtension
                         if (null !== $parent['ajax_options']) {
                             return array_merge(
                                 $value,
-                                ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-ajax-link-auto' : 'ec-crud-ajax-link-auto'],
+                                ['data-ec-crud-toggle' => 'ajax-link'],
                                 $this->getAjaxAttributes($this->validateAjaxOptions($parent['ajax_options'])),
                             );
                         }
@@ -496,6 +496,7 @@ final class CrudExtension extends AbstractExtension
 
             $attr = array_merge(
                 [
+                    'data-ec-crud-toggle' => 'search-form',
                     'data-crud-search-id' => $crud->getDivIdSearch(),
                     'data-crud-list-id' => $crud->getDivIdList(),
                 ],
@@ -503,7 +504,6 @@ final class CrudExtension extends AbstractExtension
                 $value,
                 $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options'])),
             );
-            $attr['class'] = (isset($attr['class'])) ? $attr['class'].' ec-crud-search-form' : 'ec-crud-search-form';
 
             return $attr;
         });
@@ -581,13 +581,13 @@ final class CrudExtension extends AbstractExtension
         $resolver->addNormalizer('button_attr', function (Options $options, mixed $value) use ($crud): array {
             return array_merge(
                 [
+                    'data-ec-crud-toggle' => 'search-reset',
                     'data-crud-search-id' => $crud->getDivIdSearch(),
                     'data-crud-list-id' => $crud->getDivIdList(),
                     'data-ec-crud-ajax-url' => $crud->getSearchUrl(['reset' => 1]),
                 ],
                 $value,
                 $this->getAjaxAttributes($this->validateAjaxOptions($options['ajax_options'])),
-                ['class' => (isset($value['class'])) ? $value['class'].' ec-crud-search-reset' : 'ec-crud-search-reset'],
             );
         });
         $options = $resolver->resolve($this->buildOptions('crud_search_form_reset', $options, $crud));
@@ -609,24 +609,12 @@ final class CrudExtension extends AbstractExtension
      * Ajax form start tag.
      *
      * @param array $options Options:
-     *                       * auto_class: Auto CSS class used. Default: ec-crud-ajax-form-auto
      *                       * ajax_options: See "ajaxAttributes" method options
      *                       * + form_start function options
      */
     public function formStartAjax(FormView $formView, array $options = []): string
     {
-        $autoClass = 'ec-crud-ajax-form-auto';
-        if (isset($options['auto_class']) && null !== $options['auto_class']) {
-            $autoClass = $options['auto_class'];
-            unset($options['auto_class']);
-        }
-        if (isset($options['attr']['class']) && null !== $options['attr']['class']) {
-            $options['attr']['class'] = sprintf('%s %s', $autoClass, $options['attr']['class']);
-        } elseif (isset($formView->vars['attr']['class']) && null !== $formView->vars['attr']['class']) {
-            $options['attr']['class'] = sprintf('%s %s', $autoClass, $formView->vars['attr']['class']);
-        } else {
-            $options['attr']['class'] = $autoClass;
-        }
+        $options['attr']['data-ec-crud-toggle'] = 'ajax-form';
 
         if (isset($options['ajax_options'])) {
             $this->validateAjaxOptions($options['ajax_options']);

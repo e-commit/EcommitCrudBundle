@@ -63,7 +63,7 @@ La fonction `sendRequest` retourne une promesse.
 
 Fonction permettant de faire une requête AJAX lors d'un clic sur élément du DOM.
 
-L'élément du DOM doit avoir comme classe CSS `ec-crud-ajax-click-auto`.
+L'élément du DOM doit avoir l'attribut HTML `data-ec-crud-toggle="ajax-click"`.
 
 Toutes les options de la fonction `sendRequest` peuvent être utilisées en les passant par les attributs `data-`. Pour cela:
 * Préfixer chaque option par `data-ec-crud-ajax-`
@@ -73,7 +73,7 @@ Exemple: L'équivalent de l'option `updateMode` est `data-ec-crud-ajax-update-mo
 Exemple :
 
 ```html
-<button class="ec-crud-ajax-click-auto" data-ec-crud-ajax-url="/goodRequest">Go !</button>
+<button data-ec-crud-toggle="ajax-click" data-ec-crud-ajax-url="/goodRequest">Go !</button>
 ```
 
 ### link
@@ -87,12 +87,12 @@ Toutes les options de la fonction `sendRequest` peuvent être utilisées en les 
 
 #### Mode automatique
 
-Le lien doit avoir comme classe CSS `ec-crud-ajax-link-auto`.
+Le lien doit avoir l'attribut HTML `data-ec-crud-toggle="ajax-link"`.
 
 Exemple :
 
 ```html
-<a href="/goodRequest" class="ec-crud-ajax-link-auto">Go !</a>
+<a href="/goodRequest" data-ec-crud-toggle="ajax-link">Go !</a>
 ```
 
 L'URL utilisée pour la requête Ajax est:
@@ -134,12 +134,12 @@ Toutes les options de la fonction `sendRequest` peuvent être utilisées en les 
 
 #### Mode automatique
 
-Le formulaire doit avoir comme classe CSS `ec-crud-ajax-form-auto`.
+Le formulaire doit avoir l'attribut HTML `data-ec-crud-toggle="ajax-form"`.
 
 Exemple :
 
 ```html
-<form action="/goodRequest" method="POST" class="ec-crud-ajax-form-auto">
+<form action="/goodRequest" method="POST" data-ec-crud-toggle="ajax-form">
 ```
 
 * L'URL utilisée pour la requête Ajax est:

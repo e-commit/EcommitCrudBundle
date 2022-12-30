@@ -57,45 +57,7 @@ class CrudExtensionTest extends KernelTestCase
     {
         $html = $this->crudExtension->formStartAjax($this->createFormView());
 
-        $xpath = '//form[@method="post" and @action="/url" and contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")]';
-        $this->assertMatchesXpath($html, $xpath);
-    }
-
-    public function testFormStartAjaxWithCustomAutoClass(): void
-    {
-        $html = $this->crudExtension->formStartAjax($this->createFormView(), [
-            'auto_class' => 'custom-class',
-        ]);
-
-        $xpath = '//form[not(contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")) and contains(concat(" ", normalize-space(@class), " "), " custom-class ")]';
-        $this->assertMatchesXpath($html, $xpath);
-    }
-
-    public function testFormStartAjaxWithClassAttr(): void
-    {
-        $html = $this->crudExtension->formStartAjax($this->createFormView(), [
-            'attr' => [
-                'class' => 'my-class',
-            ],
-        ]);
-
-        $xpath = '//form[(contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")) and contains(concat(" ", normalize-space(@class), " "), " my-class ")]';
-        $this->assertMatchesXpath($html, $xpath);
-    }
-
-    public function testFormStartAjaxWithClassAttrInFormView(): void
-    {
-        $builder = $this->formFactory->createBuilder(FormType::class, null, [
-            'action' => '/url',
-            'method' => 'POST',
-            'csrf_protection' => false,
-            'attr' => [
-                'class' => 'my-class',
-            ],
-        ]);
-        $html = $this->crudExtension->formStartAjax($builder->getForm()->createView());
-
-        $xpath = '//form[(contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")) and contains(concat(" ", normalize-space(@class), " "), " my-class ")]';
+        $xpath = '//form[@method="post" and @action="/url" and @data-ec-crud-toggle="ajax-form"]';
         $this->assertMatchesXpath($html, $xpath);
     }
 
@@ -107,7 +69,7 @@ class CrudExtensionTest extends KernelTestCase
             ],
         ]);
 
-        $xpath = '//form[(contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")) and @data-ec-crud-ajax-on-success="a=b"]';
+        $xpath = '//form[@data-ec-crud-toggle="ajax-form" and @data-ec-crud-ajax-on-success="a=b"]';
         $this->assertMatchesXpath($html, $xpath);
     }
 
@@ -122,7 +84,7 @@ class CrudExtensionTest extends KernelTestCase
             ],
         ]);
 
-        $xpath = '//form[(contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")) and @data-ec-crud-ajax-on-success="a=b" and @data-custom="custom"]';
+        $xpath = '//form[@data-ec-crud-toggle="ajax-form" and @data-ec-crud-ajax-on-success="a=b" and @data-custom="custom"]';
         $this->assertMatchesXpath($html, $xpath);
     }
 
@@ -142,7 +104,7 @@ class CrudExtensionTest extends KernelTestCase
             'method' => 'get',
         ]);
 
-        $xpath = '//form[@method="get" and @action="/url" and contains(concat(" ", normalize-space(@class), " "), " ec-crud-ajax-form-auto ")]';
+        $xpath = '//form[@method="get" and @action="/url" and @data-ec-crud-toggle="ajax-form"]';
         $this->assertMatchesXpath($html, $xpath);
     }
 
@@ -315,7 +277,7 @@ class CrudExtensionTest extends KernelTestCase
             'page' => 1,
         ]);
 
-        $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" class="ec-crud-ajax-link-auto">1</a></li><li><a href="/user?page=2" class="ec-crud-ajax-link-auto">2</a></li><li class="next"><a href="/user?page=2" class="ec-crud-ajax-link-auto">›</a></li><li class="last"><a href="/user?page=20" class="ec-crud-ajax-link-auto">»</a></li></ul></nav>';
+        $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" data-ec-crud-toggle="ajax-link">1</a></li><li><a href="/user?page=2" data-ec-crud-toggle="ajax-link">2</a></li><li class="next"><a href="/user?page=2" data-ec-crud-toggle="ajax-link">›</a></li><li class="last"><a href="/user?page=20" data-ec-crud-toggle="ajax-link">»</a></li></ul></nav>';
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
             'ajax_options' => [],
             'max_pages_before' => 1,
@@ -333,7 +295,7 @@ class CrudExtensionTest extends KernelTestCase
             'page' => 1,
         ]);
 
-        $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">1</a></li><li><a href="/user?page=2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">2</a></li><li class="next"><a href="/user?page=2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">›</a></li><li class="last"><a href="/user?page=20" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">»</a></li></ul></nav>';
+        $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">1</a></li><li><a href="/user?page=2" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">2</a></li><li class="next"><a href="/user?page=2" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">›</a></li><li class="last"><a href="/user?page=20" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">»</a></li></ul></nav>';
         $result = $this->crudExtension->paginatorLinks($this->environment, $paginator, 'user_crud', [], [
             'ajax_options' => [
                 'update' => '#myId',
@@ -460,7 +422,7 @@ class CrudExtensionTest extends KernelTestCase
         $crud->expects($this->once())->method('getRouteName')->willReturn('user_crud');
         $crud->expects($this->once())->method('getRouteParameters')->willReturn([]);
 
-        $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">1</a></li><li><a href="/user?page=2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">2</a></li><li class="next"><a href="/user?page=2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">›</a></li><li class="last"><a href="/user?page=20" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">»</a></li></ul></nav>';
+        $expected = '<nav><ul class="ec-crud-pagination"><li class="current"><a href="/user?page=1" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">1</a></li><li><a href="/user?page=2" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">2</a></li><li class="next"><a href="/user?page=2" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">›</a></li><li class="last"><a href="/user?page=20" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">»</a></li></ul></nav>';
         $result = $this->crudExtension->crudPaginatorLinks($this->environment, $crud, [
             'max_pages_before' => 1,
             'max_pages_after' => 1,
@@ -495,19 +457,19 @@ class CrudExtensionTest extends KernelTestCase
     public function testThColumnSortableNotActive(): void
     {
         $html = $this->crudExtension->th($this->environment, 'column2', $this->createCrud());
-        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-not-active"><a href="/user?sort=column2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">label2</a></th>', $html);
+        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-not-active"><a href="/user?sort=column2" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">label2</a></th>', $html);
     }
 
     public function testThColumnSortableActiveAsc(): void
     {
         $html = $this->crudExtension->th($this->environment, 'column1', $this->createCrud());
-        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-active-asc"><a href="/user?sort=column1&amp;sort-direction=DESC" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">label1 <i>^</i></a></th>', $html);
+        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-active-asc"><a href="/user?sort=column1&amp;sort-direction=DESC" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">label1 <i>^</i></a></th>', $html);
     }
 
     public function testThColumnSortableActiveDesc(): void
     {
         $html = $this->crudExtension->th($this->environment, 'column1', $this->createCrud('column1', CRUD::DESC));
-        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-active-desc"><a href="/user?sort=column1&amp;sort-direction=ASC" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">label1 <i>v</i></a></th>', $html);
+        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-active-desc"><a href="/user?sort=column1&amp;sort-direction=ASC" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">label1 <i>v</i></a></th>', $html);
     }
 
     public function testThWithAjaxOptions(): void
@@ -517,7 +479,7 @@ class CrudExtensionTest extends KernelTestCase
                 'update' => '#div2',
             ],
         ]);
-        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-not-active"><a href="/user?sort=column2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#div2">label2</a></th>', $html);
+        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-not-active"><a href="/user?sort=column2" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#div2">label2</a></th>', $html);
     }
 
     public function testThWithLabel(): void
@@ -525,7 +487,7 @@ class CrudExtensionTest extends KernelTestCase
         $html = $this->crudExtension->th($this->environment, 'column2', $this->createCrud(), [
             'label' => 'My label',
         ]);
-        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-not-active"><a href="/user?sort=column2" class="ec-crud-ajax-link-auto" data-ec-crud-ajax-update="#myId">My label</a></th>', $html);
+        $this->assertSame('<th class="ec-crud-th ec-crud-th-sortable-not-active"><a href="/user?sort=column2" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">My label</a></th>', $html);
     }
 
     /**
@@ -554,9 +516,9 @@ class CrudExtensionTest extends KernelTestCase
     {
         return [
             ['column3', 'column1', Crud::ASC, '<th class="a ec-crud-th ec-crud-th-not-sortable" data-a="val">label3</th>'],
-            ['column1', 'column1', Crud::ASC, '<th class="b ec-crud-th ec-crud-th-sortable-active-asc" data-b="val"><a href="/user?sort=column1&amp;sort-direction=DESC" class="e ec-crud-ajax-link-auto" data-e="val" data-ec-crud-ajax-update="#myId">label1 <i>^</i></a></th>'],
-            ['column1', 'column1', Crud::DESC, '<th class="c ec-crud-th ec-crud-th-sortable-active-desc" data-c="val"><a href="/user?sort=column1&amp;sort-direction=ASC" class="f ec-crud-ajax-link-auto" data-f="val" data-ec-crud-ajax-update="#myId">label1 <i>v</i></a></th>'],
-            ['column2', 'column1', Crud::ASC, '<th class="d ec-crud-th ec-crud-th-sortable-not-active" data-d="val"><a href="/user?sort=column2" class="g ec-crud-ajax-link-auto" data-g="val" data-ec-crud-ajax-update="#myId">label2</a></th>'],
+            ['column1', 'column1', Crud::ASC, '<th class="b ec-crud-th ec-crud-th-sortable-active-asc" data-b="val"><a href="/user?sort=column1&amp;sort-direction=DESC" class="e" data-e="val" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">label1 <i>^</i></a></th>'],
+            ['column1', 'column1', Crud::DESC, '<th class="c ec-crud-th ec-crud-th-sortable-active-desc" data-c="val"><a href="/user?sort=column1&amp;sort-direction=ASC" class="f" data-f="val" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">label1 <i>v</i></a></th>'],
+            ['column2', 'column1', Crud::ASC, '<th class="d ec-crud-th ec-crud-th-sortable-not-active" data-d="val"><a href="/user?sort=column2" class="g" data-g="val" data-ec-crud-toggle="ajax-link" data-ec-crud-ajax-update="#myId">label2</a></th>'],
         ];
     }
 

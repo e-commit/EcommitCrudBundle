@@ -78,7 +78,7 @@ describe('Test Modal-manager with spy engine', function () {
   })
 
   it('Test auto openModal', function () {
-    $('body').append('<a href="#" class="html-test ec-crud-modal-auto" id="linkToTest" data-ec-crud-modal-element="#test-modal">Go !</a>')
+    $('body').append('<a href="#" class="html-test" id="linkToTest" data-ec-crud-toggle="modal" data-ec-crud-modal-element="#test-modal">Go !</a>')
 
     $('#linkToTest').get(0).click()
 
@@ -90,7 +90,7 @@ describe('Test Modal-manager with spy engine', function () {
     $(document).on('ec-crud-modal-auto-before', '#linkToTest', function (event) {
       event.preventDefault()
     })
-    $('body').append('<a href="#" class="html-test ec-crud-modal-auto" id="linkToTest" data-ec-crud-modal-element="#test-modal">Go !</a>')
+    $('body').append('<a href="#" class="html-test" data-ec-crud-toggle="modal" id="linkToTest" data-ec-crud-modal-element="#test-modal">Go !</a>')
 
     $('#linkToTest').get(0).click()
 
@@ -101,7 +101,7 @@ describe('Test Modal-manager with spy engine', function () {
   })
 
   it('Test auto openRemoteModal - link', async function () {
-    $('body').append('<a href="#" class="html-test ec-crud-remote-modal-auto" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</a>')
+    $('body').append('<a href="#" class="html-test" data-ec-crud-toggle="remote-modal" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</a>')
 
     $('#linkToTest').get(0).click()
     await wait(() => {
@@ -115,7 +115,7 @@ describe('Test Modal-manager with spy engine', function () {
   })
 
   it('Test auto openRemoteModal - link with href', async function () {
-    $('body').append('<a href="/goodRequest" class="html-test ec-crud-remote-modal-auto" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content">Go !</a>')
+    $('body').append('<a href="/goodRequest" class="html-test" data-ec-crud-toggle="remote-modal" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content">Go !</a>')
 
     $('#linkToTest').get(0).click()
     await wait(() => {
@@ -129,7 +129,7 @@ describe('Test Modal-manager with spy engine', function () {
   })
 
   it('Test auto openRemoteModal - link - prioriry url attr', async function () {
-    $('body').append('<a href="/badRequest" class="html-test ec-crud-remote-modal-auto" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</a>')
+    $('body').append('<a href="/badRequest" class="html-test" data-ec-crud-toggle="remote-modal" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</a>')
 
     $('#linkToTest').get(0).click()
     await wait(() => {
@@ -146,7 +146,7 @@ describe('Test Modal-manager with spy engine', function () {
     $(document).on('ec-crud-remote-modal-auto-before', '#linkToTest', function (event) {
       event.preventDefault()
     })
-    $('body').append('<a href="#" class="html-test ec-crud-remote-modal-auto" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</a>')
+    $('body').append('<a href="#" class="html-test" data-ec-crud-toggle="remote-modal" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</a>')
 
     $('#linkToTest').get(0).click()
     await wait(() => {
@@ -161,7 +161,7 @@ describe('Test Modal-manager with spy engine', function () {
   })
 
   it('Test auto openRemoteModal - button', async function () {
-    $('body').append('<button class="html-test ec-crud-remote-modal-auto" id="buttonToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</button>')
+    $('body').append('<button class="html-test" data-ec-crud-toggle="remote-modal" id="buttonToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</button>')
 
     $('#buttonToTest').get(0).click()
     await wait(() => {
@@ -178,7 +178,7 @@ describe('Test Modal-manager with spy engine', function () {
     $(document).on('ec-crud-remote-modal-auto-before', '#buttonToTest', function (event) {
       event.preventDefault()
     })
-    $('body').append('<button class="html-test ec-crud-remote-modal-auto" id="buttonToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</button>')
+    $('body').append('<button class="html-test" data-ec-crud-toggle="remote-modal" id="buttonToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</button>')
 
     $('#buttonToTest').get(0).click()
     await wait(() => {
