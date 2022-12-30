@@ -90,10 +90,12 @@ class TestCrudControllerTest extends PantherTestCase
     {
         $button = $client->getCrawler()->filterXPath('//button[contains(.,"Display Settings")]');
         $button->first()->click();
+        $client->waitForVisibility('#ec-crud-display-settings-'.static::SESSION_NAME);
 
         $client->getCrawler()->filterXPath('//form[@name="crud_display_settings_'.static::SESSION_NAME.'"]/descendant::input[@value="username"]')->click();
         $client->getCrawler()->filterXPath('//form[@name="crud_display_settings_'.static::SESSION_NAME.'"]/descendant::button[@type="submit"]')->click();
         $this->waitForAjax($client);
+        $client->waitForInvisibility('#ec-crud-display-settings-'.static::SESSION_NAME);
 
         $this->assertSame([5, 3], $this->countRowsAndColumns($client->getCrawler()));
         $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
@@ -307,6 +309,44 @@ class TestCrudControllerTest extends PantherTestCase
 
     /**
      * @depends testSessionValuesAfterResetSettings
+     */
+    public function testCheckAndUncheckAllColumns(Client $client): Client
+    {
+        $client->request('GET', static::URL);
+
+        $button = $client->getCrawler()->filterXPath('//button[contains(.,"Display Settings")]');
+        $button->first()->click();
+        $form = $client->getCrawler()->selectButton('Save')->form();
+        $this->assertCount(2, $form->get('crud_display_settings_'.static::SESSION_NAME.'[displayedColumns]')->getValue());
+
+        // Check all
+        $client->getCrawler()->filterXPath('//form[@name="crud_display_settings_'.static::SESSION_NAME.'"]/descendant::button[contains(.,"Check all")]')->click();
+        $client->wait(5, 30)->until(fn () => 3 === \count($form->get('crud_display_settings_'.static::SESSION_NAME.'[displayedColumns]')->getValue()));
+        $this->assertCount(3, $form->get('crud_display_settings_'.static::SESSION_NAME.'[displayedColumns]')->getValue());
+
+        // Uncheck all
+        $client->getCrawler()->filterXPath('//form[@name="crud_display_settings_'.static::SESSION_NAME.'"]/descendant::button[contains(.,"Uncheck all")]')->click();
+        $client->wait(5, 30)->until(fn () => null === $form->get('crud_display_settings_'.static::SESSION_NAME.'[displayedColumns]')->getValue());
+        $this->assertNull($form->get('crud_display_settings_'.static::SESSION_NAME.'[displayedColumns]')->getValue());
+
+        // Save and error (save not done)
+        $client->getCrawler()->filterXPath('//form[@name="crud_display_settings_'.static::SESSION_NAME.'"]/descendant::button[@type="submit"]')->click();
+        $this->waitForAjax($client);
+        $client->waitForVisibility('#ec-crud-display-settings-'.static::SESSION_NAME);
+        $this->assertCount(1, $client->getCrawler()->filterXPath('//div[@id="ec-crud-display-settings-'.static::SESSION_NAME.'"]/descendant::li[contains(text(), "This collection should contain 1 element or more")]'));
+        $this->assertSame([5, 2], $this->countRowsAndColumns($client->getCrawler()));
+        $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
+
+        // Save not done after reload
+        $client->request('GET', static::URL);
+        $this->assertSame([5, 2], $this->countRowsAndColumns($client->getCrawler()));
+        $this->assertSame([1, 3], $this->getPagination($client->getCrawler()));
+
+        return $client;
+    }
+
+    /**
+     * @depends testCheckAndUncheckAllColumns
      */
     public function testManualReset(Client $client): Client
     {
