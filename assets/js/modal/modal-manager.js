@@ -23,15 +23,15 @@ const ready = (callback) => {
 
 ready(function () {
   document.addEventListener('click', function (event) {
-    if (event.target.matches('[data-ec-crud-toggle="modal"]')) {
+    if (event.target.closest('[data-ec-crud-toggle="modal"]')) {
       onClickModalAuto(event)
     }
 
-    if (event.target.matches('button[data-ec-crud-toggle="remote-modal"]')) {
+    if (event.target.closest('button[data-ec-crud-toggle="remote-modal"]')) {
       onClickButtonRemoteModalAuto(event)
     }
 
-    if (event.target.matches('a[data-ec-crud-toggle="remote-modal"]')) {
+    if (event.target.closest('a[data-ec-crud-toggle="remote-modal"]')) {
       onClickLinkRemoteModalAuto(event)
     }
   })
@@ -39,39 +39,42 @@ ready(function () {
 
 function onClickModalAuto (event) {
   event.preventDefault()
+  const element = event.target.closest('[data-ec-crud-toggle="modal"]')
   const eventBefore = new CustomEvent('ec-crud-modal-auto-before', {
     bubbles: true,
     cancelable: true
   })
-  event.target.dispatchEvent(eventBefore)
+  element.dispatchEvent(eventBefore)
   if (eventBefore.defaultPrevented) {
     return
   }
 
-  openModal(optionsResolver.getDataAttributes(event.target, 'ecCrudModal'))
+  openModal(optionsResolver.getDataAttributes(element, 'ecCrudModal'))
 }
 
 function onClickButtonRemoteModalAuto (event) {
   event.preventDefault()
+  const button = event.target.closest('button[data-ec-crud-toggle="remote-modal"]')
   const eventBefore = new CustomEvent('ec-crud-remote-modal-auto-before', {
     bubbles: true,
     cancelable: true
   })
-  event.target.dispatchEvent(eventBefore)
+  button.dispatchEvent(eventBefore)
   if (eventBefore.defaultPrevented) {
     return
   }
 
-  openRemoteModal(optionsResolver.getDataAttributes(event.target, 'ecCrudModal'))
+  openRemoteModal(optionsResolver.getDataAttributes(button, 'ecCrudModal'))
 }
 
 function onClickLinkRemoteModalAuto (event) {
   event.preventDefault()
+  const aLink = event.target.closest('a[data-ec-crud-toggle="remote-modal"]')
   const eventBefore = new CustomEvent('ec-crud-remote-modal-auto-before', {
     bubbles: true,
     cancelable: true
   })
-  event.target.dispatchEvent(eventBefore)
+  aLink.dispatchEvent(eventBefore)
   if (eventBefore.defaultPrevented) {
     return
   }
@@ -79,9 +82,9 @@ function onClickLinkRemoteModalAuto (event) {
   // Options in data-* override href
   const options = optionsResolver.resolve(
     {
-      url: event.target.getAttribute('href')
+      url: aLink.getAttribute('href')
     },
-    optionsResolver.getDataAttributes(event.target, 'ecCrudModal')
+    optionsResolver.getDataAttributes(aLink, 'ecCrudModal')
   )
 
   openRemoteModal(options)

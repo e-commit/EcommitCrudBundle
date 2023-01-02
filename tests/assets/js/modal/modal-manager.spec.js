@@ -86,6 +86,15 @@ describe('Test Modal-manager with spy engine', function () {
     expect(this.spyEngine.closeModal).not.toHaveBeenCalled()
   })
 
+  it('Test auto openModal with child', function () {
+    $('body').append('<a href="#" class="html-test" id="linkToTest" data-ec-crud-toggle="modal" data-ec-crud-modal-element="#test-modal"><span id="childToTest">Go !</span></a>')
+
+    $('#childToTest').get(0).click()
+
+    expect(this.spyEngine.openModal).toHaveBeenCalled()
+    expect(this.spyEngine.closeModal).not.toHaveBeenCalled()
+  })
+
   it('Test auto openModal canceled', function () {
     $(document).on('ec-crud-modal-auto-before', '#linkToTest', function (event) {
       event.preventDefault()
@@ -104,6 +113,20 @@ describe('Test Modal-manager with spy engine', function () {
     $('body').append('<a href="#" class="html-test" data-ec-crud-toggle="remote-modal" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</a>')
 
     $('#linkToTest').get(0).click()
+    await wait(() => {
+      return this.spyEngine.opened
+    })
+
+    expect(this.spyEngine.openModal).toHaveBeenCalled()
+    expect(this.spyEngine.closeModal).not.toHaveBeenCalled()
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+    expect(jasmine.Ajax.requests.mostRecent().method).toBe('POST')
+  })
+
+  it('Test auto openRemoteModal - link with child', async function () {
+    $('body').append('<a href="#" class="html-test" data-ec-crud-toggle="remote-modal" id="linkToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest"><span id="childToTest">Go !</span></a>')
+
+    $('#childToTest').get(0).click()
     await wait(() => {
       return this.spyEngine.opened
     })
@@ -164,6 +187,20 @@ describe('Test Modal-manager with spy engine', function () {
     $('body').append('<button class="html-test" data-ec-crud-toggle="remote-modal" id="buttonToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest">Go !</button>')
 
     $('#buttonToTest').get(0).click()
+    await wait(() => {
+      return this.spyEngine.opened
+    })
+
+    expect(this.spyEngine.openModal).toHaveBeenCalled()
+    expect(this.spyEngine.closeModal).not.toHaveBeenCalled()
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+    expect(jasmine.Ajax.requests.mostRecent().method).toBe('POST')
+  })
+
+  it('Test auto openRemoteModal - button with child', async function () {
+    $('body').append('<button class="html-test" data-ec-crud-toggle="remote-modal" id="buttonToTest" data-ec-crud-modal-element="#test-modal" data-ec-crud-modal-element-content="#test-modal .content" data-ec-crud-modal-url="/goodRequest"><span id="childToTest">Go !</span></button>')
+
+    $('#childToTest').get(0).click()
     await wait(() => {
       return this.spyEngine.opened
     })

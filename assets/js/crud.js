@@ -28,23 +28,23 @@ ready(function () {
   })
 
   document.addEventListener('click', function (event) {
-    if (event.target.matches('button[data-ec-crud-toggle="search-reset"]')) {
+    if (event.target.closest('button[data-ec-crud-toggle="search-reset"]')) {
       onResetCrudSearchForm(event)
     }
 
-    if (event.target.matches('button[data-ec-crud-toggle="display-settings-button"]')) {
+    if (event.target.closest('button[data-ec-crud-toggle="display-settings-button"]')) {
       onCrudDisplaySettingsOpen(event)
     }
 
-    if (event.target.matches('button[data-ec-crud-toggle="display-settings-check-all-columns"]')) {
+    if (event.target.closest('button[data-ec-crud-toggle="display-settings-check-all-columns"]')) {
       onCrudDisplaySettingsCheckAllColumns(event)
     }
 
-    if (event.target.matches('button[data-ec-crud-toggle="display-settings-uncheck-all-columns"]')) {
+    if (event.target.closest('button[data-ec-crud-toggle="display-settings-uncheck-all-columns"]')) {
       onCrudDisplaySettingsUncheckAllColumns(event)
     }
 
-    if (event.target.matches('button[data-ec-crud-toggle="display-settings-reset"]')) {
+    if (event.target.closest('button[data-ec-crud-toggle="display-settings-reset"]')) {
       onCrudDisplaySettingsReset(event)
     }
   })
@@ -67,7 +67,7 @@ function onSubmitCrudSearchForm (event) {
 }
 
 function onResetCrudSearchForm (event) {
-  const button = event.target
+  const button = event.target.closest('button[data-ec-crud-toggle="search-reset"]')
   const searchContainer = getElement('#' + button.getAttribute('data-crud-search-id'))
   const listContainer = getElement('#' + button.getAttribute('data-crud-list-id'))
 
@@ -81,7 +81,7 @@ function onResetCrudSearchForm (event) {
 }
 
 function onCrudDisplaySettingsOpen (event) {
-  const button = event.target
+  const button = event.target.closest('button[data-ec-crud-toggle="display-settings-button"]')
   const displaySettingsContainer = getElement('#' + button.getAttribute('data-display-settings'))
   const isModal = displaySettingsContainer.getAttribute('data-modal') === '1'
 
@@ -99,21 +99,21 @@ function onCrudDisplaySettingsOpen (event) {
 }
 
 function onCrudDisplaySettingsCheckAllColumns (event) {
-  const button = event.target
+  const button = event.target.closest('button[data-ec-crud-toggle="display-settings-check-all-columns"]')
   button.parentNode.closest('div[data-ec-crud-toggle="display-settings"]').querySelectorAll('input[type=checkbox]').forEach(checkbox => {
     checkbox.checked = true
   })
 }
 
 function onCrudDisplaySettingsUncheckAllColumns (event) {
-  const button = event.target
+  const button = event.target.closest('button[data-ec-crud-toggle="display-settings-uncheck-all-columns"]')
   button.parentNode.closest('div[data-ec-crud-toggle="display-settings"]').querySelectorAll('input[type=checkbox]').forEach(checkbox => {
     checkbox.checked = false
   })
 }
 
 function onCrudDisplaySettingsReset (event) {
-  const button = event.target
+  const button = event.target.closest('button[data-ec-crud-toggle="display-settings-reset"]')
   const displaySettingsContainer = button.parentNode.closest('div[data-ec-crud-toggle="display-settings"]')
   const listContainer = getElement('#' + displaySettingsContainer.getAttribute('data-crud-list-id'))
 

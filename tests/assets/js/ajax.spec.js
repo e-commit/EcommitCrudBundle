@@ -1070,6 +1070,18 @@ describe('Test Ajax.click', function () {
     expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
   })
 
+  it('Send auto-request with button and child', async function () {
+    $('body').append('<button class="html-test" data-ec-crud-toggle="ajax-click" id="buttonToTest" data-ec-crud-ajax-url="/goodRequest"><span id="childToTest">Go !</span></button>')
+
+    $('#childToTest').get(0).click()
+
+    await wait(() => {
+      return false
+    }, 500)
+
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+  })
+
   it('Send auto-request with button canceled', async function () {
     $(document).on('ec-crud-ajax-click-auto-before', '#clickToTest', function (event) {
       event.preventDefault()
@@ -1243,6 +1255,18 @@ describe('Test Ajax.link', function () {
     $('body').append('<a href="/goodRequest" class="html-test" data-ec-crud-toggle="ajax-link" id="linkToTest">Go !</a>')
 
     $('#linkToTest').get(0).click()
+
+    await wait(() => {
+      return false
+    }, 500)
+
+    expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
+  })
+
+  it('Send auto-request with link and child', async function () {
+    $('body').append('<a href="/goodRequest" class="html-test" data-ec-crud-toggle="ajax-link" id="linkToTest"><span id="childToTest">Go !</span></a>')
+
+    $('#childToTest').get(0).click()
 
     await wait(() => {
       return false

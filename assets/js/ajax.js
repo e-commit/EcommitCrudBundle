@@ -17,11 +17,11 @@ const ready = (callback) => {
 
 ready(function () {
   document.addEventListener('click', function (event) {
-    if (event.target.matches('[data-ec-crud-toggle="ajax-click"]')) {
+    if (event.target.closest('[data-ec-crud-toggle="ajax-click"]')) {
       onClickAuto(event)
     }
 
-    if (event.target.matches('a[data-ec-crud-toggle="ajax-link"]')) {
+    if (event.target.closest('a[data-ec-crud-toggle="ajax-link"]')) {
       onClickLinkAuto(event)
     }
   })
@@ -35,30 +35,32 @@ ready(function () {
 
 function onClickAuto (event) {
   event.preventDefault()
+  const element = event.target.closest('[data-ec-crud-toggle="ajax-click"]')
   const eventBefore = new CustomEvent('ec-crud-ajax-click-auto-before', {
     bubbles: true,
     cancelable: true
   })
-  event.target.dispatchEvent(eventBefore)
+  element.dispatchEvent(eventBefore)
   if (eventBefore.defaultPrevented) {
     return
   }
 
-  click(event.target).catch((error) => console.error(error))
+  click(element).catch((error) => console.error(error))
 }
 
 function onClickLinkAuto (event) {
   event.preventDefault()
+  const aLink = event.target.closest('a[data-ec-crud-toggle="ajax-link"]')
   const eventBefore = new CustomEvent('ec-crud-ajax-link-auto-before', {
     bubbles: true,
     cancelable: true
   })
-  event.target.dispatchEvent(eventBefore)
+  aLink.dispatchEvent(eventBefore)
   if (eventBefore.defaultPrevented) {
     return
   }
 
-  link(event.target).catch((error) => console.error(error))
+  link(aLink).catch((error) => console.error(error))
 }
 
 function onSubmitFormAuto (event) {
