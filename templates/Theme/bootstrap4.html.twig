@@ -77,7 +77,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                {{ form_widget(form.reset, {'attr': {'class': form.reset.vars.attr.class ~ ' btn-outline-secondary'}}) }}
+                {{ form_widget(form.reset, {'attr': {'class': form.reset.vars.attr.class|default('') ~ ' btn-outline-secondary'}}) }}
                 {{ form_widget(form.save, {'attr': {'class': 'btn-success'}}) }}
             </div>
             {{ form_end(form) }}
@@ -103,7 +103,7 @@
         </div>
 
         <div style="text-align: center;">
-            {{ form_widget(form.reset, {'attr': {'class': form.reset.vars.attr.class ~ ' btn-outline-secondary'}}) }}
+            {{ form_widget(form.reset, {'attr': {'class': form.reset.vars.attr.class|default('') ~ ' btn-outline-secondary'}}) }}
             {{ form_row(form.save, {'attr': {'class': 'btn-success'}}) }}
         </div>
         {{ form_end(form) }}
