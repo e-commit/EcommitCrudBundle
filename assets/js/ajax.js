@@ -138,14 +138,8 @@ export function sendRequest (options) {
       fetchOptions.body = options.body
     } else if (options.body instanceof Object) {
       const formData = new FormData()
-      Object.entries(options.body).forEach(entry => {
-        if (Array.isArray(entry[1])) {
-          entry[1].forEach(subEntry => {
-            formData.append(entry[0], subEntry)
-          })
-        } else {
-          formData.append(entry[0], entry[1])
-        }
+      generateParameters([], '', '', options.body).forEach(entry => {
+        formData.append(entry[0], entry[1])
       })
       fetchOptions.body = formData
     } else if (options.body !== null) {
@@ -330,17 +324,8 @@ function resolveUrl (options) {
   const url = new URL(options.url, window.location.origin)
   const searchParams = url.searchParams
 
-  Object.entries(options.query).forEach(entry => {
-    if (Array.isArray(entry[1])) {
-      if (searchParams.has(entry[0])) {
-        searchParams.delete(entry[0])
-      }
-      entry[1].forEach(subEntry => {
-        searchParams.append(entry[0], subEntry)
-      })
-    } else {
-      searchParams.set(entry[0], entry[1])
-    }
+  generateParameters([], '', '', options.query).forEach(entry => {
+    searchParams.set(entry[0], entry[1])
   })
 
   if (!options.cache && !searchParams.has('_')) {
@@ -348,6 +333,32 @@ function resolveUrl (options) {
   }
 
   return url.toString()
+}
+
+function generateParameters (result, propertyPath, property, value) {
+  if (/[[\]]/.test(property)) {
+    return result
+  }
+
+  if (propertyPath === '') {
+    propertyPath = property
+  } else {
+    propertyPath = propertyPath + '[' + property + ']'
+  }
+
+  if (typeof (value) === 'undefined' || typeof (value) !== 'object') {
+    result.push([propertyPath, value])
+
+    return result
+  }
+
+  for (const param in value) {
+    if (Object.prototype.hasOwnProperty.call(value, param)) {
+      result = generateParameters(result, propertyPath, param, value[param])
+    }
+  }
+
+  return result
 }
 
 function executeEventsAndCallbacksSuccess (callbacksSuccess, options, data, response) {

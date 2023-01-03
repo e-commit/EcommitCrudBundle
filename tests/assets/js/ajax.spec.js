@@ -432,7 +432,15 @@ describe('Test Ajax.sendRequest', function () {
       url: '/goodRequest',
       body: {
         var1: 'My value 1',
-        'var2[]': ['val2A', 'val2C']
+        var2: ['val2A', 'val2C'],
+        'var[': 'value', // Ignored
+        object: {
+          property1: 'A',
+          property2: ['B', 'C'],
+          subObject: {
+            property3: 'D'
+          }
+        }
       },
       onComplete: function (statusText, response) {
         callbackComplete()
@@ -452,7 +460,15 @@ describe('Test Ajax.sendRequest', function () {
 
     expect(response).toBeInstanceOf(Response)
     expect(jasmine.Ajax.requests.mostRecent().url).toMatch('/goodRequest')
-    expect(jasmine.Ajax.requests.mostRecent().data()).toEqual([['var1', 'My value 1'], ['var2[]', 'val2A'], ['var2[]', 'val2C']]) // Parsed by addJasmineAjaxFormDataSupport
+    expect(jasmine.Ajax.requests.mostRecent().data()).toEqual([
+      ['var1', 'My value 1'],
+      ['var2[0]', 'val2A'],
+      ['var2[1]', 'val2C'],
+      ['object[property1]', 'A'],
+      ['object[property2][0]', 'B'],
+      ['object[property2][1]', 'C'],
+      ['object[subObject][property3]', 'D']
+    ]) // Parsed by addJasmineAjaxFormDataSupport
     expect(callbackSuccess).toHaveBeenCalled()
     expect(callbackError).not.toHaveBeenCalled()
     expect(callbackComplete).toHaveBeenCalled()
@@ -496,11 +512,27 @@ describe('Test Ajax.sendRequest', function () {
 
   it('Send request with query option', async function () {
     const promise = ajax.sendRequest({
-      url: '/goodRequest?var1=val1&var2[]=val2a&var3=val3',
+      url: '/goodRequest',
       query: {
-        var1: 'new1', // override
-        'var2[]': ['new2a', 'new2b'], // override
-        var4: 'new4'
+        // Same example as https://www.php.net/manual/fr/function.http-build-query.php
+        user: {
+          name: 'Bob Smith',
+          age: 47,
+          sex: 'M',
+          dob: '5/12/1956'
+        },
+        'var[': 'value', // Ignored
+        pastimes: ['golf', 'opera', 'poker', 'rap'],
+        children: {
+          bobby: {
+            age: 12,
+            sex: 'M'
+          },
+          sally: {
+            age: 8,
+            sex: 'F'
+          }
+        }
       },
       cache: true
     })
@@ -509,7 +541,23 @@ describe('Test Ajax.sendRequest', function () {
     const response = await promise
 
     expect(response).toBeInstanceOf(Response)
-    expect(jasmine.Ajax.requests.mostRecent().url).toEqual('http://localhost:9876/goodRequest?var1=new1&var3=val3&var2%5B%5D=new2a&var2%5B%5D=new2b&var4=new4')
+    expect(jasmine.Ajax.requests.mostRecent().url).toEqual('http://localhost:9876/goodRequest?user%5Bname%5D=Bob+Smith&user%5Bage%5D=47&user%5Bsex%5D=M&user%5Bdob%5D=5%2F12%2F1956&pastimes%5B0%5D=golf&pastimes%5B1%5D=opera&pastimes%5B2%5D=poker&pastimes%5B3%5D=rap&children%5Bbobby%5D%5Bage%5D=12&children%5Bbobby%5D%5Bsex%5D=M&children%5Bsally%5D%5Bage%5D=8&children%5Bsally%5D%5Bsex%5D=F')
+  })
+
+  it('Send request with query option and override', async function () {
+    const promise = ajax.sendRequest({
+      url: '/goodRequest?var1=value1&var2=value2',
+      query: {
+        var1: 'newValue1'
+      },
+      cache: true
+    })
+    expect(promise).toBeInstanceOf(Promise)
+
+    const response = await promise
+
+    expect(response).toBeInstanceOf(Response)
+    expect(jasmine.Ajax.requests.mostRecent().url).toEqual('http://localhost:9876/goodRequest?var1=newValue1&var2=value2')
   })
 
   it('Send request with cache', async function () {
