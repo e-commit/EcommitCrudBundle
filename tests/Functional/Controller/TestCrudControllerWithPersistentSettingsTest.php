@@ -270,7 +270,7 @@ class TestCrudControllerWithPersistentSettingsTest extends PantherTestCase
         $client->request('GET', '/logout');
     }
 
-    protected function changeSettings(Client $client, array $headerColumnClicks = [], array $displayColumnClicks = [], ?int $resultsPerPage = null): void
+    protected function changeSettings(Client $client, array $headerColumnClicks = [], array $displayColumnClicks = [], int $resultsPerPage = null): void
     {
         foreach ($headerColumnClicks as $column) {
             $link = $client->getCrawler()->filterXPath('//table[@class="result"]/thead/tr/th/a[contains(text(), "'.$column.'")]');

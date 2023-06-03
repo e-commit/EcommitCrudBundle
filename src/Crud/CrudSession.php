@@ -29,7 +29,7 @@ final class CrudSession
     /**
      * @internal
      */
-    public function __construct(protected int $maxPerPage, protected array $displayedColumns, protected string $sort, protected string $sortDirection, ?SearcherInterface $searchFormData = null)
+    public function __construct(protected int $maxPerPage, protected array $displayedColumns, protected string $sort, protected string $sortDirection, SearcherInterface $searchFormData = null)
     {
         $this->searchFormData = ($searchFormData) ? clone $searchFormData : null; // Avoid modification by reference (by the user or an invalid form)
     }

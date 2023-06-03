@@ -26,7 +26,7 @@ trait CrudControllerTrait
 
     abstract protected function getTemplateName(string $action): string;
 
-    protected function createCrudConfig(?string $sessionName = null): CrudConfig
+    protected function createCrudConfig(string $sessionName = null): CrudConfig
     {
         return new CrudConfig($sessionName);
     }

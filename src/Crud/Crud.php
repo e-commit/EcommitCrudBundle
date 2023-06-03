@@ -882,10 +882,10 @@ final class Crud
                 $em->flush();
             } else {
                 // Create object in database only if not default values
-                if ($this->sessionValues->getDisplayedColumns() != $this->getDefaultDisplayedColumns() ||
-                    $this->sessionValues->getMaxPerPage() != $this->getDefaultMaxPerPage() ||
-                    $this->sessionValues->getSortDirection() != $this->getDefaultSortDirection() ||
-                    $this->sessionValues->getSort() != $this->getDefaultSort()
+                if ($this->sessionValues->getDisplayedColumns() != $this->getDefaultDisplayedColumns()
+                    || $this->sessionValues->getMaxPerPage() != $this->getDefaultMaxPerPage()
+                    || $this->sessionValues->getSortDirection() != $this->getDefaultSortDirection()
+                    || $this->sessionValues->getSort() != $this->getDefaultSort()
                 ) {
                     $objectDatabase = new UserCrudSettings(
                         $this->container->get('security.token_storage')->getToken()->getUser(),

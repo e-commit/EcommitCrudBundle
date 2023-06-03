@@ -81,7 +81,7 @@ abstract class AbstractCrudTest extends KernelTestCase
         return $crud;
     }
 
-    protected function createValidCrudConfig(?CrudConfig $crudConfig = null, bool $withSearcher = false): CrudConfig
+    protected function createValidCrudConfig(CrudConfig $crudConfig = null, bool $withSearcher = false): CrudConfig
     {
         $queryBuilder = self::getContainer()->get(ManagerRegistry::class)->getRepository(TestUser::class)
             ->createQueryBuilder('u')

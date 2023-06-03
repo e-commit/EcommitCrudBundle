@@ -65,6 +65,9 @@
         "psr-4": { "Ecommit\\CrudBundle\\Tests\\": "tests/" }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
     }
 }

@@ -31,7 +31,7 @@ final class QueryBuilder implements QueryBuilderInterface
     protected array $orders = [];
     protected HttpClientInterface $client;
 
-    public function __construct(protected string $url, protected string $httpMethod, ?HttpClientInterface $client = null)
+    public function __construct(protected string $url, protected string $httpMethod, HttpClientInterface $client = null)
     {
         if (null === $client) {
             $client = HttpClient::create();
@@ -50,7 +50,7 @@ final class QueryBuilder implements QueryBuilderInterface
     }
 
     /**
-     * @param \Closure $orderBuilder Closure aguments: $queryBuilder, $page, $resultsPerPage
+     * Closure aguments: $queryBuilder, $page, $resultsPerPage.
      */
     public function setPaginationBuilder(\Closure $paginationBuilder): self
     {

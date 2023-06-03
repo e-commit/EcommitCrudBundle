@@ -239,7 +239,7 @@ class CrudSessionTest extends TestCase
         $reflectionMethod->setValue($crudSession, $value);
     }
 
-    protected function createCrudSession(?UserSearcher $searchFormData = null): CrudSession
+    protected function createCrudSession(UserSearcher $searchFormData = null): CrudSession
     {
         return new CrudSession(100, ['col1'], 'sort1', Crud::ASC, $searchFormData);
     }

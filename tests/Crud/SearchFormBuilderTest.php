@@ -470,7 +470,7 @@ class SearchFormBuilderTest extends AbstractCrudTest
         return $container;
     }
 
-    protected function createSearchFormBuilder(?array $filters = null, ?Crud $crud = null, ?SearcherInterface $defaultData = null, ?string $type = null, array $options = []): SearchFormBuilder
+    protected function createSearchFormBuilder(array $filters = null, Crud $crud = null, SearcherInterface $defaultData = null, string $type = null, array $options = []): SearchFormBuilder
     {
         $filters = (null !== $filters) ? $filters : ['my_filter' => $this->createMock(FilterInterface::class)];
         $crud = ($crud) ?: $this->createCrud($this->createValidCrudConfig());

@@ -24,9 +24,6 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class DisplaySettingsType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('resultsPerPage', ChoiceType::class, [
@@ -62,9 +59,6 @@ class DisplaySettingsType extends AbstractType
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
@@ -78,9 +72,6 @@ class DisplaySettingsType extends AbstractType
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'crud_display_settings';

@@ -19,7 +19,7 @@ final class CrudConfig implements \ArrayAccess
 {
     protected array $options = [];
 
-    public function __construct(?string $sessionName = null)
+    public function __construct(string $sessionName = null)
     {
         if (null !== $sessionName) {
             $this->setSessionName($sessionName);
@@ -155,7 +155,7 @@ final class CrudConfig implements \ArrayAccess
         return $this;
     }
 
-    public function createSearchForm(SearcherInterface $defaultData, ?string $type = null, array $options = []): self
+    public function createSearchForm(SearcherInterface $defaultData, string $type = null, array $options = []): self
     {
         $this->options['search_form_data'] = $defaultData;
         $this->options['search_form_type'] = $type;
