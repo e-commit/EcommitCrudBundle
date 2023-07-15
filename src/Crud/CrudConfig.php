@@ -209,7 +209,7 @@ final class CrudConfig implements \ArrayAccess
         return $this;
     }
 
-    public function resetOptions(null|string|array $options = null): self
+    public function resetOptions(string|array $options = null): self
     {
         if (null === $options) {
             $this->options = [];
