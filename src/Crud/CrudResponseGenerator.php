@@ -30,7 +30,7 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
 
     public function getResponse(Crud $crud, array $options = []): Response
     {
-        $options = $this->getOptions($options);
+        $options = $this->getOptions($options, true);
         $data = $this->processCrud($crud, $options);
 
         return $this->renderCrud($this->getTemplateName($options['template_generator'], 'index'), $data);
@@ -40,7 +40,7 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
     {
         $masterRequest = $this->container->get('request_stack')->getMainRequest();
 
-        $options = $this->getOptions($options);
+        $options = $this->getOptions($options, false);
         $data = $this->processCrud($crud, $options);
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
@@ -64,7 +64,7 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
 
     public function getCrudData(Crud $crud, array $options = []): array
     {
-        $options = $this->getOptions($options);
+        $options = $this->getOptions($options, false);
 
         return $this->processCrud($crud, $options);
     }
@@ -87,6 +87,9 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
 
         $request = $this->container->get('request_stack')->getCurrentRequest();
 
+        if ($options['auto_reset']) {
+            $crud->reset();
+        }
         if ($request->query->has('search')) {
             $crud->processSearchForm();
         }
@@ -106,12 +109,13 @@ final class CrudResponseGenerator implements ServiceSubscriberInterface
         return $data;
     }
 
-    protected function getOptions(array $options): array
+    protected function getOptions(array $options, bool $autoResetDefaultValue): array
     {
         $resolver = new OptionsResolver();
         $resolver->setDefaults([
             'before_build' => null,
             'after_build' => null,
+            'auto_reset' => $autoResetDefaultValue,
         ]);
         $resolver->setRequired([
             'template_generator',
