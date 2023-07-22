@@ -165,21 +165,21 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testChangePage
      */
-    public function testSessionValuesAfterChangePageAndReload(Client $client): Client
+    public function testSessionValuesAfterChangePage(Client $client): Client
     {
         $client->request('GET', static::URL);
 
-        $this->assertSame([10, 3], $this->countRowsAndColumns($client->getCrawler()));
-        $this->assertSame([1, 2], $this->getPagination($client->getCrawler()));
+        $this->assertSame([1, 3], $this->countRowsAndColumns($client->getCrawler()));
+        $this->assertSame([2, 2], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
-        $this->assertSame('ClémentTine', $this->getFirstUsername($client->getCrawler()));
+        $this->assertSame('JudieCieux', $this->getFirstUsername($client->getCrawler()));
         $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
 
     /**
-     * @depends testSessionValuesAfterChangePageAndReload
+     * @depends testSessionValuesAfterChangePage
      */
     public function testSearch(Client $client): Client
     {
@@ -200,21 +200,21 @@ class TestCrudControllerTest extends PantherTestCase
     /**
      * @depends testSearch
      */
-    public function testSessionValuesAfterSearchAndReload(Client $client): Client
+    public function testSessionValuesAfterSearch(Client $client): Client
     {
         $client->request('GET', static::URL);
 
-        $this->assertSame([10, 3], $this->countRowsAndColumns($client->getCrawler()));
-        $this->assertSame([1, 2], $this->getPagination($client->getCrawler()));
+        $this->assertSame([2, 3], $this->countRowsAndColumns($client->getCrawler()));
+        $this->assertSame([1, 1], $this->getPagination($client->getCrawler()));
         $this->assertSame(['last_name', Crud::DESC], $this->getSort($client->getCrawler()));
-        $this->assertSame('ClémentTine', $this->getFirstUsername($client->getCrawler()));
+        $this->assertSame('HenriPoste', $this->getFirstUsername($client->getCrawler()));
         $this->checkBeforeAndAfterBuild($client->getCrawler());
 
         return $client;
     }
 
     /**
-     * @depends testSessionValuesAfterSearchAndReload
+     * @depends testSessionValuesAfterSearch
      */
     public function testSearchWithoutFilter(Client $client): Client
     {
@@ -409,7 +409,7 @@ class TestCrudControllerTest extends PantherTestCase
         }
         $client->request('GET', $resetUrl);
 
-        $this->assertSame([5, 3], $this->countRowsAndColumns($client->getCrawler())); // Not reset display settings and search
+        $this->assertSame([2, 3], $this->countRowsAndColumns($client->getCrawler())); // Not reset display settings and search
         $this->assertSame(['first_name', Crud::ASC], $this->getSort($client->getCrawler()));
 
         return $client;
