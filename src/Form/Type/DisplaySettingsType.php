@@ -21,6 +21,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 class DisplaySettingsType extends AbstractType
 {
@@ -34,8 +35,16 @@ class DisplaySettingsType extends AbstractType
             'constraints' => new NotBlank(),
         ]);
 
+        $columnsChoices = $options['columns_choices'];
         $builder->add('displayedColumns', ChoiceType::class, [
-            'choices' => array_flip($options['columns_choices']),
+            'choices' => array_keys($columnsChoices),
+            'choice_label' => function (string $choice, string $key, mixed $value) use ($columnsChoices): string|TranslatableInterface {
+                if (\array_key_exists($choice, $columnsChoices)) {
+                    return $columnsChoices[$choice];
+                }
+
+                return $choice;
+            },
             'multiple' => true,
             'expanded' => true,
             'label' => 'display_settings.displayed_columns',

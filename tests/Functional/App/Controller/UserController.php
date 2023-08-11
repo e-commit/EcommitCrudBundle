@@ -17,6 +17,7 @@ use Ecommit\CrudBundle\Controller\AbstractCrudController;
 use Ecommit\CrudBundle\Crud\Crud;
 use Ecommit\CrudBundle\Tests\Functional\App\Entity\TestUser;
 use Ecommit\CrudBundle\Tests\Functional\App\Form\Searcher\UserSearcher;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class UserController extends AbstractCrudController
 {
@@ -31,7 +32,7 @@ class UserController extends AbstractCrudController
         $crudConfig = $this->createCrudConfig(static::getCrudName())
             ->addColumn('username', 'u.username', 'username', ['displayed_by_default' => false])
             ->addColumn('firstName', 'u.firstName', 'first_name')
-            ->addColumn('lastName', 'u.lastName', 'last_name')
+            ->addColumn('lastName', 'u.lastName', new TranslatableMessage('last_name'))
             ->setQueryBuilder($queryBuilder)
             ->setMaxPerPage([5, 10, 50], 5)
             ->setDefaultSort('firstName', Crud::ASC)

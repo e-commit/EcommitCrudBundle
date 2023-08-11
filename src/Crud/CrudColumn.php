@@ -17,6 +17,7 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Validation;
+use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class CrudColumn
 {
@@ -53,7 +54,7 @@ final class CrudColumn
             'alias',
         ]);
         $resolver->setDefaults([
-            'label' => fn (Options $options): string => $options['id'],
+            'label' => fn (Options $options): string|TranslatableInterface => $options['id'],
             'sortable' => true,
             'displayed_by_default' => true,
             'alias_sort' => fn (Options $options): string => $options['alias'],
@@ -64,7 +65,7 @@ final class CrudColumn
             new Length(max: 100, maxMessage: 'The column id "{{ value }}" is too long. It should have {{ limit }} character or less')
         ));
         $resolver->setAllowedTypes('alias', 'string');
-        $resolver->setAllowedTypes('label', 'string');
+        $resolver->setAllowedTypes('label', ['string', TranslatableInterface::class]);
         $resolver->setAllowedTypes('sortable', 'bool');
         $resolver->setAllowedTypes('displayed_by_default', 'bool');
         $resolver->setAllowedTypes('alias_sort', ['string', 'array']);
@@ -83,7 +84,7 @@ final class CrudColumn
         return $this->options['alias'];
     }
 
-    public function getLabel(): string
+    public function getLabel(): string|TranslatableInterface
     {
         return $this->options['label'];
     }

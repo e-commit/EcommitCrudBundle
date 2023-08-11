@@ -19,6 +19,7 @@ use Symfony\Component\Form\FormRendererInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatableInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -330,7 +331,7 @@ final class CrudExtension extends AbstractExtension
 
             return $value;
         });
-        $resolver->setAllowedTypes('label', ['null', 'string']);
+        $resolver->setAllowedTypes('label', ['null', 'string', TranslatableInterface::class]);
         $options = $resolver->resolve($this->buildOptions('crud_th', $options, $crud));
 
         // If the column is not to be shown, returns empty
