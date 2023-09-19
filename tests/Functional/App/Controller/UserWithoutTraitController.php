@@ -67,7 +67,7 @@ class UserWithoutTraitController extends AbstractController
                     return $data;
                 },
                 'after_build' => function (Crud $crud, array $data) {
-                    $data['test_before_after_build'] = $data['test_before_after_build'].' AFTER';
+                    $data['test_before_after_build'] .= ' AFTER';
 
                     return $data;
                 },
@@ -90,7 +90,7 @@ class UserWithoutTraitController extends AbstractController
                     return $data;
                 },
                 'after_build' => function (Crud $crud, array $data) {
-                    $data['test_before_after_build'] = $data['test_before_after_build'].' AFTER';
+                    $data['test_before_after_build'] .= ' AFTER';
 
                     return $data;
                 },
