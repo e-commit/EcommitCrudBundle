@@ -39,6 +39,12 @@ class Kernel extends BaseKernel implements CompilerPassInterface
         $loader->load($this->getProjectDir().'/config/webpack_encore.yaml');
         $loader->load($this->getProjectDir().'/config/ecommit_crud.yaml');
         $loader->load($this->getProjectDir().'/config/services.yaml');
+
+        if (5 === static::MAJOR_VERSION) {
+            $container->loadFromExtension('security', [
+                'enable_authenticator_manager' => true,
+            ]);
+        }
     }
 
     public function process(ContainerBuilder $container): void

@@ -17,7 +17,7 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 class EntityToIdTransformer extends EntityToChoiceTransformer
 {
-    public function transform(mixed $value)
+    public function transform(mixed $value): mixed
     {
         if (null === $value || '' === $value) {
             return null;

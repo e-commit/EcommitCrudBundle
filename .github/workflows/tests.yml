@@ -19,43 +19,42 @@ jobs:
                         composer-flags: '--prefer-stable --prefer-lowest'
                         description: 'with SF 5.4.* lowest'
                     -   php-version: '8.1'
-                        symfony-version: '6.0.*'
+                        symfony-version: '6.4.*'
                         composer-flags: '--prefer-stable --prefer-lowest'
-                        description: 'with SF 6.0.* lowest'
-                    -   php-version: '8.1'
-                        symfony-version: '6.1.*'
+                        description: 'with SF 6.4.* lowest'
+                    -   php-version: '8.2'
+                        symfony-version: '7.0.*'
                         composer-flags: '--prefer-stable --prefer-lowest'
-                        description: 'with SF 6.1.* lowest'
-                    -   php-version: '8.1'
-                        symfony-version: '6.2.*'
-                        composer-flags: '--prefer-stable --prefer-lowest'
-                        description: 'with SF 6.2.* lowest'
-                    -   php-version: '8.1'
-                        symfony-version: '6.3.*'
-                        composer-flags: '--prefer-stable --prefer-lowest'
-                        description: 'with SF 6.3.* lowest'
+                        description: 'with SF 7.0.* lowest'
 
 
                     #Symfony versions
-                    -   php-version: '8.2'
+                    -   php-version: '8.3'
                         symfony-version: '5.4.*'
                         description: 'with SF 5.4.*'
-                    -   php-version: '8.2'
-                        symfony-version: '6.0.*'
-                        description: 'with SF 6.0.*'
-                    -   php-version: '8.2'
-                        symfony-version: '6.1.*'
-                        description: 'with SF 6.1.*'
-                    -   php-version: '8.2'
-                        symfony-version: '6.2.*'
-                        description: 'with SF 6.2.*'
-                    -   php-version: '8.2'
-                        symfony-version: '6.3.*'
-                        description: 'with SF 6.3.*'
+                    -   php-version: '8.3'
+                        symfony-version: '5.4.*@dev'
+                        description: 'with SF 5.4.* dev'
+                    -   php-version: '8.3'
+                        symfony-version: '6.4.*'
+                        description: 'with SF 6.4.*'
+                    -   php-version: '8.3'
+                        symfony-version: '6.4.*@dev'
+                        description: 'with SF 6.4.* dev'
+                    -   php-version: '8.3'
+                        symfony-version: '7.0.*'
+                        description: 'with SF 7.0.*'
+                    -   php-version: '8.3'
+                        symfony-version: '7.0.*@dev'
+                        description: 'with SF 7.0.* dev'
+                    -   php-version: '8.3'
+                        symfony-version: '7.1.*@dev'
+                        description: 'with SF 7.1.* dev'
 
                     #PHP versions
                     -   php-version: '8.1'
                     -   php-version: '8.2'
+                    -   php-version: '8.3'
 
                     #CS
                     -   php-version: '8.2'
@@ -113,6 +112,18 @@ jobs:
                         ${{ steps.yarn-cache.outputs.dir }}
                     key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.*') }}-${{ matrix.composer-flags }}-${{ hashFiles('**/yarn.lock') }}
                     restore-keys: composer-${{ runner.os }}-${{ matrix.php-version }}-
+
+            -   name: Configure minimum stability
+                if: matrix.symfony-version && contains(matrix.symfony-version, '@dev')
+                run: composer config minimum-stability dev
+
+            -   name: Remove friendsofphp/php-cs-fixer
+                if: matrix.coding-standards != true
+                run: composer remove friendsofphp/php-cs-fixer --dev --no-update
+
+            -   name: Remove vimeo/psalm
+                if: matrix.static-analysis != true
+                run: composer remove vimeo/psalm --dev --no-update
 
             -   name: Configure Symfony Flex
                 if: matrix.symfony-version

@@ -30,6 +30,7 @@ class DateFilter extends AbstractFilter
     {
         $typeOptions = $this->getTypeOptions($options, [
             'input' => 'datetime',
+            'widget' => 'choice',
         ]);
         $type = ($options['with_time']) ? DateTimeType::class : DateType::class;
         $builder->addField($property, $type, $typeOptions);

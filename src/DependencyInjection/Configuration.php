@@ -28,7 +28,7 @@ class Configuration implements ConfigurationInterface
      * @psalm-suppress PossiblyUndefinedMethod
      * @psalm-suppress PossiblyNullReference
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('ecommit_crud');
         /** @var ArrayNodeDefinition $rootNode */

@@ -28,7 +28,7 @@ class EntitiesToChoicesTransformer extends AbstractEntityTransformer
         parent::__construct($queryBuilder, $identifier, $choiceLabel, $throwExceptionIfValueNotFoundInReverse);
     }
 
-    public function transform(mixed $value)
+    public function transform(mixed $value): mixed
     {
         if (null === $value) {
             return [];
@@ -49,7 +49,7 @@ class EntitiesToChoicesTransformer extends AbstractEntityTransformer
         return $results;
     }
 
-    public function reverseTransform(mixed $value)
+    public function reverseTransform(mixed $value): mixed
     {
         $collection = new ArrayCollection();
 
