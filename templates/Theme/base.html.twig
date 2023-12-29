@@ -97,14 +97,14 @@
 
 {% block th_not_sortable %}
     {% set th_attr = th_attr.not_sortable|merge({class: (th_attr.not_sortable.class|default('') ~ ' ec-crud-th ec-crud-th-not-sortable')|trim}) %}
-    <th{% with { attr: th_attr } %}{{ block('attributes', template_name) }}{% endwith %}>{{ label|trans }}</th>
+    <th{% with { attr: th_attr } %}{{ block('attributes', template_name) }}{% endwith %}>{{ (translate_label) ? label|trans : label }}</th>
 {% endblock %}
 
 {% block th_sortable_not_active %}
     {% set th_attr = th_attr.sortable_not_active|merge({class: (th_attr.sortable_not_active.class|default('') ~ ' ec-crud-th ec-crud-th-sortable-not-active')|trim}) %}
     {% set a_attr = a_attr.sortable_not_active %}
     <th{% with { attr: th_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-        <a href="{{ path(crud.routeName, crud.routeParameters|merge({('sort'): column.id})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}>{{ label|trans }}</a>
+        <a href="{{ path(crud.routeName, crud.routeParameters|merge({('sort'): column.id})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}>{{ (translate_label) ? label|trans : label }}</a>
     </th>
 {% endblock %}
 
@@ -127,7 +127,7 @@
 {% block th_sortable_active %}
     <th{% with { attr: th_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
         <a href="{{ path(crud.routeName, crud.routeParameters|merge({('sort'): column.id, 'sort-direction': new_sort_direction})) }}"{% with { attr: a_attr } %}{{ block('attributes', template_name) }}{% endwith %}>
-            {{- label|trans }} {{ crud_icon(icon_name) -}}
+            {{- (translate_label) ? label|trans : label }} {{ crud_icon(icon_name) -}}
         </a>
     </th>
 {% endblock %}

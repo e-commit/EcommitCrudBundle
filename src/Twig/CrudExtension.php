@@ -22,6 +22,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatableInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
+use Twig\Markup;
 use Twig\TwigFunction;
 
 final class CrudExtension extends AbstractExtension
@@ -331,7 +332,7 @@ final class CrudExtension extends AbstractExtension
 
             return $value;
         });
-        $resolver->setAllowedTypes('label', ['null', 'string', TranslatableInterface::class]);
+        $resolver->setAllowedTypes('label', ['null', 'string', TranslatableInterface::class, Markup::class]);
         $options = $resolver->resolve($this->buildOptions('crud_th', $options, $crud));
 
         // If the column is not to be shown, returns empty
@@ -360,6 +361,7 @@ final class CrudExtension extends AbstractExtension
             'crud' => $crud,
             'options' => $options,
             'label' => $label,
+            'translate_label' => !$label instanceof Markup,
         ]));
     }
 
